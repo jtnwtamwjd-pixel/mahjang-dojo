@@ -1,0 +1,1145 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0e0b16"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<title>天穹の塔</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap">
+<style>
+:root{
+  --bg:#0e0b16;--bg2:#171226;--panel:#1f1832;--panel2:#2a2142;--line:rgba(255,255,255,.12);
+  --text:#f3eefc;--muted:#a99fc0;--gold:#f5c542;--red:#ff5a64;--hp:#e0414f;--blk:#5aa9ff;--green:#4ade80;--poison:#9be15d;
+  --display:"Dela Gothic One","Hiragino Kaku Gothic StdN","Yu Gothic",system-ui,sans-serif;
+  --body:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Yu Gothic",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);font-size:14px;-webkit-tap-highlight-color:transparent;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation}
+body{min-height:100vh;background:radial-gradient(ellipse at 50% -10%,#2b1f4a 0%,#0e0b16 60%) fixed}
+button{font-family:var(--body);font-size:14px;cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:10px;padding:9px 12px;font-weight:700}
+button:active{transform:scale(.96)}
+button:disabled{opacity:.4;cursor:default}
+button.pri{background:linear-gradient(180deg,#ffd76a,#e0a51c);color:#2b1a00;border:none}
+button.red{background:linear-gradient(180deg,#ff6b74,#c8323d);color:#fff;border:none}
+button.ghost{background:transparent}
+button.sm{padding:6px 9px;font-size:12px;border-radius:8px}
+#app{max-width:600px;margin:0 auto;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;position:relative}
+#app.fixed{height:100vh;height:100dvh;overflow:hidden}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0}
+.muted{color:var(--muted)}
+.kw{color:#ffd76a;font-style:normal;font-weight:700}
+b.n{color:#fff}b.n.up{color:#7dff9b}b.n.dn{color:#ff8a8a}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:8px;padding:8px 10px;padding-top:max(8px,env(safe-area-inset-top,0px));background:rgba(14,11,22,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line);flex:none}
+.top .st{display:flex;align-items:center;gap:3px;font-weight:800;white-space:nowrap}
+.top .hp{color:#ff8a93}.top .gold{color:var(--gold)}.top .fl{color:var(--muted);font-size:12px}
+.top .sp{flex:1}
+.pots{display:flex;gap:3px}
+.pot{width:30px;height:30px;border-radius:8px;border:1px dashed rgba(255,255,255,.25);display:grid;place-items:center;font-size:17px;background:rgba(255,255,255,.04);padding:0}
+.pot.has{border-style:solid;border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.08)}
+.pot.sel{outline:2px solid var(--gold)}
+.relics{display:flex;gap:2px;padding:3px 8px;overflow-x:auto;flex:none;scrollbar-width:none;border-bottom:1px solid rgba(255,255,255,.05);background:rgba(0,0,0,.2)}
+.relics::-webkit-scrollbar{display:none}
+.rel{flex:none;width:30px;height:30px;font-size:19px;display:grid;place-items:center;border-radius:50%;position:relative;padding:0;background:radial-gradient(#3a2e58,#1e1730);border:1px solid rgba(255,215,106,.35)}
+.rel i{position:absolute;bottom:-3px;right:-3px;font-style:normal;font-size:9px;background:#000a;border-radius:6px;padding:0 3px;color:#fff}
+
+/* cards */
+.card{--cw:80px;position:relative;width:var(--cw);height:calc(var(--cw)*1.42);border-radius:calc(var(--cw)*.11);border:2px solid #8a8399;box-shadow:0 3px 10px rgba(0,0,0,.55);display:flex;flex-direction:column;align-items:center;padding:calc(var(--cw)*.05);font-size:calc(var(--cw)*.118);flex:none;color:#fff;overflow:visible;background:linear-gradient(180deg,#3a3448,#1d1a24)}
+.card.atk{background:linear-gradient(180deg,#6a2530 0%,#30131a 60%)}
+.card.skl{background:linear-gradient(180deg,#22487a 0%,#121d33 60%)}
+.card.pow{background:linear-gradient(180deg,#6b5517 0%,#2b220a 60%)}
+.card.sts{background:linear-gradient(180deg,#45454a,#202024)}
+.card.cur{background:linear-gradient(180deg,#43234f,#170c1d)}
+.card.rU{border-color:#5fa8ff}.card.rR{border-color:#f5c542;box-shadow:0 0 10px rgba(245,197,66,.35),0 3px 10px rgba(0,0,0,.55)}
+.card .cost{position:absolute;top:calc(var(--cw)*-.07);left:calc(var(--cw)*-.07);width:calc(var(--cw)*.27);height:calc(var(--cw)*.27);border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe9a8,#e08a1e);color:#2a1300;font-weight:800;display:grid;place-items:center;font-size:calc(var(--cw)*.17);border:2px solid rgba(255,255,255,.4);z-index:2;line-height:1}
+.card .cost.bad{background:radial-gradient(circle at 35% 30%,#ccc,#777);color:#333}
+.card .cost.mod{color:#0a6b25}
+.card .nm{font-weight:800;font-size:1em;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;margin-top:calc(var(--cw)*.03);line-height:1.2}
+.card.up .nm{color:#7dff9b}
+.card .art{font-size:2.3em;line-height:1.25;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}
+.card .ty{font-size:.72em;color:rgba(255,255,255,.6);line-height:1.1}
+.card .ds{font-size:.8em;line-height:1.28;text-align:center;margin-top:2px;overflow:hidden;flex:1;word-break:break-all;padding:0 1px}
+.card .ds .kw{color:#ffd76a}
+.card.dim{filter:brightness(.6)}
+.card.pick{outline:3px solid var(--gold);outline-offset:2px}
+
+/* map */
+.mapwrap{position:relative;margin:0 auto;width:100%;max-width:520px}
+.mapwrap svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.node{position:absolute;transform:translate(-50%,-50%);width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:20px;padding:0;background:#241c38;border:2px solid #4a3f66;z-index:2}
+.node.done{background:#3b2f14;border-color:#a08033;opacity:.85}
+.node.av{border-color:var(--gold);box-shadow:0 0 0 0 rgba(245,197,66,.7);animation:pulse 1.3s infinite;background:#3a2c5c}
+.node.cur{border-color:#fff;background:#5b4a1c}
+.node.boss{width:76px;height:76px;font-size:42px;border-width:3px;border-color:#a8323d;background:radial-gradient(#4a1620,#1a0a0e)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(245,197,66,.7)}70%{box-shadow:0 0 0 12px rgba(245,197,66,0)}100%{box-shadow:0 0 0 0 rgba(245,197,66,0)}}
+.legend{display:flex;flex-wrap:wrap;gap:6px 12px;justify-content:center;font-size:12px;color:var(--muted);padding:8px}
+
+/* combat */
+.field{flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:6px 8px 0;min-height:0;position:relative}
+.enemies{display:flex;justify-content:center;align-items:flex-end;gap:6px;flex-wrap:nowrap;padding-top:6px}
+.ent{display:flex;flex-direction:column;align-items:center;min-width:0;flex:0 1 120px;border-radius:12px;padding:4px 2px;position:relative;transition:background .2s}
+.ent.tgt{background:rgba(245,197,66,.12);outline:2px dashed rgba(245,197,66,.7)}
+.ent .spr{font-size:52px;line-height:1.1;filter:drop-shadow(0 4px 6px rgba(0,0,0,.6));transition:transform .15s}
+.ent.big .spr{font-size:72px}
+.ent .enm{font-size:11px;font-weight:700;color:#ddd;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.ent.dying{pointer-events:none;animation:die .7s forwards}.ent.gone{visibility:hidden;pointer-events:none}
+@keyframes die{0%{opacity:1}100%{opacity:0;filter:blur(3px)}}
+.intent{display:flex;align-items:center;gap:2px;font-weight:800;font-size:15px;min-height:24px;background:rgba(0,0,0,.35);border-radius:12px;padding:1px 8px;white-space:nowrap}
+.intent .atkn{color:#ff9aa2}
+.hpbar{position:relative;width:100%;max-width:110px;height:13px;background:#2a0d12;border-radius:7px;border:1px solid rgba(0,0,0,.6);margin-top:2px}
+.hpbar>span{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(180deg,#ff6b74,#c1222f);border-radius:6px;transition:width .25s}
+.hpbar.blkd{border-color:var(--blk);box-shadow:0 0 0 1px var(--blk)}
+.hpbar.blkd>span{background:linear-gradient(180deg,#8cc6ff,#3b80c9)}
+.hpbar.psn>span{background:linear-gradient(180deg,#b6f07a,#5c9d25)}
+.hpbar em{position:absolute;inset:0;font-style:normal;font-size:10px;font-weight:800;display:grid;place-items:center;text-shadow:0 1px 2px #000;line-height:1}
+.blkb{position:absolute;left:-12px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50% 50% 45% 45%;background:linear-gradient(180deg,#8cc6ff,#2a6db5);font-size:10px;font-weight:800;display:grid;place-items:center;border:1px solid #fff6;z-index:2}
+.sts{display:flex;flex-wrap:wrap;gap:2px;justify-content:center;margin-top:2px;min-height:16px}
+.sts span{font-size:11px;background:rgba(0,0,0,.4);border-radius:6px;padding:0 3px;white-space:nowrap}
+.sts span.bad{background:rgba(120,20,40,.55)}
+.player{display:flex;align-items:center;gap:10px;padding:4px 6px 6px}
+.player .spr{font-size:58px;line-height:1;filter:drop-shadow(0 4px 6px rgba(0,0,0,.6))}
+.player .pinfo{flex:1;min-width:0}
+.player .hpbar{max-width:170px;height:15px}
+.player .sts{justify-content:flex-start}
+.hit .spr{animation:shake .3s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px) rotate(-3deg)}75%{transform:translateX(6px) rotate(3deg)}}
+.lunge .spr{animation:lunge .3s}
+@keyframes lunge{50%{transform:translateY(14px) scale(1.1)}}
+.ctrl{display:flex;align-items:center;gap:8px;padding:4px 10px;flex:none}
+.energy{width:52px;height:52px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe9a8,#e08a1e 60%,#8a4a08);display:grid;place-items:center;font-family:var(--display);font-size:20px;color:#2a1300;border:2px solid rgba(255,255,255,.5);box-shadow:0 0 14px rgba(255,170,40,.5);flex:none}
+.energy.zero{filter:grayscale(.9) brightness(.7)}
+.piles{display:flex;gap:6px;flex:1}
+.pile{display:flex;flex-direction:column;align-items:center;font-size:11px;padding:4px 7px;min-width:44px}
+.pile b{font-size:15px}
+.endbtn{padding:12px 14px;font-size:15px}
+.hand{position:relative;height:138px;flex:none;display:flex;justify-content:center;align-items:flex-end;padding:0 6px calc(8px + env(safe-area-inset-bottom,0px));overflow:visible}
+.hand .card{transition:transform .15s,margin .15s;cursor:pointer;transform-origin:50% 120%}
+.hand .card.sel{z-index:20!important}
+.preview{position:absolute;left:50%;bottom:160px;transform:translateX(-50%);z-index:40;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none}
+.preview .hint{background:rgba(0,0,0,.75);padding:4px 10px;border-radius:10px;font-size:12px;font-weight:700;white-space:nowrap}
+.banner{position:absolute;left:0;right:0;top:40%;text-align:center;font-family:var(--display);font-size:28px;text-shadow:0 2px 10px #000;pointer-events:none;z-index:50;animation:ban 1s forwards}
+@keyframes ban{0%{opacity:0;transform:scale(1.4)}20%{opacity:1;transform:scale(1)}80%{opacity:1}100%{opacity:0}}
+.floater{position:fixed;z-index:200;pointer-events:none;font-family:var(--display);font-size:24px;text-shadow:0 2px 0 #000,0 0 6px #000;animation:float 1s forwards;transform:translate(-50%,-50%)}
+.floater.dmg{color:#fff}.floater.blk{color:#8cc6ff;font-size:18px}.floater.heal{color:#7dff9b}.floater.st{color:#ffd76a;font-size:15px}.floater.psn{color:var(--poison)}
+@keyframes float{0%{opacity:0;margin-top:0}15%{opacity:1}100%{opacity:0;margin-top:-56px}}
+
+/* generic screens */
+.scr{flex:1;padding:16px 14px calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px}
+.panel{background:rgba(31,24,50,.85);border:1px solid var(--line);border-radius:14px;padding:14px}
+.rewards{display:flex;flex-direction:column;gap:8px}
+.rw{display:flex;align-items:center;gap:10px;text-align:left;padding:12px 14px;font-size:15px;background:rgba(42,33,66,.9)}
+.rw .ic{font-size:24px;width:30px;text-align:center}
+.cardrow{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.cardrow .card{--cw:104px;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:12px 8px;justify-items:center;padding:8px 2px}
+.grid .card{--cw:98px;cursor:pointer}
+.shopsec{display:flex;flex-wrap:wrap;gap:12px 8px;justify-content:center}
+.item{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;background:none;border:none;padding:4px}
+.item .price{color:var(--gold);font-weight:800;font-size:13px}
+.item .price.no{color:#ff8a8a}
+.item.sold{opacity:.25;pointer-events:none}
+.item .card{--cw:96px}
+.ricon{width:54px;height:54px;border-radius:50%;font-size:30px;display:grid;place-items:center;background:radial-gradient(#3a2e58,#1e1730);border:2px solid rgba(255,215,106,.45)}
+.sale{position:absolute;top:-6px;right:-6px;background:var(--red);color:#fff;font-size:10px;font-weight:800;border-radius:6px;padding:1px 4px;z-index:3}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opts button{text-align:left;padding:12px 14px;line-height:1.45}
+.opts button small{display:block;color:var(--muted);font-weight:500;font-size:12px}
+.title{align-items:center;text-align:center;justify-content:center}
+.title h1{font-size:44px;letter-spacing:.06em;background:linear-gradient(180deg,#fff7d6,#f5c542 60%,#b07a12);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 12px rgba(245,197,66,.3))}
+.chars{display:flex;gap:10px;width:100%}
+.charc{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border-radius:14px;background:rgba(42,33,66,.9);border:2px solid var(--line)}
+.charc.on{border-color:var(--gold);background:rgba(80,60,20,.5)}
+.charc .ic{font-size:52px}
+.charc p{margin:0;font-size:12px;color:var(--muted);font-weight:500;line-height:1.5}
+
+/* modal */
+#modal{position:fixed;inset:0;z-index:100;display:none}
+#modal.on{display:flex;flex-direction:column;background:rgba(5,3,10,.86);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.mhead{display:flex;align-items:center;gap:8px;padding:12px 14px;padding-top:max(12px,env(safe-area-inset-top,0px));border-bottom:1px solid var(--line)}
+.mhead h3{flex:1;font-size:17px}
+.mbody{flex:1;overflow-y:auto;padding:10px 12px;-webkit-overflow-scrolling:touch}
+.mfoot{display:flex;gap:8px;padding:10px 14px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);justify-content:center;align-items:center;flex-wrap:wrap}
+.mcenter{margin:auto;max-width:420px;width:calc(100% - 32px);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px;max-height:86vh;overflow-y:auto}
+.ilist{display:flex;flex-direction:column;gap:8px}
+.ilist div{display:flex;gap:8px;align-items:flex-start;line-height:1.5}
+.ilist .ic{font-size:20px;width:26px;text-align:center;flex:none}
+.toast{position:fixed;left:50%;top:22%;transform:translateX(-50%);background:rgba(0,0,0,.85);padding:8px 14px;border-radius:12px;z-index:300;font-weight:700;pointer-events:none;animation:toast 1.4s forwards;white-space:nowrap}
+@keyframes toast{0%{opacity:0}10%{opacity:1}80%{opacity:1}100%{opacity:0}}
+.upar{display:flex;align-items:center;gap:10px;justify-content:center}
+.upar .card{--cw:120px}
+.stats{display:grid;grid-template-columns:1fr auto;gap:4px 16px;text-align:left}
+</style></head>
+<body>
+<div id="app"></div>
+<div id="modal"></div>
+<script>
+'use strict';
+const SAVE='tenkyu_save_v1',META='tenkyu_meta_v1';
+const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const wpick=arr=>{let t=arr.reduce((s,x)=>s+x[1],0),r=Math.random()*t;for(const[it,w]of arr){if((r-=w)<0)return it}return arr[arr.length-1][0]};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const v=(a,u)=>Array.isArray(a)?a[u?1:0]:a;
+const kw=s=>`<i class="kw">${s}</i>`;
+const esc=s=>String(s);
+let S=null,C=null;
+const UI={sel:null,pot:null,busy:false,modal:null,fxq:[],charSel:'k',speed:1};
+const inC=()=>!!(S&&C&&S.screen==='combat');
+const hasR=id=>!!(S&&S.relics.includes(id));
+
+/* ================= ステータス ================= */
+const ST={
+ str:{n:'筋力',i:'💪',d:'攻撃のダメージが{n}増える。'},
+ dex:{n:'敏捷',i:'🦶',d:'カードで得るブロックが{n}増える。'},
+ vigor:{n:'活力',i:'🐂',d:'次に使う攻撃カードのダメージが{n}増える。'},
+ weak:{n:'弱体',i:'🥀',d:'与える攻撃ダメージが25%減る。残り{n}ターン。',bad:1},
+ vuln:{n:'脆弱',i:'💔',d:'受ける攻撃ダメージが50%増える。残り{n}ターン。',bad:1},
+ frail:{n:'虚弱',i:'🩹',d:'カードで得るブロックが25%減る。残り{n}ターン。',bad:1},
+ poison:{n:'毒',i:'☠️',d:'ターン開始時に{n}ダメージを受け、毒が1減る。',bad:1},
+ ritual:{n:'儀式',i:'🕯️',d:'ターン終了時に筋力{n}を得る。'},
+ metal:{n:'金属化',i:'⚙️',d:'ターン終了時にブロック{n}を得る。'},
+ thorns:{n:'棘',i:'🌵',d:'攻撃を受けるたび、攻撃者に{n}ダメージを返す。'},
+ flameb:{n:'炎の障壁',i:'🔥',d:'このターン、攻撃を受けるたび攻撃者に{n}ダメージ。'},
+ demon:{n:'悪魔の形',i:'😈',d:'ターン開始時に筋力{n}を得る。'},
+ combust:{n:'燃焼',i:'☄️',d:'ターン終了時にHPを1失い、敵全体に{n}ダメージ。'},
+ barricade:{n:'鉄城',i:'🏯',d:'ターン開始時にブロックが消えない。'},
+ noxious:{n:'毒の結界',i:'🌫️',d:'ターン開始時に敵全体に毒{n}を与える。'},
+ blades:{n:'無限の刃',i:'♾️',d:'ターン開始時に刃片を{n}枚手札に加える。'},
+ accuracy:{n:'刃研ぎ',i:'🎯',d:'刃片のダメージが{n}増える。'},
+ envenom:{n:'毒の王',i:'🐍',d:'攻撃で防がれなかったダメージを与えるたび、毒{n}を与える。'},
+ afterimg:{n:'残像',i:'👥',d:'カードを使うたびにブロック{n}を得る。'},
+ strDown:{n:'力み',i:'⏬',d:'ターン終了時に筋力を{n}失う。',bad:1},
+ nextE:{n:'気力',i:'⚡',d:'次のターン開始時にエネルギー+{n}。'},
+ nextDraw:{n:'次の一手',i:'📜',d:'次のターン開始時にカードを{n}枚多く引く。'},
+ enrage:{n:'激怒',i:'😡',d:'プレイヤーがスキルを使うたびに筋力{n}を得る。'},
+ sleep:{n:'睡眠',i:'💤',d:'眠っている。HPが減ると目を覚ます。'},
+ spore:{n:'胞子',i:'🍄',d:'倒れたとき、プレイヤーに脆弱{n}を与える。'},
+ artifact:{n:'加護',i:'✨',d:'次に受けるデバフを{n}回無効化する。'},
+ angry:{n:'怒り',i:'💢',d:'HPが減るたびに筋力{n}を得る。'},
+ intang:{n:'霊体',i:'👻',d:'受けるダメージがすべて1になる。'},
+ corpse:{n:'死体爆破',i:'💥',d:'倒れたとき、他の敵全体に最大HPと同じダメージ。'},
+ timeWarp:{n:'時の歪み',i:'⌛',d:'カードが12枚使われるとターンを強制終了させ、筋力2を得る。（現在{n}）'},
+ curious:{n:'好奇心',i:'👁️',d:'プレイヤーがパワーを使うたびに筋力{n}を得る。'},
+ minion:{n:'手下',i:'🔗',d:'主が倒れると逃げ出す。'},
+};
+
+/* ================= カード ================= */
+let P={};
+function pvD(b,m=1){if(!inC())return b;const s=C.p.st;let d=b+(s.str||0)*m+(s.vigor||0);if(s.weak)d*=.75;return Math.max(0,Math.floor(d))}
+function pvB(b){if(!inC())return b;const s=C.p.st;let d=b+(s.dex||0);if(s.frail)d*=.75;return Math.max(0,Math.floor(d))}
+const fmtN=(b,x)=>`<b class="n ${x>b?'up':x<b?'dn':''}">${x}</b>`;
+P.d=(b,m)=>fmtN(b,pvD(b,m));P.b=b=>fmtN(b,pvB(b));
+const shivBase=u=>v([4,6],u)+(inC()?(C.p.st.accuracy||0):0);
+
+const CD={
+// ---------- 剣士 ----------
+kStrike:{n:'斬撃',t:'atk',c:1,r:'B',cl:'k',tg:'e',ic:'🗡️',d:u=>`${P.d(v([6,9],u))}ダメージ。`,f:async(u,t)=>{hit(t,v([6,9],u))}},
+kDefend:{n:'防御',t:'skl',c:1,r:'B',cl:'k',ic:'🛡️',d:u=>`ブロック${P.b(v([5,8],u))}を得る。`,f:async u=>{blk(v([5,8],u))}},
+kBash:{n:'強打',t:'atk',c:2,r:'B',cl:'k',tg:'e',ic:'🔨',d:u=>`${P.d(v([8,10],u))}ダメージ。${kw('脆弱')}${v([2,3],u)}を与える。`,f:async(u,t)=>{hit(t,v([8,10],u));debE(t,'vuln',v([2,3],u))}},
+kCleave:{n:'薙ぎ払い',t:'atk',c:1,r:'C',cl:'k',tg:'a',ic:'🌙',d:u=>`敵全体に${P.d(v([8,11],u))}ダメージ。`,f:async u=>{hitAll(v([8,11],u))}},
+kTwin:{n:'二連斬',t:'atk',c:1,r:'C',cl:'k',tg:'e',ic:'⚔️',d:u=>`${P.d(v([5,7],u))}ダメージを2回。`,f:async(u,t)=>{hit(t,v([5,7],u));await sleep(110);hit(t,v([5,7],u))}},
+kPommel:{n:'柄打ち',t:'atk',c:1,r:'C',cl:'k',tg:'e',ic:'🥊',d:u=>`${P.d(v([9,10],u))}ダメージ。カードを${v([1,2],u)}枚引く。`,f:async(u,t)=>{hit(t,v([9,10],u));draw(v([1,2],u))}},
+kBodySlam:{n:'体当たり',t:'atk',c:[1,0],r:'C',cl:'k',tg:'e',ic:'🦬',d:u=>`現在のブロック値に等しいダメージ${inC()?'（'+P.d(C.p.block)+'）':''}。`,f:async(u,t)=>{hit(t,C.p.block)}},
+kHeavy:{n:'重撃',t:'atk',c:2,r:'C',cl:'k',tg:'e',ic:'🪓',d:u=>`${P.d(14,v([3,5],u))}ダメージ。${kw('筋力')}の効果が${v([3,5],u)}倍。`,f:async(u,t)=>{hit(t,14,v([3,5],u))}},
+kAnger:{n:'怒りの一撃',t:'atk',c:0,r:'C',cl:'k',tg:'e',ic:'💢',d:u=>`${P.d(v([6,8],u))}ダメージ。このカードのコピーを捨て札に加える。`,f:async(u,t,X,c)=>{hit(t,v([6,8],u));C.disc.push(mk(c.id,c.up))}},
+kClothes:{n:'首締め',t:'atk',c:2,r:'C',cl:'k',tg:'e',ic:'🧣',d:u=>`${P.d(v([12,14],u))}ダメージ。${kw('弱体')}${v([2,3],u)}を与える。`,f:async(u,t)=>{hit(t,v([12,14],u));debE(t,'weak',v([2,3],u))}},
+kIronWave:{n:'鉄の波',t:'atk',c:1,r:'C',cl:'k',tg:'e',ic:'🌊',d:u=>`ブロック${P.b(v([5,7],u))}を得て、${P.d(v([5,7],u))}ダメージ。`,f:async(u,t)=>{blk(v([5,7],u));hit(t,v([5,7],u))}},
+kShrug:{n:'受け流し',t:'skl',c:1,r:'C',cl:'k',ic:'🤷',d:u=>`ブロック${P.b(v([8,11],u))}を得る。カードを1枚引く。`,f:async u=>{blk(v([8,11],u));draw(1)}},
+kArmaments:{n:'武具強化',t:'skl',c:1,r:'C',cl:'k',ic:'⚒️',d:u=>`ブロック${P.b(5)}を得る。手札の${u?'すべてのカード':'カード1枚'}を戦闘中${kw('強化')}する。`,f:async u=>{blk(5);const ok=C.hand.filter(canUp);if(u)ok.forEach(c=>c.up=1);else{const s=await chooseHand(ok,1,'強化するカードを選択','up');s.forEach(c=>c.up=1)}}},
+kTrueGrit:{n:'闘志',t:'skl',c:1,r:'C',cl:'k',ic:'🔥',d:u=>`ブロック${P.b(v([7,9],u))}を得る。手札の${u?'選んだ':'ランダムな'}カード1枚を${kw('廃棄')}。`,f:async u=>{blk(v([7,9],u));if(!C.hand.length)return;let c;if(u)c=(await chooseHand(C.hand,1,'廃棄するカードを選択'))[0];else c=pick(C.hand);if(c){rmHand(c);exhaust(c)}}},
+kWarcry:{n:'鬨の声',t:'skl',c:0,r:'C',cl:'k',ic:'📣',ex:1,d:u=>`カードを${v([1,2],u)}枚引き、手札1枚を山札の一番上に戻す。`,f:async u=>{draw(v([1,2],u));if(C.hand.length){const c=(await chooseHand(C.hand,1,'山札の上に戻すカード'))[0];if(c){rmHand(c);C.draw.push(c)}}}},
+kFlex:{n:'力み',t:'skl',c:0,r:'C',cl:'k',ic:'💪',d:u=>`${kw('筋力')}${v([2,4],u)}を得る。ターン終了時に失う。`,f:async u=>{addSt(C.p,'str',v([2,4],u));addSt(C.p,'strDown',v([2,4],u))}},
+kUppercut:{n:'昇竜斬',t:'atk',c:2,r:'U',cl:'k',tg:'e',ic:'🐉',d:u=>`${P.d(13)}ダメージ。${kw('弱体')}${v([1,2],u)}と${kw('脆弱')}${v([1,2],u)}を与える。`,f:async(u,t)=>{hit(t,13);debE(t,'weak',v([1,2],u));debE(t,'vuln',v([1,2],u))}},
+kHemo:{n:'血の代償',t:'atk',c:1,r:'U',cl:'k',tg:'e',ic:'🩸',d:u=>`HPを2失う。${P.d(v([15,20],u))}ダメージ。`,f:async(u,t)=>{loseHP(2);hit(t,v([15,20],u))}},
+kWhirl:{n:'旋風剣',t:'atk',c:-1,r:'U',cl:'k',tg:'a',ic:'🌀',d:u=>`敵全体に${P.d(v([5,8],u))}ダメージを<b>X</b>回与える。`,f:async(u,t,X)=>{for(let i=0;i<X;i++){hitAll(v([5,8],u));await sleep(140)}}},
+kPummel:{n:'乱打',t:'atk',c:1,r:'U',cl:'k',tg:'e',ic:'👊',ex:1,d:u=>`${P.d(2)}ダメージを${v([4,5],u)}回。`,f:async(u,t)=>{for(let i=0;i<v([4,5],u);i++){hit(t,2);await sleep(80)}}},
+kCarnage:{n:'殺戮',t:'atk',c:2,r:'U',cl:'k',tg:'e',ic:'🩸',eth:1,d:u=>`${P.d(v([20,28],u))}ダメージ。`,f:async(u,t)=>{hit(t,v([20,28],u))}},
+kInflame:{n:'激昂',t:'pow',c:1,r:'U',cl:'k',ic:'😤',d:u=>`${kw('筋力')}${v([2,3],u)}を得る。`,f:async u=>{addSt(C.p,'str',v([2,3],u))}},
+kMetal:{n:'鋼の肉体',t:'pow',c:1,r:'U',cl:'k',ic:'⚙️',d:u=>`ターン終了時にブロック${v([3,4],u)}を得る。`,f:async u=>{addSt(C.p,'metal',v([3,4],u))}},
+kIntim:{n:'威圧',t:'skl',c:0,r:'U',cl:'k',tg:'a',ic:'👁️',ex:1,d:u=>`敵全体に${kw('弱体')}${v([1,2],u)}を与える。`,f:async u=>{alive().forEach(e=>debE(e,'weak',v([1,2],u)))}},
+kEntrench:{n:'堅守',t:'skl',c:[2,1],r:'U',cl:'k',ic:'🏰',d:u=>`現在のブロックを2倍にする。`,f:async u=>{gainBlockRaw(C.p.block)}},
+kBloodlet:{n:'瀉血',t:'skl',c:0,r:'U',cl:'k',ic:'💉',d:u=>`HPを3失う。エネルギー+${v([2,3],u)}。`,f:async u=>{loseHP(3);C.energy+=v([2,3],u)}},
+kFlameBar:{n:'炎の障壁',t:'skl',c:2,r:'U',cl:'k',ic:'🔥',d:u=>`ブロック${P.b(v([12,16],u))}を得る。このターン、攻撃を受けるたび攻撃者に${v([4,6],u)}ダメージ。`,f:async u=>{blk(v([12,16],u));addSt(C.p,'flameb',v([4,6],u))}},
+kCombust:{n:'燃焼',t:'pow',c:1,r:'U',cl:'k',ic:'☄️',d:u=>`ターン終了時にHPを1失い、敵全体に${v([5,7],u)}ダメージ。`,f:async u=>{addSt(C.p,'combust',v([5,7],u))}},
+kSecondWind:{n:'背水',t:'skl',c:1,r:'U',cl:'k',ic:'🌬️',d:u=>`手札の攻撃以外のカードをすべて${kw('廃棄')}し、1枚につきブロック${P.b(v([5,7],u))}を得る。`,f:async u=>{const xs=C.hand.filter(c=>CD[c.id].t!=='atk');for(const c of xs){rmHand(c);exhaust(c);blk(v([5,7],u))}}},
+kDisarm:{n:'武装解除',t:'skl',c:1,r:'U',cl:'k',tg:'e',ic:'🤲',ex:1,d:u=>`敵の${kw('筋力')}を${v([2,3],u)}減らす。`,f:async(u,t)=>{debE(t,'str',-v([2,3],u))}},
+kDemon:{n:'悪魔の形',t:'pow',c:3,r:'R',cl:'k',ic:'😈',d:u=>`ターン開始時に${kw('筋力')}${v([2,3],u)}を得る。`,f:async u=>{addSt(C.p,'demon',v([2,3],u))}},
+kImperv:{n:'不動',t:'skl',c:2,r:'R',cl:'k',ic:'🗿',ex:1,d:u=>`ブロック${P.b(v([30,40],u))}を得る。`,f:async u=>{blk(v([30,40],u))}},
+kBludgeon:{n:'断罪',t:'atk',c:3,r:'R',cl:'k',tg:'e',ic:'⚒️',d:u=>`${P.d(v([32,42],u))}ダメージ。`,f:async(u,t)=>{hit(t,v([32,42],u))}},
+kLimit:{n:'限界突破',t:'skl',c:1,r:'R',cl:'k',ic:'💥',ex:[1,0],d:u=>`${kw('筋力')}を2倍にする。`,f:async u=>{if((C.p.st.str||0)>0)addSt(C.p,'str',C.p.st.str)}},
+kReaper:{n:'死神の鎌',t:'atk',c:2,r:'R',cl:'k',tg:'a',ic:'💀',ex:1,d:u=>`敵全体に${P.d(v([4,5],u))}ダメージ。防がれなかったダメージ分HP回復。`,f:async u=>{const h=hitAll(v([4,5],u));if(h>0)heal(h)}},
+kBarricade:{n:'鉄城',t:'pow',c:[3,2],r:'R',cl:'k',ic:'🏯',d:u=>`ターン開始時にブロックが消えなくなる。`,f:async u=>{C.p.st.barricade=1}},
+kOffering:{n:'生贄',t:'skl',c:0,r:'R',cl:'k',ic:'🕯️',ex:1,d:u=>`HPを6失う。エネルギー+2。カードを${v([3,5],u)}枚引く。`,f:async u=>{loseHP(6);C.energy+=2;draw(v([3,5],u))}},
+kFeed:{n:'捕食',t:'atk',c:1,r:'R',cl:'k',tg:'e',ic:'🍖',ex:1,d:u=>`${P.d(v([10,12],u))}ダメージ。これで倒すと最大HP+${v([3,4],u)}。`,f:async(u,t)=>{hit(t,v([10,12],u));if(t.dead&&!t.minion)gainMax(v([3,4],u))}},
+// ---------- 魔導師 ----------
+mStrike:{n:'魔弾',t:'atk',c:1,r:'B',cl:'m',tg:'e',ic:'✴️',d:u=>`${P.d(v([6,9],u))}ダメージ。`,f:async(u,t)=>{hit(t,v([6,9],u))}},
+mDefend:{n:'結界',t:'skl',c:1,r:'B',cl:'m',ic:'🔰',d:u=>`ブロック${P.b(v([5,8],u))}を得る。`,f:async u=>{blk(v([5,8],u))}},
+mNeutral:{n:'封印の矢',t:'atk',c:0,r:'B',cl:'m',tg:'e',ic:'🏹',d:u=>`${P.d(v([3,4],u))}ダメージ。${kw('弱体')}${v([1,2],u)}を与える。`,f:async(u,t)=>{hit(t,v([3,4],u));debE(t,'weak',v([1,2],u))}},
+mSurvivor:{n:'見切り',t:'skl',c:1,r:'B',cl:'m',ic:'🌀',d:u=>`ブロック${P.b(v([8,11],u))}を得る。手札を1枚捨てる。`,f:async u=>{blk(v([8,11],u));await discardN(1)}},
+mPoisonStab:{n:'毒刃',t:'atk',c:1,r:'C',cl:'m',tg:'e',ic:'🧪',d:u=>`${P.d(v([6,8],u))}ダメージ。${kw('毒')}${v([3,4],u)}を与える。`,f:async(u,t)=>{hit(t,v([6,8],u));debE(t,'poison',v([3,4],u))}},
+mDeadly:{n:'猛毒',t:'skl',c:1,r:'C',cl:'m',tg:'e',ic:'☠️',d:u=>`${kw('毒')}${v([5,7],u)}を与える。`,f:async(u,t)=>{debE(t,'poison',v([5,7],u))}},
+mQuickSlash:{n:'一閃',t:'atk',c:1,r:'C',cl:'m',tg:'e',ic:'⚡',d:u=>`${P.d(v([8,12],u))}ダメージ。カードを1枚引く。`,f:async(u,t)=>{hit(t,v([8,12],u));draw(1)}},
+mBladeDance:{n:'刃の舞',t:'skl',c:1,r:'C',cl:'m',ic:'💃',d:u=>`${kw('刃片')}を${v([3,4],u)}枚手札に加える。`,f:async u=>{addHand('mShiv',0,v([3,4],u))}},
+mAcro:{n:'軽業',t:'skl',c:1,r:'C',cl:'m',ic:'🤸',d:u=>`カードを${v([3,4],u)}枚引く。手札を1枚捨てる。`,f:async u=>{draw(v([3,4],u));await discardN(1)}},
+mDaggerThrow:{n:'投げナイフ',t:'atk',c:1,r:'C',cl:'m',tg:'e',ic:'🔪',d:u=>`${P.d(v([9,12],u))}ダメージ。カードを1枚引き、1枚捨てる。`,f:async(u,t)=>{hit(t,v([9,12],u));draw(1);await discardN(1)}},
+mPrepared:{n:'準備',t:'skl',c:0,r:'C',cl:'m',ic:'📜',d:u=>`カードを${v([1,2],u)}枚引き、${v([1,2],u)}枚捨てる。`,f:async u=>{draw(v([1,2],u));await discardN(v([1,2],u))}},
+mBackflip:{n:'宙返り',t:'skl',c:1,r:'C',cl:'m',ic:'🔄',d:u=>`ブロック${P.b(v([5,8],u))}を得る。カードを2枚引く。`,f:async u=>{blk(v([5,8],u));draw(2)}},
+mSlice:{n:'薄刃',t:'atk',c:0,r:'C',cl:'m',tg:'e',ic:'🍃',d:u=>`${P.d(v([6,9],u))}ダメージ。`,f:async(u,t)=>{hit(t,v([6,9],u))}},
+mDeflect:{n:'弾き',t:'skl',c:0,r:'C',cl:'m',ic:'✋',d:u=>`ブロック${P.b(v([4,7],u))}を得る。`,f:async u=>{blk(v([4,7],u))}},
+mSucker:{n:'不意打ち',t:'atk',c:1,r:'C',cl:'m',tg:'e',ic:'👊',d:u=>`${P.d(v([7,9],u))}ダメージ。${kw('弱体')}${v([1,2],u)}を与える。`,f:async(u,t)=>{hit(t,v([7,9],u));debE(t,'weak',v([1,2],u))}},
+mBane:{n:'追い討ち',t:'atk',c:1,r:'C',cl:'m',tg:'e',ic:'🩸',d:u=>`${P.d(v([7,10],u))}ダメージ。敵が${kw('毒')}状態ならもう一度。`,f:async(u,t)=>{hit(t,v([7,10],u));if(!t.dead&&t.st.poison){await sleep(110);hit(t,v([7,10],u))}}},
+mCatalyst:{n:'触媒',t:'skl',c:1,r:'U',cl:'m',tg:'e',ic:'⚗️',ex:1,d:u=>`敵の${kw('毒')}を${v([2,3],u)}倍にする。`,f:async(u,t)=>{const p=t.st.poison||0;if(p)debE(t,'poison',p*(v([2,3],u)-1))}},
+mNoxious:{n:'毒の結界',t:'pow',c:1,r:'U',cl:'m',ic:'🌫️',d:u=>`ターン開始時に敵全体に${kw('毒')}${v([2,3],u)}を与える。`,f:async u=>{addSt(C.p,'noxious',v([2,3],u))}},
+mInfBlades:{n:'無限の刃',t:'pow',c:1,r:'U',cl:'m',ic:'♾️',inn:[0,1],d:u=>`ターン開始時に${kw('刃片')}を1枚手札に加える。`,f:async u=>{addSt(C.p,'blades',1)}},
+mAccuracy:{n:'刃研ぎ',t:'pow',c:1,r:'U',cl:'m',ic:'🎯',d:u=>`${kw('刃片')}のダメージが${v([4,6],u)}増える。`,f:async u=>{addSt(C.p,'accuracy',v([4,6],u))}},
+mLegSweep:{n:'足払い',t:'skl',c:2,r:'U',cl:'m',tg:'e',ic:'🦵',d:u=>`${kw('弱体')}${v([2,3],u)}を与える。ブロック${P.b(v([11,14],u))}を得る。`,f:async(u,t)=>{debE(t,'weak',v([2,3],u));blk(v([11,14],u))}},
+mBackstab:{n:'奇襲',t:'atk',c:0,r:'U',cl:'m',tg:'e',ic:'🥷',ex:1,inn:1,d:u=>`${P.d(v([11,15],u))}ダメージ。`,f:async(u,t)=>{hit(t,v([11,15],u))}},
+mFootwork:{n:'身のこなし',t:'pow',c:1,r:'U',cl:'m',ic:'👣',d:u=>`${kw('敏捷')}${v([2,3],u)}を得る。`,f:async u=>{addSt(C.p,'dex',v([2,3],u))}},
+mSkewer:{n:'串刺し',t:'atk',c:-1,r:'U',cl:'m',tg:'e',ic:'🍢',d:u=>`${P.d(v([7,10],u))}ダメージを<b>X</b>回与える。`,f:async(u,t,X)=>{for(let i=0;i<X;i++){hit(t,v([7,10],u));await sleep(100)}}},
+mCloud:{n:'毒霧',t:'skl',c:2,r:'U',cl:'m',tg:'a',ic:'☁️',ex:1,d:u=>`敵全体に${kw('毒')}${v([4,7],u)}と${kw('弱体')}2を与える。`,f:async u=>{alive().forEach(e=>{debE(e,'poison',v([4,7],u));debE(e,'weak',2)})}},
+mGamble:{n:'賭け',t:'skl',c:0,r:'U',cl:'m',ic:'🎲',ex:[1,0],d:u=>`手札をすべて捨て、同じ枚数を引く。`,f:async u=>{const n=C.hand.length;for(const c of [...C.hand]){rmHand(c);discardCard(c)}draw(n)}},
+mPredator:{n:'捕食者',t:'atk',c:2,r:'U',cl:'m',tg:'e',ic:'🐆',d:u=>`${P.d(v([15,20],u))}ダメージ。次のターン、カードを2枚多く引く。`,f:async(u,t)=>{hit(t,v([15,20],u));addSt(C.p,'nextDraw',2)}},
+mRiddle:{n:'蜂の巣',t:'atk',c:2,r:'U',cl:'m',tg:'e',ic:'🐝',d:u=>`${P.d(v([3,4],u))}ダメージを5回。`,f:async(u,t)=>{for(let i=0;i<5;i++){hit(t,v([3,4],u));await sleep(80)}}},
+mEnvenom:{n:'毒の王',t:'pow',c:[2,1],r:'R',cl:'m',ic:'🐍',d:u=>`攻撃で防がれなかったダメージを与えるたび、${kw('毒')}1を与える。`,f:async u=>{addSt(C.p,'envenom',1)}},
+mStorm:{n:'千の刃',t:'skl',c:1,r:'R',cl:'m',ic:'🌩️',d:u=>`手札をすべて捨て、1枚につき${u?'強化された':''}${kw('刃片')}を1枚加える。`,f:async u=>{const n=C.hand.length;for(const c of [...C.hand]){rmHand(c);discardCard(c)}addHand('mShiv',u,n)}},
+mAdrenaline:{n:'加速思考',t:'skl',c:0,r:'R',cl:'m',ic:'💊',ex:1,d:u=>`エネルギー+${v([1,2],u)}。カードを2枚引く。`,f:async u=>{C.energy+=v([1,2],u);draw(2)}},
+mDieDie:{n:'死の宣告',t:'atk',c:1,r:'R',cl:'m',tg:'a',ic:'💀',ex:1,d:u=>`敵全体に${P.d(v([13,17],u))}ダメージ。`,f:async u=>{hitAll(v([13,17],u))}},
+mAfterImage:{n:'残像',t:'pow',c:1,r:'R',cl:'m',ic:'👥',inn:[0,1],d:u=>`カードを使うたびにブロック1を得る。`,f:async u=>{addSt(C.p,'afterimg',1)}},
+mCorpse:{n:'死体爆破',t:'skl',c:2,r:'R',cl:'m',tg:'e',ic:'💥',d:u=>`${kw('毒')}${v([6,9],u)}を与える。この敵が倒れると、他の敵全体に最大HPと同じダメージ。`,f:async(u,t)=>{debE(t,'poison',v([6,9],u));t.st.corpse=1}},
+mMalaise:{n:'呪縛',t:'skl',c:-1,r:'R',cl:'m',tg:'e',ic:'🕸️',ex:1,d:u=>`敵の${kw('筋力')}を<b>X${u?'+1':''}</b>減らし、${kw('弱体')}<b>X${u?'+1':''}</b>を与える。`,f:async(u,t,X)=>{const n=X+(u?1:0);if(n>0){debE(t,'str',-n);debE(t,'weak',n)}}},
+mShiv:{n:'刃片',t:'atk',c:0,r:'S',cl:'m',tg:'e',ic:'🔹',ex:1,d:u=>`${fmtN(v([4,6],u),pvD(shivBase(u)))}ダメージ。`,f:async(u,t)=>{hit(t,shivBase(u))}},
+// ---------- 無色 ----------
+xSwift:{n:'疾風突き',t:'atk',c:0,r:'U',cl:'x',tg:'e',ic:'💨',d:u=>`${P.d(v([7,10],u))}ダメージ。`,f:async(u,t)=>{hit(t,v([7,10],u))}},
+xBandage:{n:'包帯',t:'skl',c:0,r:'U',cl:'x',ic:'🩹',ex:1,d:u=>`HPを${v([4,6],u)}回復する。`,f:async u=>{heal(v([4,6],u))}},
+xFinesse:{n:'優雅',t:'skl',c:0,r:'U',cl:'x',ic:'🪶',d:u=>`ブロック${P.b(v([2,4],u))}を得る。カードを1枚引く。`,f:async u=>{blk(v([2,4],u));draw(1)}},
+xMadness:{n:'狂気',t:'skl',c:[1,0],r:'U',cl:'x',ic:'🤪',ex:1,d:u=>`手札のランダムなカード1枚のコストを戦闘中0にする。`,f:async u=>{const xs=C.hand.filter(c=>{const k=cardCost(c);return k!=='u'&&k>0});if(xs.length)pick(xs).cc=0}},
+xDramatic:{n:'劇的登場',t:'atk',c:0,r:'U',cl:'x',tg:'a',ic:'🎭',ex:1,inn:1,d:u=>`敵全体に${P.d(v([8,12],u))}ダメージ。`,f:async u=>{hitAll(v([8,12],u))}},
+xApotheosis:{n:'神化',t:'skl',c:[2,1],r:'R',cl:'x',ic:'🌟',ex:1,d:u=>`この戦闘中、すべてのカードを${kw('強化')}する。`,f:async u=>{[...C.hand,...C.draw,...C.disc,...C.exh].forEach(c=>{if(canUp(c))c.up=1})}},
+xMaster:{n:'名軍師',t:'skl',c:0,r:'R',cl:'x',ic:'♟️',ex:1,d:u=>`カードを${v([3,4],u)}枚引く。`,f:async u=>{draw(v([3,4],u))}},
+xGreed:{n:'強欲の手',t:'atk',c:2,r:'R',cl:'x',tg:'e',ic:'💰',d:u=>`${P.d(v([20,25],u))}ダメージ。これで倒すと${v([20,25],u)}ゴールドを得る。`,f:async(u,t)=>{hit(t,v([20,25],u));if(t.dead&&!t.minion)gainGold(v([20,25],u))}},
+// ---------- 状態異常・呪い ----------
+sDazed:{n:'眩暈',t:'sts',c:'u',r:'S',cl:'s',ic:'💫',eth:1,d:u=>`使用不可。`},
+sWound:{n:'傷',t:'sts',c:'u',r:'S',cl:'s',ic:'🤕',d:u=>`使用不可。`},
+sBurn:{n:'火傷',t:'sts',c:'u',r:'S',cl:'s',ic:'🔥',d:u=>`使用不可。ターン終了時、手札にあると2ダメージを受ける。`},
+sSlimed:{n:'粘液',t:'sts',c:1,r:'S',cl:'s',ic:'🟩',ex:1,d:u=>`何も起きない。`,f:async u=>{}},
+cDoubt:{n:'疑念',t:'cur',c:'u',r:'S',cl:'c',ic:'❓',d:u=>`使用不可。ターン終了時、手札にあると${kw('弱体')}1を受ける。`},
+cSloth:{n:'怠惰',t:'cur',c:'u',r:'S',cl:'c',ic:'🦥',d:u=>`使用不可。`},
+};
+const TYN={atk:'攻撃',skl:'スキル',pow:'パワー',sts:'状態異常',cur:'呪い'};
+
+/* ================= レリック ================= */
+const RL={
+ rBlood:{n:'戦士の血',ic:'❤️‍🔥',r:'S',d:'戦闘終了時にHPを6回復する。',end(){heal(6)}},
+ rHourglass:{n:'星の砂時計',ic:'⏳',r:'S',d:'戦闘の最初のターン、カードを2枚多く引く。',start(){C.extraDraw+=2}},
+ rAnchor:{n:'錨',ic:'⚓',r:'C',d:'戦闘開始時にブロック10を得る。',start(){C.p.block+=10}},
+ rLantern:{n:'ランタン',ic:'🏮',r:'C',d:'戦闘の最初のターン、エネルギー+1。',turn(t){if(t===1)C.energy++}},
+ rVajra:{n:'金剛杵',ic:'🔱',r:'C',d:'戦闘開始時に筋力1を得る。',start(){addSt(C.p,'str',1)}},
+ rStone:{n:'滑らかな石',ic:'🥌',r:'C',d:'戦闘開始時に敏捷1を得る。',start(){addSt(C.p,'dex',1)}},
+ rBag:{n:'準備の袋',ic:'👝',r:'C',d:'戦闘の最初のターン、カードを2枚多く引く。',start(){C.extraDraw+=2}},
+ rVial:{n:'血の小瓶',ic:'🧪',r:'C',d:'戦闘開始時にHPを2回復する。',start(){heal(2)}},
+ rScales:{n:'青銅の鱗',ic:'🦔',r:'C',d:'戦闘開始時に棘3を得る（攻撃者に3ダメージを返す）。',start(){addSt(C.p,'thorns',3)}},
+ rMarbles:{n:'ビー玉袋',ic:'🎱',r:'C',d:'戦闘開始時、敵全体に脆弱1を与える。',start(){alive().forEach(e=>debE(e,'vuln',1))}},
+ rBull:{n:'闘牛の置物',ic:'🐂',r:'C',d:'戦闘開始時に活力8を得る（次の攻撃カードのダメージ+8）。',start(){addSt(C.p,'vigor',8)}},
+ rStrawberry:{n:'いちご',ic:'🍓',r:'C',d:'拾ったとき最大HP+7。',pick(){gainMax(7)}},
+ rPenNib:{n:'羽ペン',ic:'🖋️',r:'C',d:'攻撃カードを10回使うごとに、その攻撃のダメージが2倍になる。',cnt:()=>S.cnt.pen||0},
+ rFlower:{n:'陽だまりの花',ic:'🌻',r:'C',d:'3ターンごとにエネルギー+1。',turn(t){if(t%3===0)C.energy++}},
+ rOricha:{n:'古の鎧',ic:'🥋',r:'C',d:'ターン終了時にブロックが0なら、ブロック6を得る。'},
+ rKunai:{n:'苦無',ic:'🗡️',r:'U',d:'1ターンに攻撃カードを3回使うごとに敏捷1を得る。'},
+ rShuriken:{n:'手裏剣',ic:'⭐',r:'U',d:'1ターンに攻撃カードを3回使うごとに筋力1を得る。'},
+ rFan:{n:'扇子',ic:'🎐',r:'U',d:'1ターンに攻撃カードを3回使うごとにブロック4を得る。'},
+ rLetter:{n:'紙切りナイフ',ic:'✉️',r:'U',d:'1ターンにスキルを3回使うごとに敵全体に5ダメージ。'},
+ rMeat:{n:'骨付き肉',ic:'🍖',r:'U',d:'戦闘終了時にHPが50%以下なら12回復する。',end(){if(S.hp<=S.maxHp/2)heal(12)}},
+ rPear:{n:'洋梨',ic:'🍐',r:'U',d:'拾ったとき最大HP+10。',pick(){gainMax(10)}},
+ rHorn:{n:'角笛',ic:'📯',r:'U',d:'敵を倒すたびにエネルギー+1、カードを1枚引く。'},
+ rWheel:{n:'舵輪',ic:'☸️',r:'U',d:'戦闘の2ターン目開始時にブロック14を得る。',turn(t){if(t===2)gainBlockRaw(14)}},
+ rIce:{n:'氷菓',ic:'🍨',r:'R',d:'使わなかったエネルギーが次のターンに持ち越される。'},
+ rRod:{n:'重金属の杖',ic:'🪄',r:'R',d:'HPを失うとき、その量が1減る。'},
+ rTop:{n:'独楽',ic:'🪀',r:'R',d:'自分のターン中に手札が0枚になると、カードを1枚引く。'},
+ rMango:{n:'マンゴー',ic:'🥭',r:'R',d:'拾ったとき最大HP+14。',pick(){gainMax(14)}},
+ rCalipers:{n:'測量器',ic:'📐',r:'R',d:'ターン開始時、ブロックは全部ではなく15だけ失われる。'},
+ rBranch:{n:'枯れ枝',ic:'🌿',r:'R',d:'カードを廃棄するたび、ランダムなカードを手札に加える。'},
+ rStoneP:{n:'賢者の石',ic:'💎',r:'X',en:1,d:'毎ターンのエネルギー+1。敵は筋力1を持って戦闘を始める。',start(){alive().forEach(e=>addSt(e,'str',1))}},
+ rCoffee:{n:'珈琲ミル',ic:'☕',r:'X',en:1,d:'毎ターンのエネルギー+1。休憩所で休めなくなる。'},
+ rEcto:{n:'霊質の瓶',ic:'⚱️',r:'X',en:1,d:'毎ターンのエネルギー+1。今後ゴールドを得られない。'},
+ rSozu:{n:'封印の壺',ic:'🏺',r:'X',en:1,d:'毎ターンのエネルギー+1。今後ポーションを得られない。'},
+ rMark:{n:'苦痛の刻印',ic:'♨️',r:'X',en:1,d:'毎ターンのエネルギー+1。戦闘開始時、山札に傷を2枚加える。',start(){for(let i=0;i<2;i++)C.draw.splice(R(0,C.draw.length),0,mk('sWound'))}},
+ rBlackStar:{n:'黒い星',ic:'🌑',r:'X',d:'エリートを倒すとレリックが2つ手に入る。'},
+ rMember:{n:'会員証',ic:'💳',r:'$',d:'ショップの商品がすべて半額になる。'},
+};
+/* ================= ポーション ================= */
+const PO={
+ pFire:{n:'炎の薬',ic:'🔥',tg:'e',d:'敵1体に20ダメージ。',f(t){dmgE(t,20)}},
+ pExplo:{n:'爆薬',ic:'💣',tg:'a',d:'敵全体に10ダメージ。',f(){alive().forEach(e=>dmgE(e,10))}},
+ pBlock:{n:'鉄壁の薬',ic:'🛡️',d:'ブロック12を得る。',f(){gainBlockRaw(12)}},
+ pStr:{n:'剛力の薬',ic:'💪',d:'筋力2を得る。',f(){addSt(C.p,'str',2)}},
+ pDex:{n:'俊敏の薬',ic:'🦶',d:'敏捷2を得る。',f(){addSt(C.p,'dex',2)}},
+ pEnergy:{n:'活力の薬',ic:'⚡',d:'エネルギー+2。',f(){C.energy+=2}},
+ pSwift:{n:'速読の薬',ic:'📖',d:'カードを3枚引く。',f(){draw(3)}},
+ pPoison:{n:'毒薬',ic:'☠️',tg:'e',d:'敵1体に毒6を与える。',f(t){debE(t,'poison',6)}},
+ pWeak:{n:'弱体の薬',ic:'🥀',tg:'e',d:'敵1体に弱体3を与える。',f(t){debE(t,'weak',3)}},
+ pFear:{n:'恐怖の薬',ic:'😱',tg:'e',d:'敵1体に脆弱3を与える。',f(t){debE(t,'vuln',3)}},
+ pHeal:{n:'回復薬',ic:'❤️',any:1,d:'最大HPの25%を回復する。戦闘外でも使える。',f(){heal(Math.floor(S.maxHp*.25))}},
+ pFruit:{n:'果実の汁',ic:'🧃',any:1,d:'最大HP+5。戦闘外でも使える。',f(){gainMax(5)}},
+};
+
+/* ================= 敵 ================= */
+const A=(nm,dmg,hits,x)=>Object.assign({nm,dmg,hits:hits||1},x||{});
+const M=(nm,x)=>Object.assign({nm},x||{});
+const last=(e,n=1)=>e.hist[e.hist.length-n];
+const twice=(e,nm)=>last(e)===nm&&last(e,2)===nm;
+const EN={
+// ---- 第一層 ----
+slimeM:{n:'緑スライム',ic:'🦠',act:1,hp:[28,32],ai(e){const o=[];if(!twice(e,'体当たり'))o.push([A('体当たり',10),40]);if(last(e)!=='粘液飛ばし')o.push([A('粘液飛ばし',7,1,{add:['sSlimed',1,'disc']}),30]);if(last(e)!=='舐める')o.push([M('舐める',{deb:{weak:1}}),30]);return wpick(o)}},
+slimeS:{n:'小スライム',ic:'🟢',act:1,hp:[10,14],ai(e){return (e.mv+e.ofs)%2===0?A('体当たり',5):M('ねばつく',{deb:{weak:1}})}},
+cultist:{n:'黒衣の信徒',ic:'🦹',act:1,hp:[48,54],ai(e){return e.mv===0?M('儀式',{buff:{ritual:3}}):A('闇の刃',6)}},
+jaw:{n:'大顎虫',ic:'🪱',act:1,hp:[40,44],ai(e){if(e.mv===0)return A('噛みつき',11);const o=[];if(last(e)!=='噛みつき')o.push([A('噛みつき',11),25]);if(last(e)!=='威嚇')o.push([M('威嚇',{buff:{str:3},blk:6}),45]);if(!twice(e,'突き'))o.push([A('突き',7,1,{blk:5}),30]);return wpick(o)}},
+bat:{n:'吸血コウモリ',ic:'🦇',act:1,hp:[16,20],ai(e){return last(e)==='噛みつき'||(e.mv===0&&Math.random()<.5)?A('連続噛み',3,2):A('噛みつき',7)}},
+bandit:{n:'盗賊',ic:'🥷',act:1,hp:[20,24],ai(e){return last(e)==='斬りつけ'?A('足払い',6,1,{deb:{weak:1}}):A('斬りつけ',9)}},
+banditAxe:{n:'斧の盗賊',ic:'🪓',act:1,hp:[24,28],ai(e){return e.mv%2===0?A('振り下ろし',12):M('身構える',{blk:8,buff:{str:1}})}},
+shroom:{n:'毒キノコ',ic:'🍄',act:1,hp:[22,26],st:{spore:2},ai(e){return last(e)==='体当たり'&&Math.random()<.6?M('胞子を溜める',{buff:{str:2}}):A('体当たり',8)}},
+nob:{n:'猪頭の大将',ic:'🐗',act:1,hp:[84,88],elite:1,ai(e){if(e.mv===0)return M('咆哮',{buff:{enrage:2}});if(!twice(e,'粉砕')&&Math.random()<.67)return A('粉砕',14);return A('頭突き',6,1,{deb:{vuln:2}})}},
+sentry:{n:'石の番兵',ic:'🗿',act:1,hp:[38,42],elite:1,st:{artifact:1},ai(e){return (e.mv+e.ofs)%2===0?A('光線',9):M('眩暈の光',{add:['sDazed',2,'disc']})}},
+golem:{n:'眠れる巨像',ic:'🗻',act:1,hp:[108,112],elite:1,big:1,st:{sleep:3,metal:8},ai(e){if(e.st.sleep)return M('眠っている',{t:'sleep'});const k=e.awake%3;e.awake++;return k===2?M('吸魂',{deb:{str:-1,dex:-1}}):A('叩きつけ',18)}},
+hexa:{n:'獄炎の亡霊',ic:'👻',act:1,hp:[250,250],boss:1,big:1,ai(e){if(e.mv===0)return M('起動',{t:'unknown'});if(e.mv===1)return A('分断',Math.floor(S.hp/12)+1,6);const k=(e.mv-2)%7;return [A('焼却',6,1,{add:['sBurn',1,'disc']}),A('連撃',5,2),A('焼却',6,1,{add:['sBurn',1,'disc']}),M('炎上',{buff:{str:2},blk:12}),A('連撃',5,2),A('焼却',6,1,{add:['sBurn',1,'disc']}),A('獄炎',3,6,{add:['sBurn',3,'disc']})][k]}},
+guardian:{n:'鋼鉄の番人',ic:'🤖',act:1,hp:[240,240],boss:1,big:1,ai(e){const k=e.mv%4;return [M('鋼の構え',{blk:16,buff:{metal:2}}),A('粉砕',30),A('旋風',5,4),M('威圧',{deb:{weak:2,vuln:2},blk:8})][k]}},
+// ---- 第二層 ----
+knightG:{n:'鎧の亡者',ic:'💀',act:2,hp:[52,58],ai(e){const o=[];if(last(e)!=='斬撃')o.push([A('斬撃',13),40]);if(last(e)!=='盾構え')o.push([M('盾構え',{blk:10,buff:{str:2}}),30]);if(last(e)!=='重撃')o.push([A('重撃',9,1,{deb:{frail:2}}),30]);return wpick(o)}},
+spider:{n:'毒蜘蛛',ic:'🕷️',act:2,hp:[40,46],ai(e){return last(e)==='毒牙'&&Math.random()<.6?M('糸を吐く',{deb:{weak:2,frail:1}}):A('毒牙',6,2)}},
+shaman:{n:'呪術師',ic:'🧞',act:2,hp:[48,52],ai(e){if(e.mv===0)return M('呪いの言葉',{deb:{weak:2,frail:2}});const o=[[A('呪弾',11),50]];if(last(e)!=='闇の加護')o.push([M('闇の加護',{allyBlk:12}),50]);return wpick(o)}},
+thug:{n:'傭兵',ic:'🧌',act:2,hp:[60,66],ai(e){const o=[];if(last(e)!=='一撃')o.push([A('一撃',16),40]);if(last(e)!=='連打')o.push([A('連打',7,2),35]);if(last(e)!=='気合')o.push([M('気合',{buff:{str:3}}),25]);return wpick(o)}},
+archer:{n:'弓兵',ic:'🏹',act:2,hp:[36,40],ai(e){return (e.mv+e.ofs)%3===2?M('狙いを定める',{buff:{str:2},blk:6}):A('連射',5,2)}},
+byrd:{n:'怪鳥',ic:'🦅',act:2,hp:[25,30],ai(e){const o=[];if(last(e)!=='啄む')o.push([A('啄む',1,5),50]);if(last(e)!=='急降下')o.push([A('急降下',12),30]);if(last(e)!=='鳴く')o.push([M('鳴く',{buff:{str:1}}),20]);return wpick(o)}},
+orb:{n:'魔導球',ic:'🔮',act:2,hp:[45,50],ai(e){return e.mv%2===0?A('光線',10,1,{add:['sBurn',1,'disc']}):M('守護',{allyBlk:10})}},
+twinB:{n:'双剣の騎士',ic:'🤺',act:2,hp:[140,146],elite:1,big:1,ai(e){const k=e.mv%3;return [A('双撃',12,2),M('構え',{buff:{str:3},blk:15}),A('突き',26)][k]}},
+tome:{n:'刺突の書',ic:'📕',act:2,hp:[160,164],elite:1,big:1,ai(e){e.stab=(e.stab||1)+1;if(e.mv>0&&e.mv%3===2)return A('大刺',21);return A('連刺',6,e.stab)}},
+slaverR:{n:'赤鬼',ic:'👹',act:2,hp:[46,50],elite:1,ai(e){return e.mv%2===0?A('殴打',13):A('鎖打ち',8,1,{deb:{vuln:2}})}},
+slaverB:{n:'青鬼',ic:'👺',act:2,hp:[46,50],elite:1,ai(e){return e.mv%2===0?A('刺突',12):A('棘鞭',7,1,{deb:{weak:2}})}},
+slaverK:{n:'鬼の頭領',ic:'🐃',act:2,hp:[54,60],elite:1,ai(e){return e.mv%2===0?M('号令',{allyBuff:{str:2},blk:10}):A('鞭打ち',7,1,{add:['sWound',1,'disc']})}},
+champ:{n:'鉄の王',ic:'👑',act:2,hp:[420,420],boss:1,big:1,ai(e){if(!e.angry&&e.hp<e.maxHp/2){e.angry=1;return M('怒髪天',{buff:{str:6},cleanse:1})}if(e.angry)return last(e)==='処刑'?(Math.random()<.5?A('斬撃',16):M('威嚇',{deb:{weak:2,vuln:2}})):A('処刑',10,2);const o=[];if(last(e)!=='斬撃')o.push([A('斬撃',16),35]);if(last(e)!=='防御')o.push([M('防御',{blk:18,buff:{metal:3}}),25]);if(last(e)!=='威嚇')o.push([M('威嚇',{deb:{weak:2,vuln:2}}),20]);if(last(e)!=='顔面殴打')o.push([A('顔面殴打',12,1,{deb:{frail:2}}),20]);return wpick(o)}},
+collector:{n:'収集家',ic:'🕴️',act:2,hp:[300,300],boss:1,big:1,ai(e){const mins=alive().filter(x=>x.minion).length;if(e.mv===0||(mins===0&&Math.random()<.5&&last(e)!=='召喚'))return M('召喚',{summon:['torch','torch']});if(e.mv===3)return M('呪縛',{deb:{weak:3,vuln:3,frail:3}});const o=[];if(last(e)!=='火球')o.push([A('火球',18),60]);if(last(e)!=='強化')o.push([M('強化',{allyBuff:{str:3},blk:15}),40]);return wpick(o)}},
+torch:{n:'松明の手下',ic:'🦴',act:2,hp:[36,40],minion:1,ai(e){return Math.random()<.65?A('火の粉',7):M('主を守る',{allyBlk:6})}},
+// ---- 第三層 ----
+darkling:{n:'闇の落とし子',ic:'👾',act:3,hp:[50,56],ai(e){const o=[];if(last(e)!=='爪')o.push([A('爪',9,2),40]);if(last(e)!=='噛み砕き')o.push([A('噛み砕き',22),30]);if(last(e)!=='硬化')o.push([M('硬化',{blk:12,buff:{str:2}}),30]);return wpick(o)}},
+orbWalker:{n:'球体歩行機',ic:'🛸',act:3,hp:[92,100],st:{ritual:2},ai(e){return last(e)==='業火'?A('粉砕',15):A('業火',11,1,{add:['sBurn',1,'draw']})}},
+sentinel:{n:'天穹の衛士',ic:'🛡️',act:3,hp:[70,78],ai(e){const o=[];if(last(e)!=='槍')o.push([A('槍',12,2),45]);if(last(e)!=='大盾')o.push([M('大盾',{blk:20}),30]);if(last(e)!=='輝き')o.push([A('輝き',8,1,{deb:{vuln:2,weak:1}}),25]);return wpick(o)}},
+warlock:{n:'塔の魔術師',ic:'🧛',act:3,hp:[60,66],ai(e){const o=[];if(last(e)!=='闇の矢')o.push([A('闇の矢',8,3),45]);if(last(e)!=='加護')o.push([M('加護',{allyBlk:15}),25]);if(last(e)!=='魔力の衣')o.push([M('魔力の衣',{allyBuff:{str:3}}),30]);return wpick(o)}},
+giant:{n:'大鬼',ic:'🦍',act:3,hp:[130,140],big:1,ai(e){const k=e.mv%3;return [A('二連撃',12,2),M('咆哮',{buff:{str:4},deb:{weak:1}}),A('叩き潰し',30)][k]}},
+nemesis:{n:'冥府の使者',ic:'☠️',act:3,hp:[185,185],elite:1,big:1,endT(e){e.st.intang=e.st.intang?0:1},ai(e){const o=[];if(last(e)!=='大鎌')o.push([A('大鎌',40),35]);if(last(e)!=='連斬')o.push([A('連斬',6,3),35]);if(last(e)!=='業火の呪い')o.push([M('業火の呪い',{add:['sBurn',3,'disc']}),30]);return wpick(o)}},
+reaper:{n:'骸骨の騎士',ic:'🏇',act:3,hp:[170,176],elite:1,big:1,st:{artifact:2},ai(e){const k=e.mv%4;return [A('突撃',18,1,{deb:{vuln:2}}),A('乱れ斬り',7,4),M('鎧を固める',{blk:25,buff:{str:3}}),A('処刑',38)][k]}},
+awaken:{n:'天穹の守護神',ic:'🐉',act:3,hp:[300,300],boss:1,big:1,st:{curious:1},onDeath(e){if(e.phase)return false;e.phase=1;e.hp=e.maxHp;e.n='目覚めし守護神';e.ic='🐲';e.block=0;for(const k in e.st)if((ST[k]&&ST[k].bad)||e.st[k]<0||k==='curious')delete e.st[k];e.intent=M('再誕',{t:'unknown'});banner('守護神が目覚めた！');return true},ai(e){if(!e.phase){if(e.mv===0)return A('斬撃',20);const o=[];if(last(e)!=='斬撃')o.push([A('斬撃',20),50]);if(last(e)!=='魂の嵐')o.push([A('魂の嵐',6,4),50]);return wpick(o)}const o=[];if(last(e)!=='闇の顎')o.push([A('闇の顎',10,1,{deb:{weak:2,vuln:1}}),35]);if(last(e)!=='咆哮')o.push([A('咆哮',10,3),35]);if(last(e)!=='残響')o.push([A('残響',40),30]);return wpick(o)}},
+timeq:{n:'時の女王',ic:'⏳',act:3,hp:[456,456],boss:1,big:1,st:{timeWarp:0},ai(e){if(!e.healed&&e.hp<e.maxHp/2){e.healed=1;return M('時間逆行',{heal:Math.floor(e.maxHp/2-e.hp),cleanse:1})}const o=[];if(!twice(e,'振り子'))o.push([A('振り子',7,3),40]);if(last(e)!=='頭突き')o.push([A('頭突き',32,1,{deb:{frail:2}}),35]);if(last(e)!=='時の鎖')o.push([M('時の鎖',{blk:20,deb:{weak:1,vuln:1}}),25]);return wpick(o)}},
+};
+const ACTS=[null,
+ {n:'第一層　苔むす回廊',easy:[['slimeM'],['cultist'],['jaw'],['slimeS','slimeS'],['bat','bat']],hard:[['bandit','banditAxe'],['shroom','shroom'],['slimeS','slimeS','slimeS'],['jaw','bat'],['cultist','slimeS'],['slimeM','slimeS'],['shroom','bat']],elite:[['nob'],['sentry','sentry','sentry'],['golem']],boss:['hexa','guardian']},
+ {n:'第二層　朽ちた王都',easy:[['knightG'],['spider','spider'],['thug'],['archer','archer']],hard:[['knightG','shaman'],['byrd','byrd','byrd'],['thug','archer'],['spider','shaman'],['orb','knightG'],['byrd','byrd','shaman']],elite:[['twinB'],['tome'],['slaverB','slaverK','slaverR']],boss:['champ','collector']},
+ {n:'第三層　天穹の頂',easy:[['darkling','darkling'],['orbWalker'],['sentinel']],hard:[['darkling','darkling','darkling'],['sentinel','warlock'],['giant'],['jaw','jaw','jaw'],['warlock','darkling'],['orbWalker','warlock'],['sentinel','sentinel']],elite:[['nemesis'],['reaper'],['giant','warlock']],boss:['awaken','timeq']},
+];
+const CH={
+ k:{n:'剣士アレス',ic:'🦸',hp:80,relic:'rBlood',deck:['kStrike','kStrike','kStrike','kStrike','kStrike','kDefend','kDefend','kDefend','kDefend','kBash'],d:'筋力と鉄壁の守りで、正面から敵を叩き潰す戦士。戦闘後にHPが回復する。'},
+ m:{n:'魔導師リラ',ic:'🧙‍♀️',hp:70,relic:'rHourglass',deck:['mStrike','mStrike','mStrike','mStrike','mStrike','mDefend','mDefend','mDefend','mDefend','mDefend','mNeutral','mSurvivor'],d:'毒と刃片、手札の回転で敵を翻弄する術師。最初のターンに多く引ける。'},
+};
+
+/* ================= 共通処理 ================= */
+function mk(id,up=0){return {id,up:up?1:0,uid:S?++S.uidc:Math.random()}}
+function cardCost(c){const d=CD[c.id];if(d.c==='u')return 'u';let k=v(d.c,c.up);if(c.cc!=null&&k!==-1)k=c.cc;return k}
+const canUp=c=>{const d=CD[c.id];return !c.up&&d.t!=='sts'&&d.t!=='cur'};
+const cname=c=>CD[c.id].n+(c.up?'+':'');
+function isEx(c){return !!v(CD[c.id].ex,c.up)}
+function alive(){return C?C.enemies.filter(e=>!e.dead):[]}
+function addSt(o,k,n){o.st[k]=(o.st[k]||0)+n;if(o.st[k]===0)delete o.st[k]}
+function gainMax(n){S.maxHp+=n;S.hp+=n;if(inC())fx('p','+'+n,'heal')}
+function heal(n){const b=S.hp;S.hp=Math.min(S.maxHp,S.hp+n);if(inC()&&S.hp>b)fx('p','+'+(S.hp-b),'heal')}
+function gainGold(n){if(hasR('rEcto'))return;S.gold+=n;S.stats.gold+=n}
+function baseEnergy(){return 3+S.relics.reduce((s,r)=>s+(RL[r].en||0),0)}
+
+/* ---- 戦闘アクション ---- */
+function fx(k,t,cls){UI.fxq.push({k,t,cls})}
+function hit(t,base,strMul=1){
+  if(!t||t.dead)return 0;
+  const s=C.p.st;let d=base+(s.str||0)*strMul+(s.vigor||0);if(s.weak)d*=.75;if(t.st.vuln)d*=1.5;d=Math.floor(d*(C.mul||1));d=Math.max(0,d);
+  return dmgE(t,d,true);
+}
+function hitAll(base){let h=0;for(const e of alive())h+=hit(e,base);return h}
+function dmgE(e,d,atk){
+  if(e.dead)return 0;
+  if(e.st.intang)d=Math.min(d,1);
+  const b=Math.min(e.block,d);e.block-=b;const l=d-b;
+  fx(e.uid,b&&!l?'ブロック':'-'+d,b&&!l?'blk':'dmg');
+  if(l>0){e.hp-=l;S.stats.dmg+=l;
+    if(e.st.sleep){delete e.st.sleep;delete e.st.metal;e.intent=M('目覚めた',{t:'stun'});}
+    if(e.st.angry)addSt(e,'str',e.st.angry);
+    if(atk&&C.p.st.envenom)debE(e,'poison',C.p.st.envenom);
+  }
+  if(e.hp<=0)killE(e);
+  return l;
+}
+function killE(e){
+  const d=EN[e.key];
+  if(d.onDeath&&d.onDeath(e)){return}
+  e.hp=0;e.dead=true;e.deadT=Date.now();e.block=0;S.stats.kills++;
+  if(e.st.spore)debP('vuln',e.st.spore);
+  if(e.st.corpse)for(const o of alive())dmgE(o,e.maxHp);
+  if(hasR('rHorn')&&alive().length){C.energy++;draw(1)}
+  if(d.boss)for(const m of alive().filter(x=>x.minion)){m.dead=true;m.hp=0}
+}
+function debE(e,k,n){
+  if(!e||e.dead)return;
+  const bad=(ST[k]&&ST[k].bad)||n<0;
+  if(bad&&e.st.artifact){addSt(e,'artifact',-1);fx(e.uid,'無効化','st');return}
+  addSt(e,k,n);fx(e.uid,(ST[k]?ST[k].n:k)+(n>0&&k!=='str'?'':' '+(n>0?'+':'')+n),k==='poison'?'psn':'st');
+}
+function debP(k,n){addSt(C.p,k,n);if(C.phase==='enemy')C.pj[k]=1;fx('p',ST[k].n+(k==='str'||k==='dex'?' '+n:''),'st')}
+function blk(base){const s=C.p.st;let d=base+(s.dex||0);if(s.frail)d*=.75;gainBlockRaw(Math.max(0,Math.floor(d)))}
+function gainBlockRaw(n){if(n<=0)return;C.p.block+=n;fx('p','+'+n,'blk')}
+function loseHP(n){if(hasR('rRod'))n=Math.max(0,n-1);if(n<=0)return;S.hp-=n;S.stats.taken+=n;fx('p','-'+n,'dmg')}
+function hitP(e,base){
+  let d=base+(e.st.str||0);if(e.st.weak)d*=.75;if(C.p.st.vuln)d*=1.5;d=Math.max(0,Math.floor(d));
+  const b=Math.min(C.p.block,d);C.p.block-=b;const l=d-b;
+  if(l>0)loseHP(l);else fx('p','ブロック','blk');
+  const th=(C.p.st.thorns||0)+(C.p.st.flameb||0);if(th&&!e.dead)dmgE(e,th);
+}
+function draw(n){
+  for(let i=0;i<n;i++){
+    if(C.hand.length>=10)break;
+    if(!C.draw.length){if(!C.disc.length)break;C.draw=shuffle(C.disc);C.disc=[]}
+    C.hand.push(C.draw.pop());
+  }
+}
+function addHand(id,up,n){for(let i=0;i<n;i++){const c=mk(id,up);if(C.hand.length<10)C.hand.push(c);else C.disc.push(c)}}
+function rmHand(c){const i=C.hand.indexOf(c);if(i>=0)C.hand.splice(i,1)}
+function exhaust(c){C.exh.push(c);if(hasR('rBranch')){const pool=Object.keys(CD).filter(k=>CD[k].cl===S.char&&'CUR'.includes(CD[k].r));addHand(pick(pool),0,1)}}
+function discardCard(c){C.disc.push(c)}
+async function discardN(n){if(!C.hand.length)return;const xs=await chooseHand(C.hand,Math.min(n,C.hand.length),'捨てるカードを選択');xs.forEach(c=>{rmHand(c);discardCard(c)})}
+function chooseHand(list,n,title,mode){
+  if(!list.length)return Promise.resolve([]);
+  if(list.length<=n&&mode!=='up')return Promise.resolve([...list]);
+  return chooseCards(list,{n,title,mode,combat:1});
+}
+
+/* ---- 戦闘の流れ ---- */
+function spawn(key,ofs){
+  const d=EN[key];const sc=1+.45*Math.max(0,S.act-d.act);
+  const hp=Math.round(R(d.hp[0],d.hp[1])*sc);
+  return {uid:'e'+(++S.uidc),key,n:d.n,ic:d.ic,hp,maxHp:hp,block:0,st:Object.assign({},d.st||{}),intent:null,mv:0,hist:[],sc,ofs:ofs||0,awake:0,minion:!!d.minion,big:!!d.big};
+}
+function setIntent(e){
+  const m=Object.assign({},EN[e.key].ai(e,C));
+  if(e.sc>1){if(m.dmg&&m.nm!=='分断')m.dmg=Math.round(m.dmg*e.sc);if(m.blk)m.blk=Math.round(m.blk*e.sc);if(m.allyBlk)m.allyBlk=Math.round(m.allyBlk*e.sc)}
+  e.intent=m;e.hist.push(m.nm);e.mv++;
+}
+function startCombat(groups,kind){
+  C=S.combat={kind,turn:1,energy:0,p:{block:0,st:{}},enemies:[],draw:[],hand:[],disc:[],exh:[],phase:'player',mul:1,extraDraw:0,atkT:0,sklT:0,pj:{},start:S.hp};
+  C.enemies=groups.map((k,i)=>spawn(k,i));
+  const cards=shuffle(S.deck.map(c=>({id:c.id,up:c.up,uid:c.uid})));
+  const inn=cards.filter(c=>v(CD[c.id].inn,c.up)),rest=cards.filter(c=>!v(CD[c.id].inn,c.up));
+  C.draw=[...rest,...inn];
+  if(inn.length>5)C.extraDraw+=inn.length-5;
+  S.screen='combat';UI.sel=null;UI.pot=null;
+  for(const r of S.relics)RL[r].start&&RL[r].start();
+  for(const e of C.enemies)setIntent(e);
+  startTurn(true);
+}
+function startTurn(first){
+  C.phase='player';const p=C.p;
+  if(!first&&!p.st.barricade){p.block=hasR('rCalipers')?Math.max(0,p.block-15):0}
+  C.energy=(hasR('rIce')&&!first?C.energy:0)+baseEnergy();
+  if(p.st.nextE){C.energy+=p.st.nextE;delete p.st.nextE}
+  C.atkT=0;C.sklT=0;
+  if(p.st.demon)addSt(p,'str',p.st.demon);
+  if(p.st.noxious)alive().forEach(e=>debE(e,'poison',p.st.noxious));
+  for(const r of S.relics)RL[r].turn&&RL[r].turn(C.turn);
+  let n=5+(C.turn===1?C.extraDraw:0)+(p.st.nextDraw||0);delete p.st.nextDraw;
+  draw(n);
+  if(p.st.blades)addHand('mShiv',0,p.st.blades);
+  UI.busy=false;
+  if(C.turn>1)banner('あなたのターン');
+  render();
+}
+function checkWin(){if(C&&!alive().length&&C.phase!=='done'){winCombat();return true}return false}
+function checkLose(){if(S.hp<=0){gameOver(false);return true}return false}
+
+function canPlay(c){
+  const k=cardCost(c);if(k==='u')return '使用できないカード';
+  if(k!==-1&&k>C.energy)return 'エネルギーが足りない';
+  return '';
+}
+async function playCard(c,t){
+  const d=CD[c.id];const k=cardCost(c);let X=0;
+  if(k===-1){X=C.energy;C.energy=0}else C.energy-=k;
+  rmHand(c);
+  if(d.t==='atk'){S.cnt.pen=(S.cnt.pen||0)+1;if(hasR('rPenNib')&&S.cnt.pen>=10){C.mul=2;S.cnt.pen=0;fx('p','羽ペン！','st')}}
+  if(d.f)await d.f(c.up,t,X,c);
+  C.mul=1;
+  if(d.t==='atk'&&C.p.st.vigor)delete C.p.st.vigor;
+  if(d.t==='pow'){S.stats.powers=(S.stats.powers||0)+1}
+  else if(isEx(c))exhaust(c);else C.disc.push(c);
+  S.stats.cards++;
+  // 反応
+  if(C.p.st.afterimg)gainBlockRaw(C.p.st.afterimg);
+  if(d.t==='atk'){C.atkT++;if(C.atkT%3===0){if(hasR('rKunai'))addSt(C.p,'dex',1);if(hasR('rShuriken'))addSt(C.p,'str',1);if(hasR('rFan'))gainBlockRaw(4)}}
+  if(d.t==='skl'){C.sklT++;for(const e of alive())if(e.st.enrage){addSt(e,'str',e.st.enrage);fx(e.uid,'筋力+'+e.st.enrage,'st')}if(C.sklT%3===0&&hasR('rLetter'))alive().forEach(e=>dmgE(e,5))}
+  if(d.t==='pow')for(const e of alive())if(e.st.curious){addSt(e,'str',e.st.curious);fx(e.uid,'筋力+'+e.st.curious,'st')}
+  for(const e of alive())if('timeWarp' in e.st){e.st.timeWarp=(e.st.timeWarp||0)+1;if(e.st.timeWarp>=12){e.st.timeWarp=0;addSt(e,'str',2);C.forceEnd=1}}
+  if(hasR('rTop')&&!C.hand.length&&alive().length)draw(1);
+}
+async function doPlay(c,t){
+  UI.busy=true;UI.sel=null;
+  await playCard(c,t);
+  if(checkLose())return;
+  if(checkWin())return;
+  UI.busy=false;render();
+  if(C.forceEnd){C.forceEnd=0;banner('時が止まった……');await sleep(600);endTurn()}
+}
+async function endTurn(){
+  if(!inC()||C.phase!=='player'||UI.busy)return;
+  UI.busy=true;UI.sel=null;UI.pot=null;C.phase='enemy';
+  const p=C.p;
+  for(const c of [...C.hand]){if(c.id==='sBurn'){const b=Math.min(p.block,2);p.block-=b;if(2-b)loseHP(2-b)}if(c.id==='cDoubt')debP('weak',1)}
+  if(p.st.metal)gainBlockRaw(p.st.metal);
+  if(p.st.combust){loseHP(1);alive().forEach(e=>dmgE(e,p.st.combust))}
+  if(hasR('rOricha')&&p.block===0)gainBlockRaw(6);
+  if(p.st.strDown){addSt(p,'str',-p.st.strDown);delete p.st.strDown}
+  delete p.st.flameb;
+  for(const c of [...C.hand]){rmHand(c);if(v(CD[c.id].eth,c.up))exhaust(c);else C.disc.push(c)}
+  render();
+  if(checkLose())return;if(checkWin())return;
+  await sleep(350/UI.speed);
+  C.pj={};
+  for(const e of [...C.enemies]){
+    if(e.dead)continue;
+    if(!S.combat)return;
+    e.block=0;
+    if(e.st.poison){dmgE(e,e.st.poison);addSt(e,'poison',-1);render();if(checkWin())return;if(e.dead)continue;await sleep(250/UI.speed)}
+    await enemyAct(e);
+    render();
+    if(checkLose())return;if(checkWin())return;
+    // ターン終了処理
+    if(e.st.ritual&&e.mv>1)addSt(e,'str',e.st.ritual);
+    if(e.st.metal)e.block+=e.st.metal;
+    if(e.st.sleep){e.st.sleep--;if(!e.st.sleep){delete e.st.sleep;delete e.st.metal}}
+    for(const k of ['weak','vuln','frail'])if(e.st[k])addSt(e,k,-1);
+    EN[e.key].endT&&EN[e.key].endT(e);
+    await sleep(380/UI.speed);
+  }
+  for(const k of ['weak','vuln','frail'])if(p.st[k]&&!C.pj[k])addSt(p,k,-1);
+  C.pj={};
+  for(const e of alive())setIntent(e);
+  C.turn++;
+  startTurn(false);
+}
+async function enemyAct(e){
+  const m=e.intent;if(!m)return;
+  if(m.t==='sleep'||m.t==='stun'||m.t==='unknown')return;
+  const el=document.querySelector(`[data-ent="${e.uid}"]`);if(el&&m.dmg!=null){el.classList.remove('lunge');void el.offsetWidth;el.classList.add('lunge')}
+  if(m.cleanse)for(const k in e.st)if((ST[k]&&ST[k].bad)||e.st[k]<0)delete e.st[k];
+  if(m.heal){e.hp=Math.min(e.maxHp,e.hp+m.heal);fx(e.uid,'+'+m.heal,'heal')}
+  if(m.blk){e.block+=m.blk;fx(e.uid,'+'+m.blk,'blk')}
+  if(m.allyBlk)for(const a of alive()){a.block+=m.allyBlk;fx(a.uid,'+'+m.allyBlk,'blk')}
+  if(m.buff)for(const k in m.buff){addSt(e,k,m.buff[k]);fx(e.uid,ST[k].n+'+'+m.buff[k],'st')}
+  if(m.allyBuff)for(const a of alive())for(const k in m.allyBuff){addSt(a,k,m.allyBuff[k])}
+  if(m.dmg!=null){for(let i=0;i<(m.hits||1);i++){if(e.dead)break;hitP(e,m.dmg);if(m.hits>1){render();await sleep(140/UI.speed)}if(S.hp<=0)return}}
+  if(m.deb)for(const k in m.deb)debP(k,m.deb[k]);
+  if(m.add){const[id,n,w]=m.add;for(let i=0;i<n;i++){const c=mk(id);if(w==='draw')C.draw.splice(R(0,C.draw.length),0,c);else C.disc.push(c)}fx('p',CD[id].n+'×'+n,'st')}
+  if(m.summon){for(const k of m.summon){if(alive().length>=4)break;const ne=spawn(k,C.enemies.length);C.enemies.splice(C.enemies.indexOf(e),0,ne);setIntent(ne)}}
+}
+function intentDmg(e,m){let d=m.dmg+(e.st.str||0);if(e.st.weak)d*=.75;if(C.p.st.vuln)d*=1.5;return Math.max(0,Math.floor(d))}
+function intentHTML(e){
+  const m=e.intent;if(!m)return '';
+  if(m.t==='sleep')return '💤';if(m.t==='stun')return '💫';if(m.t==='unknown')return '❓';
+  let s='';
+  if(m.dmg!=null){const d=intentDmg(e,m);const ic=d*(m.hits||1)>=25?'⚔️':'🗡️';s+=`${ic}<span class="atkn">${d}${m.hits>1?'×'+m.hits:''}</span>`}
+  if(m.blk||m.allyBlk)s+='🛡️';
+  if(m.buff||m.allyBuff||m.heal||m.summon)s+='💢';
+  if(m.deb||m.add)s+='🌀';
+  return s||'❓';
+}
+function intentText(e){
+  const m=e.intent;if(!m)return '';
+  if(m.t==='sleep')return '眠っている。';if(m.t==='stun')return '目を覚ましたばかりで動けない。';if(m.t==='unknown')return '何をするかわからない。';
+  const a=[];
+  if(m.dmg!=null)a.push(`${intentDmg(e,m)}ダメージ${m.hits>1?'を'+m.hits+'回':''}の攻撃`);
+  if(m.blk)a.push(`ブロック${m.blk}`);if(m.allyBlk)a.push(`味方全体にブロック${m.allyBlk}`);
+  if(m.buff)a.push('強化（'+Object.keys(m.buff).map(k=>ST[k].n+m.buff[k]).join('・')+'）');
+  if(m.allyBuff)a.push('味方全体を強化（'+Object.keys(m.allyBuff).map(k=>ST[k].n+m.allyBuff[k]).join('・')+'）');
+  if(m.deb)a.push('デバフ（'+Object.keys(m.deb).map(k=>ST[k].n+m.deb[k]).join('・')+'）');
+  if(m.add)a.push(`「${CD[m.add[0]].n}」を${m.add[1]}枚${m.add[2]==='draw'?'山札':'捨て札'}に加える`);
+  if(m.summon)a.push('手下を呼ぶ');if(m.heal)a.push('HP回復');if(m.cleanse)a.push('デバフ解除');
+  return `「${m.nm}」 ${a.join('、')}。`;
+}
+
+/* ---- 戦闘終了 ---- */
+async function winCombat(){
+  C.phase='done';UI.busy=true;
+  render();banner('勝利！');
+  await sleep(900);
+  for(const r of S.relics)RL[r].end&&RL[r].end();
+  const kind=C.kind;
+  if(kind==='elite')S.stats.elites++;if(kind==='boss')S.stats.bosses++;
+  S.combat=null;C=null;UI.busy=false;
+  const rw={items:[]};
+  const g=kind==='boss'?R(95,105):kind==='elite'?R(25,35):R(10,20);
+  if(!hasR('rEcto'))rw.items.push({k:'gold',n:g});
+  if(!hasR('rSozu')&&(Math.random()<S.potChance||kind==='elite')){rw.items.push({k:'pot',id:rollPotion()});S.potChance=.4}else S.potChance=Math.min(.9,S.potChance+.1);
+  if(kind==='elite'){rw.items.push({k:'relic',id:rollRelic()});if(hasR('rBlackStar'))rw.items.push({k:'relic',id:rollRelic()})}
+  if(S.chestRelic){rw.items.push({k:'relic',id:S.chestRelic});S.chestRelic=null}
+  rw.items.push({k:'card',ids:rollCards(3,kind)});
+  if(kind==='boss'&&S.act<3)rw.boss=1;
+  if(kind==='boss'&&S.act>=3){S.reward=rw;S.final=1}
+  S.reward=rw;S.screen='reward';
+  render();
+}
+function gameOver(win){
+  UI.busy=false;
+  const m=loadMeta();m.runs++;if(win){m.wins[S.char]=(m.wins[S.char]||0)+1}
+  m.best=Math.max(m.best||0,S.floor);saveMeta(m);
+  S.screen=win?'victory':'over';S.combat=null;C=null;
+  try{localStorage.removeItem(SAVE)}catch(e){}
+  UI.modal=null;renderModal();render();
+}
+
+/* ================= 生成 ================= */
+function rollRar(kind){const w=kind==='boss'?[[ 'R',1]]:kind==='elite'?[['C',50],['U',40],['R',10]]:[['C',60],['U',36],['R',4]];return wpick(w)}
+function rollCards(n,kind,cl){
+  cl=cl||S.char;const out=[];
+  while(out.length<n){
+    const r=rollRar(kind);const pool=Object.keys(CD).filter(k=>CD[k].cl===cl&&CD[k].r===r&&!out.some(o=>o.id===k));
+    if(!pool.length)continue;
+    const up=(S.act>=2&&Math.random()<(S.act===2?.1:.2))?1:0;
+    out.push({id:pick(pool),up});
+  }
+  return out;
+}
+function rollRelic(rar){
+  rar=rar||wpick([['C',50],['U',33],['R',17]]);
+  let pool=Object.keys(RL).filter(k=>RL[k].r===rar&&!S.relics.includes(k)&&!(S.seenR||[]).includes(k));
+  if(!pool.length)pool=Object.keys(RL).filter(k=>'CUR'.includes(RL[k].r)&&!S.relics.includes(k));
+  if(!pool.length)return 'rStrawberry';
+  const id=pick(pool);(S.seenR=S.seenR||[]).push(id);return id;
+}
+function rollPotion(){return pick(Object.keys(PO))}
+function gainRelic(id){if(S.relics.includes(id))return;S.relics.push(id);RL[id].pick&&RL[id].pick()}
+function gainPotion(id){if(hasR('rSozu'))return false;const i=S.potions.indexOf(null);if(i<0)return false;S.potions[i]=id;return true}
+
+function genMap(){
+  const H=15,W=7;const rows=[...Array(H)].map(()=>Array(W).fill(null));
+  let first=-1;
+  for(let p=0;p<6;p++){
+    let c=R(0,W-1);if(p===1)while(c===first)c=R(0,W-1);if(p===0)first=c;
+    for(let r=0;r<H;r++){
+      if(!rows[r][c])rows[r][c]={t:null,nx:[],jx:R(-8,8),jy:R(-6,6)};
+      if(r<H-1){
+        let o=[c-1,c,c+1].filter(x=>x>=0&&x<W).filter(nc=>{
+          if(nc===c+1&&rows[r][c+1]&&rows[r][c+1].nx.includes(c))return false;
+          if(nc===c-1&&rows[r][c-1]&&rows[r][c-1].nx.includes(c))return false;return true});
+        const nc=pick(o);if(!rows[r][c].nx.includes(nc))rows[r][c].nx.push(nc);c=nc;
+      }
+    }
+  }
+  const parents=(r,c)=>r===0?[]:rows[r-1].map((n,i)=>n&&n.nx.includes(c)?n:null).filter(Boolean);
+  for(let r=0;r<H;r++)for(let c=0;c<W;c++){const n=rows[r][c];if(!n)continue;
+    if(r===0){n.t='M';continue}if(r===8){n.t='T';continue}if(r===H-1){n.t='R';continue}
+    let t;for(let k=0;k<8;k++){
+      t=wpick([['M',45],['?',22],['E',r>=5?16:0],['R',r>=5&&r!==H-2?12:0],['$',r>=2?6:0]]);
+      if('ER$'.includes(t)&&parents(r,c).some(p=>p.t===t))continue;break}
+    n.t=t;
+  }
+  return rows;
+}
+function newRun(ch){
+  const d=CH[ch];
+  S={ver:1,char:ch,hp:d.hp,maxHp:d.hp,gold:99,deck:[],relics:[],potions:[null,null,null],act:1,floor:0,map:null,pos:null,path:[],screen:'map',combat:null,uidc:0,cnt:{},potChance:.4,fights:0,removeCost:75,stats:{kills:0,elites:0,bosses:0,dmg:0,taken:0,cards:0,gold:0}};
+  S.deck=d.deck.map(id=>mk(id));
+  gainRelic(d.relic);
+  startAct(1);
+  S.screen='neow';
+  render();
+}
+function startAct(a){
+  S.act=a;S.map=genMap();S.pos=null;S.path=[];S.fights=0;S.boss=pick(ACTS[a].boss);
+}
+
+/* ================= ノード ================= */
+function availNodes(){
+  if(!S.pos)return S.map[0].map((n,c)=>n?[0,c]:null).filter(Boolean);
+  if(S.pos.r===14)return [['B',0]];
+  return S.map[S.pos.r][S.pos.c].nx.map(c=>[S.pos.r+1,c]);
+}
+function goNode(r,c){
+  if(!availNodes().some(([a,b])=>a===r&&b===c))return;
+  S.floor++;
+  if(r==='B'){S.pos={r:15,c:0};startCombat([S.boss],'boss');return}
+  S.pos={r,c};S.path.push([r,c]);
+  const t=S.map[r][c].t;
+  if(t==='M')fightNormal();
+  else if(t==='E')startCombat(pick(ACTS[S.act].elite),'elite');
+  else if(t==='R'){S.screen='rest';S.restDone=0;render()}
+  else if(t==='$'){S.shop=genShop();S.screen='shop';render()}
+  else if(t==='T'){S.screen='chest';S.chestOpen=0;render()}
+  else if(t==='?'){const x=Math.random();if(x<.15)fightNormal();else if(x<.2){S.shop=genShop();S.screen='shop';render()}else startEvent()}
+}
+function fightNormal(){const a=ACTS[S.act];const g=S.fights<3?pick(a.easy):pick(a.hard);S.fights++;startCombat(g,'normal')}
+
+/* ---- ショップ ---- */
+function price(b){return Math.round(b*(hasR('rMember')?.5:1))}
+function genShop(){
+  const cl=S.char,cards=[];
+  const types=['atk','atk','skl','skl','pow'];
+  for(const t of types){let id;for(let i=0;i<40;i++){const r=wpick([['C',55],['U',37],['R',8]]);const pool=Object.keys(CD).filter(k=>CD[k].cl===cl&&CD[k].t===t&&CD[k].r===r&&!cards.some(c=>c.id===k));if(pool.length){id=pick(pool);break}}if(id)cards.push({id,p:priceOf(CD[id].r)})}
+  const xs=Object.keys(CD).filter(k=>CD[k].cl==='x');shuffle(xs);
+  for(const id of xs.slice(0,2))cards.push({id,p:Math.round(priceOf(CD[id].r)*1.2)});
+  const sale=R(0,Math.min(4,cards.length-1));cards[sale].p=Math.round(cards[sale].p/2);cards[sale].sale=1;
+  const relics=[];for(let i=0;i<2;i++){const id=rollRelic();relics.push({id,p:{C:R(143,157),U:R(238,262),R:R(285,315)}[RL[id].r]||150})}
+  if(!S.relics.includes('rMember')&&Math.random()<.5)relics.push({id:'rMember',p:R(170,190)});else{const id=rollRelic('C');relics.push({id,p:R(143,157)})}
+  const pots=[0,1,2].map(()=>({id:rollPotion(),p:R(48,58)}));
+  return {cards,relics,pots,removed:0};
+}
+function priceOf(r){return r==='C'?R(45,55):r==='U'?R(68,82):R(135,165)}
+
+/* ---- イベント ---- */
+const EV={
+ altar:{t:'古の祭壇',ic:'🗿',x:'苔むした祭壇に、黄金の像が祀られている。持ち去れば何かが起きそうだ……',o:()=>[
+  {l:'像を奪う',s:'レリックを得る。最大HPの25%のダメージを受ける。',f(){const r=rollRelic();gainRelic(r);const d=Math.floor(S.maxHp*.25);S.hp-=d;return `「${RL[r].n}」を手に入れた！ 崩れ落ちる天井に打たれ、${d}ダメージを受けた。`}},
+  {l:'立ち去る',f(){return '触らぬ神に祟りなし。あなたは静かに祭壇を後にした。'}}]},
+ fountain:{t:'清めの泉',ic:'⛲',x:'澄んだ水がこんこんと湧き出ている。水面にあなたの迷いが映る。',o:()=>[
+  {l:'身を清める',s:'カードを1枚デッキから削除する。',dis:!S.deck.length,async f(){const c=(await chooseCards(S.deck,{n:1,title:'削除するカードを選択',cancel:0}))[0];if(c){S.deck.splice(S.deck.indexOf(c),1);return `「${cname(c)}」が泉に溶けていった。`}return ''}},
+  {l:'水を飲む',s:`HPを${Math.floor(S.maxHp/3)}回復する。`,f(){heal(Math.floor(S.maxHp/3));return '冷たい水が体に染みわたる。'}}]},
+ gamble:{t:'賭博好きの小鬼',ic:'🎲',x:'「よう旅人、ひと勝負どうだい？ 50ゴールド賭けて、勝ったら倍にしてやるぜ」',o:()=>[
+  {l:'50ゴールド賭ける',s:'50%で100ゴールドを得る。負けると50ゴールドを失う。',dis:S.gold<50,f(){if(Math.random()<.5){S.gold+=50;return '勝った！ 小鬼は悔しそうに金貨を投げてよこした。（+50ゴールド）'}S.gold-=50;return '負けた……。小鬼は高笑いしながら去っていった。（-50ゴールド）'}},
+  {l:'断る',f(){return '「ちぇっ、つまんねえの」'}}]},
+ forge:{t:'打ち捨てられた鍛冶場',ic:'⚒️',x:'炉にはまだ火が残っている。道具も使えそうだ。',o:()=>[
+  {l:'鍛える',s:'カードを1枚強化する。',dis:!S.deck.some(canUp),async f(){const c=(await chooseCards(S.deck.filter(canUp),{n:1,title:'強化するカードを選択',mode:'up'}))[0];if(c){c.up=1;return `「${cname(c)}」に鍛え直した。`}return ''}},
+  {l:'物色する',s:'60ゴールドを得る。',f(){gainGold(60);return '隅に隠された金貨袋を見つけた。'}}]},
+ book:{t:'囁く魔導書',ic:'📖',x:'黒い装丁の本が、あなたの名を囁いている……',o:()=>[
+  {l:'読む',s:'レアカードを1枚得る。呪い「疑念」を得る。',f(){const c=rollCards(1,'boss')[0];S.deck.push(mk(c.id,c.up));S.deck.push(mk('cDoubt'));return `禁断の知識「${CD[c.id].n}」を得た。だが心に疑念が巣食った。`}},
+  {l:'燃やす',s:'HPを5失う。50ゴールドを得る。',f(){S.hp-=5;gainGold(50);return '本は悲鳴を上げて燃え尽き、灰の中から金貨がこぼれた。'}},
+  {l:'立ち去る',f(){return '耳を塞いで足早に去った。'}}]},
+ bones:{t:'冒険者の亡骸',ic:'☠️',x:'先に挑んだ冒険者の亡骸だ。荷物がまだ残っている。',o:()=>[
+  {l:'荷物を漁る',s:'90ゴールドとポーションを得る。呪い「怠惰」を得る。',f(){gainGold(90);gainPotion(rollPotion());S.deck.push(mk('cSloth'));return '金貨と薬を手に入れた。だが、どこか体が重い……。'}},
+  {l:'弔う',s:'HPを8回復する。',f(){heal(8);return '静かに祈りを捧げると、不思議と力が湧いた。'}}]},
+ herbal:{t:'旅の薬師',ic:'🧑‍⚕️',x:'「傷を癒やすかい？ 薬もあるよ」',o:()=>[
+  {l:'治療を受ける（35ゴールド）',s:'HPを最大まで回復する。',dis:S.gold<35||hasR('rEcto')&&S.gold<35,f(){S.gold-=35;S.hp=S.maxHp;return '傷がすっかり癒えた。'}},
+  {l:'薬を買う（20ゴールド）',s:'ランダムなポーションを得る。',dis:S.gold<20||!S.potions.includes(null)||hasR('rSozu'),f(){S.gold-=20;gainPotion(rollPotion());return '薬を受け取った。'}},
+  {l:'立ち去る',f(){return '「気をつけてな」'}}]},
+ mirror:{t:'謎の鏡',ic:'🪞',x:'鏡の中のあなたが、手札を差し出してくる。',o:()=>[
+  {l:'手を伸ばす',s:'デッキのカードを1枚複製する。',async f(){const c=(await chooseCards(S.deck,{n:1,title:'複製するカードを選択'}))[0];if(c){S.deck.push(mk(c.id,c.up));return `「${cname(c)}」が2枚になった。`}return ''}},
+  {l:'鏡を割る',s:'最大HP+4。',f(){gainMax(4);return '破片が光となってあなたに吸い込まれた。'}}]},
+ trial:{t:'力試しの石碑',ic:'🪦',x:'「強者よ、試練を受けよ。勝てば宝を授けん」',o:()=>[
+  {l:'試練に挑む',s:'エリートと戦う。勝てばレリックを得る。',f(){return {fight:'elite'}}},
+  {l:'立ち去る',f(){return '今はまだその時ではない。'}}]},
+ spirit:{t:'焚き火の精霊',ic:'🔥',x:'焚き火の中から小さな精霊が顔を出した。「何か燃やしてくれる？」',o:()=>[
+  {l:'カードを捧げる',s:'カードを1枚削除し、HPを10回復する。',dis:!S.deck.length,async f(){const c=(await chooseCards(S.deck,{n:1,title:'捧げるカードを選択'}))[0];if(c){S.deck.splice(S.deck.indexOf(c),1);heal(10);return `「${cname(c)}」は炎に包まれ、温かな光が戻ってきた。`}return ''}},
+  {l:'温まるだけ',s:'HPを5回復する。',f(){heal(5);return 'ぱちぱちと薪がはぜる。'}}]},
+};
+function startEvent(){
+  let keys=Object.keys(EV).filter(k=>!(S.seenE||[]).includes(k));if(!keys.length){S.seenE=[];keys=Object.keys(EV)}
+  const k=pick(keys);(S.seenE=S.seenE||[]).push(k);
+  S.event={k,res:null};S.screen='event';render();
+}
+async function evChoose(i){
+  if(UI.busy)return;const ev=EV[S.event.k];const o=ev.o()[i];if(!o||o.dis)return;
+  UI.busy=true;const r=await o.f();UI.busy=false;
+  if(r&&r.fight){startCombat(pick(ACTS[S.act].elite),'elite');return}
+  if(r==='')return render();
+  S.event.res=r;if(checkLoseOut())return;render();
+}
+function checkLoseOut(){if(S.hp<=0){S.hp=0;gameOver(false);return true}return false}
+
+/* ================= 画面操作 ================= */
+function toMap(){S.screen='map';S.reward=null;S.event=null;S.shop=null;render();setTimeout(scrollMap,30)}
+function tapCard(uid){
+  if(!inC()||UI.busy||C.phase!=='player')return;
+  const c=C.hand.find(x=>x.uid===uid);if(!c)return;
+  UI.pot=null;
+  if(UI.sel===uid){
+    const why=canPlay(c);if(why){toast(why);return}
+    const d=CD[c.id];
+    if(d.tg==='e'){const a=alive();if(a.length===1)return doPlay(c,a[0]);toast('対象の敵をタップ');return}
+    return doPlay(c,null);
+  }
+  UI.sel=uid;render();
+}
+function tapEnemy(uid){
+  if(!inC())return;const e=C.enemies.find(x=>x.uid===uid);if(!e||e.dead)return;
+  if(UI.pot!=null&&!UI.busy){const i=UI.pot;UI.pot=null;return usePotion(i,e)}
+  if(UI.sel!=null&&!UI.busy){const c=C.hand.find(x=>x.uid===UI.sel);if(c&&CD[c.id].tg==='e'){const why=canPlay(c);if(why){toast(why);return}return doPlay(c,e)}}
+  showEnemy(e);
+}
+function tapField(ev){if(ev.target.closest('.ent,.card,.player,button'))return;if(UI.sel!=null||UI.pot!=null){UI.sel=null;UI.pot=null;render()}}
+async function usePotion(i,t){
+  const id=S.potions[i];if(!id)return;const d=PO[id];
+  if(inC()){
+    if(UI.busy||C.phase!=='player')return;
+    if(d.tg==='e'&&!t){const a=alive();if(a.length===1)t=a[0];else{UI.pot=i;UI.sel=null;closeModal();render();toast('対象の敵をタップ');return}}
+    S.potions[i]=null;closeModal();d.f(t);UI.pot=null;render();checkWin();
+  }else{if(!d.any)return;S.potions[i]=null;d.f();closeModal();render()}
+}
+function scrollMap(){const el=document.querySelector('.node.av')||document.querySelector('.node.cur');if(el)el.scrollIntoView({block:'center',behavior:'smooth'})}
+
+/* ================= 描画 ================= */
+const $app=document.getElementById('app'),$modal=document.getElementById('modal');
+function cardHTML(c,opt={}){
+  const d=CD[c.id];const k=cardCost(c);
+  let cls=`card ${d.t} r${d.r}${c.up?' up':''}${opt.cls?' '+opt.cls:''}`;
+  let costCls='cost';if(inC()&&opt.hand&&k!=='u'&&k!==-1&&k>C.energy)costCls+=' bad';if(c.cc!=null)costCls+=' mod';
+  const cost=k==='u'?'':`<div class="${costCls}">${k===-1?'X':k}</div>`;
+  let tags=[];if(v(d.inn,c.up))tags.push(kw('先天'));if(v(d.eth,c.up))tags.push(kw('儚い'));if(isEx(c))tags.push(kw('廃棄'));
+  return `<div class="${cls}" ${opt.attr||''} style="${opt.style||''}">${cost}<div class="nm">${cname(c)}</div><div class="art">${d.ic}</div><div class="ty">${TYN[d.t]}</div><div class="ds">${d.d(c.up)}${tags.length?' '+tags.join('・')+'。':''}</div></div>`;
+}
+function stHTML(st,owner){
+  return Object.keys(st).filter(k=>ST[k]&&(st[k]||k==='timeWarp')).map(k=>`<span class="${ST[k].bad||st[k]<0?'bad':''}">${ST[k].i}${k==='barricade'||k==='sleep'&&false?'':st[k]}</span>`).join('');
+}
+function topHTML(){
+  const pots=S.potions.map((p,i)=>`<button class="pot ${p?'has':''} ${UI.pot===i?'sel':''}" onclick="potMenu(${i})">${p?PO[p].ic:''}</button>`).join('');
+  return `<div class="top"><span class="st hp">❤️${Math.max(0,S.hp)}/${S.maxHp}</span><span class="st gold">🪙${S.gold}</span><span class="st fl">${S.act}層 ${S.floor}階</span><span class="sp"></span><div class="pots">${pots}</div><button class="sm" onclick="showDeck()">🃏${S.deck.length}</button><button class="sm ghost" onclick="showMenu()">☰</button></div>
+  <div class="relics">${S.relics.map(r=>`<button class="rel" onclick="showRelic('${r}')">${RL[r].ic}${RL[r].cnt?`<i>${RL[r].cnt()}</i>`:''}</button>`).join('')}</div>`;
+}
+function render(){
+  if(!S){$app.className='';$app.innerHTML=titleHTML();return}
+  const s=S.screen;$app.className=s==='combat'?'fixed':'';
+  let h='';
+  if(s==='over'||s==='victory'){$app.innerHTML=endHTML(s==='victory');return}
+  h+=topHTML();
+  if(s==='map')h+=mapHTML();
+  else if(s==='combat')h+=combatHTML();
+  else if(s==='reward')h+=rewardHTML();
+  else if(s==='rest')h+=restHTML();
+  else if(s==='shop')h+=shopHTML();
+  else if(s==='event')h+=eventHTML();
+  else if(s==='chest')h+=chestHTML();
+  else if(s==='bossrelic')h+=bossRelicHTML();
+  else if(s==='neow')h+=neowHTML();
+  $app.innerHTML=h;
+  if(s==='combat')layoutHand();
+  flushFx();save();
+}
+function titleHTML(){
+  const m=loadMeta();let sv=null;try{sv=localStorage.getItem(SAVE)}catch(e){}
+  let cont='';if(sv){try{const o=JSON.parse(sv);cont=`<button class="pri" style="width:100%;padding:14px" onclick="loadRun()">続きから（${CH[o.char].n}・${o.act}層${o.floor}階）</button>`}catch(e){}}
+  return `<div class="scr title"><div style="font-size:56px;margin-top:20px">🌠</div><h1>天穹の塔</h1><div class="muted" style="margin-top:-6px">デッキ構築ローグライク</div>
+  ${cont}
+  <div class="panel" style="width:100%;display:flex;flex-direction:column;gap:10px"><b>キャラクターを選ぶ</b>
+  <div class="chars">${Object.keys(CH).map(k=>`<button class="charc ${UI.charSel===k?'on':''}" onclick="UI.charSel='${k}';render()"><span class="ic">${CH[k].ic}</span><b>${CH[k].n}</b><span style="color:#ff8a93">❤️${CH[k].hp}</span><p>${CH[k].d}</p>${m.wins[k]?`<span class="muted" style="font-size:11px">踏破 ${m.wins[k]}回</span>`:''}</button>`).join('')}</div>
+  <button class="pri" style="padding:14px;font-size:16px" onclick="${sv?"confirmNew()":"newRun(UI.charSel)"}">新しく塔に挑む</button></div>
+  <div style="display:flex;gap:8px"><button onclick="showHelp()">遊び方</button></div>
+  <div class="muted" style="font-size:12px">挑戦 ${m.runs}回 ・ 最高到達 ${m.best||0}階</div></div>`;
+}
+function confirmNew(){openModal({t:'center',html:`<h3>新しく始めますか？</h3><p class="muted">今のセーブデータは消えます。</p><div style="display:flex;gap:8px;justify-content:flex-end"><button onclick="closeModal()">やめる</button><button class="red" onclick="closeModal();newRun(UI.charSel)">始める</button></div>`})}
+function loadRun(){try{S=JSON.parse(localStorage.getItem(SAVE));C=S.combat||null;UI.busy=false;UI.sel=null;
+  if(C&&C.phase!=='player'){C.phase='player'}render();if(S.screen==='map')setTimeout(scrollMap,30)}catch(e){toast('読み込みに失敗しました');S=null;render()}}
+function neowHTML(){
+  return `<div class="scr"><div class="panel" style="text-align:center"><div style="font-size:48px">🌌</div><h2 style="font-size:20px;margin:6px 0">塔の入口</h2><p class="muted" style="line-height:1.7">天を貫く塔の頂には、願いを叶える星があるという。<br>入口の守り手が、旅立つあなたに祝福を授ける。</p></div>
+  <div class="opts">
+  <button onclick="neow(0)">🍀 最大HP+8<small>体が少し頑丈になる。</small></button>
+  <button onclick="neow(1)">🎁 ランダムなコモンレリックを得る</button>
+  <button onclick="neow(2)">🃏 デッキからカードを1枚削除する</button>
+  <button onclick="neow(3)">💰 100ゴールドを得る</button>
+  </div></div>`;
+}
+async function neow(i){
+  if(i===0)gainMax(8);if(i===1)gainRelic(rollRelic('C'));if(i===3)gainGold(100);
+  if(i===2){const c=(await chooseCards(S.deck,{n:1,title:'削除するカードを選択',cancel:1}))[0];if(!c)return;S.deck.splice(S.deck.indexOf(c),1)}
+  toMap();
+}
+const NODEI={M:'⚔️',E:'👹',R:'🔥','$':'🪙','?':'❓',T:'💎'};
+const NODEN={M:'敵',E:'エリート',R:'休憩所','$':'ショップ','?':'イベント',T:'宝箱'};
+function mapHTML(){
+  const H=15,W=7,rowH=66,top=130;const tot=top+H*rowH+30;
+  const av=availNodes();const isAv=(r,c)=>av.some(([a,b])=>a===r&&b===c);
+  const done=(r,c)=>S.path.some(([a,b])=>a===r&&b===c);
+  const X=(c,n)=>((c+.5)/W*100)+n.jx/5.2,Y=(r,n)=>top+(H-1-r)*rowH+n.jy;
+  let lines='',nodes='';
+  for(let r=0;r<H;r++)for(let c=0;c<W;c++){const n=S.map[r][c];if(!n)continue;
+    for(const nc of n.nx){const m=S.map[r+1][nc];const tr=done(r,c)&&done(r+1,nc);lines+=`<line x1="${X(c,n)}" y1="${Y(r,n)}" x2="${X(nc,m)}" y2="${Y(r+1,m)}" stroke="${tr?'#f5c542':'rgba(255,255,255,.22)'}" stroke-width="${tr?3:2}" stroke-dasharray="${tr?'':'4 5'}" vector-effect="non-scaling-stroke"/>`}
+    if(r===H-1)lines+=`<line x1="${X(c,n)}" y1="${Y(r,n)}" x2="50" y2="56" stroke="rgba(255,255,255,.15)" stroke-width="2" stroke-dasharray="4 5" vector-effect="non-scaling-stroke"/>`;
+    const cur=S.pos&&S.pos.r===r&&S.pos.c===c;
+    nodes+=`<button class="node ${done(r,c)?'done':''} ${isAv(r,c)?'av':''} ${cur?'cur':''}" style="left:${X(c,n)}%;top:${Y(r,n)}px" onclick="goNode(${r},${c})">${NODEI[n.t]}</button>`;
+  }
+  const bav=isAv('B',0);
+  nodes+=`<button class="node boss ${bav?'av':''}" style="left:50%;top:56px" onclick="goNode('B',0)">${EN[S.boss].ic}</button>`;
+  return `<div style="text-align:center;padding:10px 0 0"><h2 style="font-size:17px">${ACTS[S.act].n}</h2><div class="muted" style="font-size:12px">ボス：${EN[S.boss].n}</div></div>
+  <div class="mapwrap" style="height:${tot}px"><svg viewBox="0 0 100 ${tot}" preserveAspectRatio="none">${lines}</svg>${nodes}</div>
+  <div class="legend">${Object.keys(NODEI).map(k=>`<span>${NODEI[k]} ${NODEN[k]}</span>`).join('')}</div><div style="height:20px"></div>`;
+}
+function combatHTML(){
+  const es=C.enemies.filter(e=>!e.dead||e.fade);
+  const tgtMode=(UI.sel!=null&&(()=>{const c=C.hand.find(x=>x.uid===UI.sel);return c&&CD[c.id].tg==='e'})())||UI.pot!=null;
+  const ens=C.enemies.map(e=>{if(e.dead){if(e.minion&&Date.now()-e.deadT>700)return '';return `<div class="ent ${e.big?'big':''} ${Date.now()-e.deadT<700?'dying':'gone'}" data-ent="${e.uid}"><div class="intent" style="visibility:hidden">-</div><div class="spr">${e.ic}</div><div class="enm">${e.n}</div></div>`}const pct=Math.max(0,e.hp/e.maxHp*100);const psn=e.st.poison>=e.hp;
+    return `<div class="ent ${e.big?'big':''} ${tgtMode?'tgt':''}" data-ent="${e.uid}" onclick="tapEnemy('${e.uid}')"><div class="intent">${intentHTML(e)}</div><div class="spr">${e.ic}</div><div class="enm">${e.n}</div><div class="hpbar ${e.block?'blkd':''} ${psn?'psn':''}">${e.block?`<div class="blkb">${e.block}</div>`:''}<span style="width:${pct}%"></span><em>${e.hp}/${e.maxHp}</em></div><div class="sts">${stHTML(e.st)}</div></div>`}).join('');
+  const p=C.p;const pct=Math.max(0,S.hp/S.maxHp*100);
+  const selC=UI.sel!=null?C.hand.find(x=>x.uid===UI.sel):null;
+  let prev='';if(selC){const d=CD[selC.id];const why=canPlay(selC);const hint=why||(d.tg==='e'&&alive().length>1?'敵をタップして使用':'もう一度タップで使用');prev=`<div class="preview">${cardHTML(selC,{style:'--cw:150px'})}<div class="hint">${hint}</div></div>`}
+  const hand=C.hand.map((c,i)=>cardHTML(c,{hand:1,cls:(UI.sel===c.uid?'sel':'')+(canPlay(c)?' dim':''),attr:`data-i="${i}" onclick="tapCard(${typeof c.uid==='number'?c.uid:`'${c.uid}'`})"`})).join('');
+  return `<div class="field" onclick="tapField(event)">
+  <div class="enemies">${ens}</div>
+  <div class="player" data-ent="p" onclick="showPlayer()"><div class="spr">${CH[S.char].ic}</div><div class="pinfo"><b style="font-size:13px">${CH[S.char].n}</b><div class="hpbar ${p.block?'blkd':''}">${p.block?`<div class="blkb">${p.block}</div>`:''}<span style="width:${pct}%"></span><em>${Math.max(0,S.hp)}/${S.maxHp}</em></div><div class="sts">${stHTML(p.st)}</div></div></div>
+  </div>
+  <div class="ctrl"><div class="energy ${C.energy?'':'zero'}">${C.energy}/${baseEnergy()}</div><div class="piles"><button class="pile sm" onclick="showPile('draw')">山札<b>${C.draw.length}</b></button><button class="pile sm" onclick="showPile('disc')">捨て札<b>${C.disc.length}</b></button>${C.exh.length?`<button class="pile sm" onclick="showPile('exh')">廃棄<b>${C.exh.length}</b></button>`:''}</div><button class="red endbtn" ${UI.busy||C.phase!=='player'?'disabled':''} onclick="endTurn()">ターン終了</button></div>
+  <div class="hand" onclick="tapField(event)">${hand}${prev}</div>`;
+}
+function layoutHand(){
+  const h=document.querySelector('.hand');if(!h)return;const cs=[...h.querySelectorAll(':scope > .card')];const n=cs.length;if(!n)return;
+  const W=h.clientWidth-54;const cw=Math.min(82,Math.max(64,W/4.7));
+  let ov=n>1?Math.min(4,(W-n*cw)/(n-1)):0;
+  cs.forEach((el,i)=>{el.style.setProperty('--cw',cw+'px');if(i)el.style.marginLeft=ov+'px';const mid=(n-1)/2;const off=i-mid;const rot=n>1?off*Math.min(3,14/n):0;const ty=off*off*(n>5?.8:1.4);
+    const sel=el.classList.contains('sel');el.style.transform=sel?'translateY(-30px) scale(1.06)':`translateY(${ty}px) rotate(${rot}deg)`;el.style.zIndex=sel?50:i+1});
+}
+function flushFx(){
+  const q=UI.fxq;UI.fxq=[];const cnt={};
+  for(const f of q){const el=document.querySelector(`[data-ent="${f.k}"]`);if(!el)continue;const sp=el.querySelector('.spr')||el;const r=sp.getBoundingClientRect();
+    const k=f.k;cnt[k]=(cnt[k]||0)+1;
+    const d=document.createElement('div');d.className='floater '+(f.cls||'');d.textContent=f.t;d.style.left=(r.left+r.width/2+(cnt[k]%2?-1:1)*((cnt[k]-1)*9))+'px';d.style.top=(r.top+r.height*.4-(cnt[k]-1)*16)+'px';document.body.appendChild(d);setTimeout(()=>d.remove(),1000);
+    if(f.cls==='dmg'){el.classList.remove('hit');void el.offsetWidth;el.classList.add('hit')}}
+}
+function banner(t){const d=document.createElement('div');d.className='banner';d.textContent=t;(document.querySelector('.field')||$app).appendChild(d);setTimeout(()=>d.remove(),1000)}
+function toast(t){const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),1400)}
+
+function rewardHTML(){
+  const rw=S.reward;
+  const it=rw.items.map((x,i)=>{if(x.taken)return '';
+    if(x.k==='gold')return `<button class="rw" onclick="takeRw(${i})"><span class="ic">🪙</span>${x.n}ゴールド</button>`;
+    if(x.k==='pot')return `<button class="rw" onclick="takeRw(${i})"><span class="ic">${PO[x.id].ic}</span><span>${PO[x.id].n}<br><small class="muted">${PO[x.id].d}</small></span></button>`;
+    if(x.k==='relic')return `<button class="rw" onclick="takeRw(${i})"><span class="ic">${RL[x.id].ic}</span><span>${RL[x.id].n}<br><small class="muted">${RL[x.id].d}</small></span></button>`;
+    if(x.k==='card')return `<button class="rw" onclick="takeRw(${i})"><span class="ic">🃏</span>カードを1枚デッキに加える</button>`;}).join('');
+  return `<div class="scr"><h2 style="text-align:center;font-size:22px">戦利品</h2><div class="rewards">${it||'<p class="muted" style="text-align:center">すべて受け取った</p>'}</div>
+  <button class="pri" style="padding:14px;font-size:16px" onclick="leaveReward()">${rw.boss?'ボスの宝へ':S.final?'頂へ':'先へ進む'}</button></div>`;
+}
+function takeRw(i){
+  const x=S.reward.items[i];
+  if(x.k==='gold'){gainGold(x.n);x.taken=1}
+  if(x.k==='pot'){if(!gainPotion(x.id)){toast('ポーションがいっぱいです');return}x.taken=1}
+  if(x.k==='relic'){gainRelic(x.id);x.taken=1}
+  if(x.k==='card'){showCardReward(i);return}
+  render();
+}
+function showCardReward(i){
+  const x=S.reward.items[i];
+  openModal({t:'full',title:'カードを選ぶ',body:`<div class="cardrow" style="padding-top:20px">${x.ids.map((c,j)=>cardHTML(c,{attr:`onclick="pickCardRw(${i},${j})"`,style:'--cw:108px'})).join('')}</div><p class="muted" style="text-align:center;font-size:12px;margin-top:16px">タップでデッキに加える</p>`,foot:`<button onclick="closeModal()">戻る</button><button onclick="pickCardRw(${i},-1)">スキップ</button>`});
+}
+function pickCardRw(i,j){const x=S.reward.items[i];if(j>=0){const c=x.ids[j];S.deck.push(mk(c.id,c.up))}x.taken=1;closeModal();render()}
+function leaveReward(){
+  if(S.reward.boss){S.screen='bossrelic';S.bossRelics=pickBossRelics();S.reward=null;render();return}
+  if(S.final){gameOver(true);return}
+  toMap();
+}
+function pickBossRelics(){const p=shuffle(Object.keys(RL).filter(k=>RL[k].r==='X'&&!S.relics.includes(k)));return p.slice(0,3)}
+function bossRelicHTML(){
+  return `<div class="scr"><div class="panel" style="text-align:center"><div style="font-size:40px">👑</div><h2 style="font-size:19px">ボスの宝</h2><p class="muted">レリックを1つ選ぼう</p></div>
+  <div class="opts">${S.bossRelics.map(id=>`<button onclick="takeBossRelic('${id}')"><span style="font-size:22px">${RL[id].ic}</span> ${RL[id].n}<small>${RL[id].d}</small></button>`).join('')}<button class="ghost" onclick="takeBossRelic('')">何も取らない</button></div></div>`;
+}
+function takeBossRelic(id){if(id)gainRelic(id);const a=S.act+1;startAct(a);S.hp=Math.min(S.maxHp,S.hp+Math.ceil((S.maxHp-S.hp)*.75));S.screen='map';render();banner(ACTS[a].n);setTimeout(scrollMap,30)}
+function restHTML(){
+  const coffee=hasR('rCoffee');const amt=Math.floor(S.maxHp*.3);
+  if(S.restDone)return `<div class="scr"><div class="panel" style="text-align:center"><div style="font-size:56px">🏕️</div><p>${S.restDone}</p></div><button class="pri" style="padding:14px" onclick="toMap()">先へ進む</button></div>`;
+  return `<div class="scr"><div class="panel" style="text-align:center"><div style="font-size:56px">🔥</div><h2 style="font-size:20px">休憩所</h2><p class="muted">揺れる炎が心を落ち着かせる。</p></div>
+  <div class="opts"><button ${coffee?'disabled':''} onclick="restHeal()">😴 休む<small>${coffee?'珈琲ミルのせいで眠れない……':`HPを${amt}回復する。`}</small></button>
+  <button ${S.deck.some(canUp)?'':'disabled'} onclick="restUp()">⚒️ 鍛える<small>カードを1枚強化する。</small></button></div></div>`;
+}
+function restHeal(){heal(Math.floor(S.maxHp*.3));S.restDone='ぐっすり眠って体力が戻った。';render()}
+async function restUp(){const c=(await chooseCards(S.deck.filter(canUp),{n:1,title:'強化するカードを選択',mode:'up',cancel:1}))[0];if(!c)return;c.up=1;S.restDone=`「${cname(c)}」を鍛え上げた。`;render()}
+function shopHTML(){
+  const sh=S.shop;const ok=p=>S.gold>=price(p);
+  const cards=sh.cards.map((x,i)=>`<button class="item ${x.sold?'sold':''}" onclick="buy('c',${i})"><div style="position:relative">${x.sale?'<span class="sale">SALE</span>':''}${cardHTML({id:x.id,up:0})}</div><span class="price ${ok(x.p)?'':'no'}">🪙${price(x.p)}</span></button>`).join('');
+  const rels=sh.relics.map((x,i)=>`<button class="item ${x.sold?'sold':''}" onclick="buy('r',${i})"><div class="ricon">${RL[x.id].ic}</div><span style="font-size:11px;max-width:84px">${RL[x.id].n}</span><span class="price ${ok(x.p)?'':'no'}">🪙${price(x.p)}</span></button>`).join('');
+  const pots=sh.pots.map((x,i)=>`<button class="item ${x.sold?'sold':''}" onclick="buy('p',${i})"><div class="ricon" style="border-radius:14px">${PO[x.id].ic}</div><span style="font-size:11px">${PO[x.id].n}</span><span class="price ${ok(x.p)?'':'no'}">🪙${price(x.p)}</span></button>`).join('');
+  return `<div class="scr"><div style="text-align:center"><div style="font-size:40px">🧙‍♂️</div><h2 style="font-size:19px">怪しげな商人</h2><p class="muted" style="margin:4px 0 0">「いいもの揃ってるよ。ゆっくり見ていきな」</p></div>
+  <div class="panel"><div class="shopsec">${cards}</div></div>
+  <div class="panel"><div class="shopsec">${rels}${pots}</div></div>
+  <div class="panel" style="display:flex;align-items:center;gap:10px"><div style="flex:1"><b>カード削除</b><br><small class="muted">デッキからカードを1枚取り除く</small></div><button ${sh.removed||S.gold<price(S.removeCost)?'disabled':''} onclick="buy('x')">${sh.removed?'売り切れ':'🪙'+price(S.removeCost)}</button></div>
+  <button class="pri" style="padding:14px" onclick="toMap()">店を出る</button></div>`;
+}
+async function buy(k,i){
+  const sh=S.shop;
+  if(k==='x'){const p=price(S.removeCost);if(S.gold<p||sh.removed)return;const c=(await chooseCards(S.deck,{n:1,title:'削除するカードを選択',cancel:1}))[0];if(!c)return;S.gold-=p;S.deck.splice(S.deck.indexOf(c),1);sh.removed=1;S.removeCost+=25;render();return}
+  const x=(k==='c'?sh.cards:k==='r'?sh.relics:sh.pots)[i];if(x.sold)return;const p=price(x.p);
+  if(k!=='c'&&k!=='r'&&k!=='p')return;
+  if(k==='c'){showShopCard(i);return}
+  if(k==='r'){confirmBuyR(i);return}
+  if(S.gold<p){toast('ゴールドが足りない');return}
+  if(k==='p'){if(hasR('rSozu')){toast('封印の壺のせいで持てない');return}if(!gainPotion(x.id)){toast('ポーションがいっぱいです');return}}
+  S.gold-=p;x.sold=1;render();
+}
+function confirmBuyR(i){const x=S.shop.relics[i];const p=price(x.p);openModal({t:'center',html:`<div style="text-align:center;font-size:40px">${RL[x.id].ic}</div><h3 style="text-align:center">${RL[x.id].n}</h3><p style="line-height:1.6">${RL[x.id].d}</p><div style="display:flex;gap:8px;justify-content:flex-end"><button onclick="closeModal()">やめる</button><button class="pri" ${S.gold<p?'disabled':''} onclick="buyRelic(${i})">🪙${p}で買う</button></div>`})}
+function buyRelic(i){const x=S.shop.relics[i];const p=price(x.p);if(S.gold<p||x.sold)return;S.gold-=p;x.sold=1;gainRelic(x.id);closeModal();render()}
+function showShopCard(i){const x=S.shop.cards[i];const p=price(x.p);openModal({t:'center',html:`<div style="display:flex;justify-content:center">${cardHTML({id:x.id,up:0},{style:'--cw:150px'})}</div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px"><button onclick="closeModal()">やめる</button><button class="pri" ${S.gold<p?'disabled':''} onclick="buyCard(${i})">🪙${p}で買う</button></div>`})}
+function buyCard(i){const x=S.shop.cards[i];const p=price(x.p);if(S.gold<p||x.sold)return;S.gold-=p;x.sold=1;S.deck.push(mk(x.id));closeModal();render()}
+function eventHTML(){
+  const ev=EV[S.event.k];
+  if(S.event.res!=null)return `<div class="scr"><div class="panel" style="text-align:center"><div style="font-size:56px">${ev.ic}</div><h2 style="font-size:20px;margin:6px 0">${ev.t}</h2><p style="line-height:1.8">${S.event.res}</p></div><button class="pri" style="padding:14px" onclick="toMap()">先へ進む</button></div>`;
+  return `<div class="scr"><div class="panel" style="text-align:center"><div style="font-size:56px">${ev.ic}</div><h2 style="font-size:20px;margin:6px 0">${ev.t}</h2><p class="muted" style="line-height:1.8">${ev.x}</p></div>
+  <div class="opts">${ev.o().map((o,i)=>`<button ${o.dis?'disabled':''} onclick="evChoose(${i})">${o.l}${o.s?`<small>${o.s}</small>`:''}</button>`).join('')}</div></div>`;
+}
+function chestHTML(){
+  if(!S.chestOpen)return `<div class="scr" style="justify-content:center;align-items:center"><div style="font-size:90px">🧰</div><button class="pri" style="padding:14px 30px;font-size:16px" onclick="openChest()">宝箱を開ける</button></div>`;
+  return `<div class="scr" style="justify-content:center;align-items:center;text-align:center"><div class="ricon" style="width:80px;height:80px;font-size:44px">${RL[S.chestOpen.r].ic}</div><h2 style="font-size:20px">${RL[S.chestOpen.r].n}</h2><p class="muted">${RL[S.chestOpen.r].d}</p>${S.chestOpen.g?`<p>🪙 ${S.chestOpen.g}ゴールドも入っていた！</p>`:''}<button class="pri" style="padding:14px 30px" onclick="toMap()">先へ進む</button></div>`;
+}
+function openChest(){const r=rollRelic();gainRelic(r);const g=hasR('rEcto')?0:R(20,40);gainGold(g);S.chestOpen={r,g};render()}
+function endHTML(win){
+  const st=S.stats;
+  return `<div class="scr title"><div style="font-size:72px">${win?'🌟':'🪦'}</div><h1 style="font-size:34px">${win?'塔を踏破！':'力尽きた……'}</h1><p class="muted">${win?'星の光があなたを包む。おめでとう！':`${ACTS[S.act].n}・${S.floor}階で倒れた。`}</p>
+  <div class="panel stats" style="width:100%"><span>キャラクター</span><b>${CH[S.char].n}</b><span>到達階</span><b>${S.floor}階</b><span>倒した敵</span><b>${st.kills}</b><span>エリート撃破</span><b>${st.elites}</b><span>ボス撃破</span><b>${st.bosses}</b><span>与えたダメージ</span><b>${st.dmg}</b><span>使ったカード</span><b>${st.cards}</b><span>デッキ枚数</span><b>${S.deck.length}</b><span>レリック</span><b>${S.relics.map(r=>RL[r].ic).join('')}</b></div>
+  <button class="pri" style="padding:14px 30px;font-size:16px" onclick="S=null;C=null;render()">タイトルへ</button></div>`;
+}
+
+/* ================= モーダル ================= */
+function openModal(m){UI.modal=m;renderModal()}
+function closeModal(){const m=UI.modal;UI.modal=null;renderModal();if(m&&m.onClose)m.onClose()}
+function renderModal(){
+  const m=UI.modal;if(!m){$modal.className='';$modal.innerHTML='';return}
+  $modal.className='on';
+  if(m.t==='center')$modal.innerHTML=`<div class="mcenter">${m.html}</div>`;
+  else $modal.innerHTML=`<div class="mhead"><h3>${m.title||''}</h3>${m.noClose?'':'<button class="sm" onclick="closeModal()">✕</button>'}</div><div class="mbody">${m.body||''}</div>${m.foot?`<div class="mfoot">${m.foot}</div>`:''}`;
+}
+$modal.addEventListener('click',e=>{if(e.target===$modal&&UI.modal&&UI.modal.t==='center'&&!UI.modal.noClose)closeModal()});
+function sortCards(a){const o={atk:0,skl:1,pow:2,sts:3,cur:4};return [...a].sort((x,y)=>o[CD[x.id].t]-o[CD[y.id].t]||CD[x.id].n.localeCompare(CD[y.id].n,'ja')||y.up-x.up)}
+function showDeck(){openModal({t:'full',title:`デッキ（${S.deck.length}枚）`,body:`<div class="grid">${sortCards(S.deck).map(c=>cardHTML(c)).join('')}</div>`})}
+function showPile(k){const a=C[k];const nm={draw:'山札（順不同）',disc:'捨て札',exh:'廃棄'}[k];openModal({t:'full',title:`${nm}（${a.length}枚）`,body:a.length?`<div class="grid">${(k==='draw'?sortCards(a):a).map(c=>cardHTML(c)).join('')}</div>`:'<p class="muted" style="text-align:center">カードがありません</p>'})}
+function showRelic(id){const r=RL[id];openModal({t:'center',html:`<div style="text-align:center;font-size:44px">${r.ic}</div><h3 style="text-align:center">${r.n}</h3><p style="line-height:1.6;text-align:center">${r.d}${r.cnt?`<br><small class="muted">カウント：${r.cnt()}</small>`:''}</p><button onclick="closeModal()">閉じる</button>`})}
+function potMenu(i){
+  const id=S.potions[i];if(!id)return;const d=PO[id];
+  const can=inC()?(C.phase==='player'&&!UI.busy):!!d.any;
+  openModal({t:'center',html:`<div style="text-align:center;font-size:44px">${d.ic}</div><h3 style="text-align:center">${d.n}</h3><p style="text-align:center;line-height:1.6">${d.d}</p><div style="display:flex;gap:8px;justify-content:center"><button onclick="S.potions[${i}]=null;closeModal();render()">捨てる</button><button onclick="closeModal()">閉じる</button><button class="pri" ${can?'':'disabled'} onclick="usePotion(${i})">使う</button></div>`});
+}
+function stList(st){const ks=Object.keys(st).filter(k=>ST[k]&&(st[k]||k==='timeWarp'));if(!ks.length)return '<p class="muted">状態変化なし</p>';return `<div class="ilist">${ks.map(k=>`<div><span class="ic">${ST[k].i}</span><span><b>${ST[k].n} ${k==='barricade'?'':st[k]}</b><br><small class="muted">${ST[k].d.replace('{n}',st[k])}</small></span></div>`).join('')}</div>`}
+function showEnemy(e){openModal({t:'center',html:`<div style="text-align:center;font-size:48px">${e.ic}</div><h3 style="text-align:center">${e.n}</h3><p style="text-align:center">❤️ ${e.hp}/${e.maxHp}${e.block?` 🛡️${e.block}`:''}</p><div class="panel" style="padding:10px"><b>次の行動</b><br>${intentHTML(e)}<br><small>${intentText(e)}</small></div>${stList(e.st)}<button onclick="closeModal()">閉じる</button>`})}
+function showPlayer(){if(UI.sel!=null){UI.sel=null;render();return}openModal({t:'center',html:`<div style="text-align:center;font-size:48px">${CH[S.char].ic}</div><h3 style="text-align:center">${CH[S.char].n}</h3><p style="text-align:center">❤️ ${S.hp}/${S.maxHp}${C.p.block?` 🛡️${C.p.block}`:''}</p>${stList(C.p.st)}<button onclick="closeModal()">閉じる</button>`})}
+function showMenu(){openModal({t:'center',html:`<h3>メニュー</h3><button onclick="closeModal();showHelp()">遊び方</button><button onclick="UI.speed=UI.speed===1?2:1;closeModal();toast('敵の速度：'+(UI.speed===1?'ふつう':'はやい'))">敵の行動速度：${UI.speed===1?'ふつう':'はやい'}</button><button onclick="closeModal();render();S=null;C=null;render()">タイトルへ（自動保存済み）</button><button class="red" onclick="abandon()">この挑戦を諦める</button><button onclick="closeModal()">閉じる</button>`})}
+function abandon(){if(UI.ab){UI.ab=0;closeModal();gameOver(false);return}UI.ab=1;toast('もう一度押すと諦めます');setTimeout(()=>UI.ab=0,2500)}
+function showHelp(){openModal({t:'full',title:'遊び方',body:`<div style="line-height:1.8;max-width:520px;margin:0 auto">
+<p>🗼 <b>目的</b>：3つの層を登り、各層のボスを倒して塔の頂を目指します。HPが0になると最初からやり直しです。</p>
+<p>🗺️ <b>マップ</b>：下から上へ道を選んで進みます。⚔️敵、👹エリート（強いがレリックを落とす）、🔥休憩所、🪙ショップ、❓イベント、💎宝箱。</p>
+<p>🃏 <b>戦闘</b>：毎ターン、エネルギー3とカード5枚でスタート。カードを<b>タップで選び、もう一度タップ</b>で使います。敵が複数いるときは、選んだ後に<b>敵をタップ</b>。</p>
+<p>🗡️ 敵の頭上には<b>次の行動</b>が表示されます。攻撃が来るならブロックで守り、隙があれば攻めましょう。ブロックは自分のターン開始時に消えます。</p>
+<p>📈 <b>デッキ構築</b>：戦闘に勝つとカードを1枚選んで加えられます。強いカードだけを厳選し、弱いカードは削除するのがコツ。</p>
+<p>🔍 敵や自分をタップすると、状態や次の行動の詳細が見られます。</p>
+<p>💾 進行は自動で保存されます（戦闘中はターン開始時点）。</p>
+<p><b>用語</b><br>${kw('廃棄')}：使うとこの戦闘中は戻らない。<br>${kw('儚い')}：ターン終了時に手札にあると廃棄される。<br>${kw('先天')}：戦闘開始時に必ず手札に来る。<br>${kw('強化')}：カードの性能が上がる（名前に＋）。</p></div>`})}
+/* カード選択 */
+function chooseCards(list,opt){
+  return new Promise(res=>{
+    UI.ch={list,opt,sel:[],res};
+    const prevBusy=UI.busy;
+    drawChoose();
+  });
+}
+function drawChoose(){
+  const ch=UI.ch;const {list,opt}=ch;
+  const shown=opt.combat?list:sortCards(list);ch.shown=shown;
+  let foot='';
+  if(opt.mode==='up'&&ch.sel.length===1){const c=ch.sel[0];foot=`<div class="upar">${cardHTML(c,{style:'--cw:96px'})}<span style="font-size:22px">➜</span>${cardHTML({...c,up:1},{style:'--cw:96px'})}</div>`}
+  foot+=`<div style="display:flex;gap:8px;width:100%;justify-content:center">${opt.cancel?'<button onclick="chooseDone(1)">やめる</button>':''}<button class="pri" ${ch.sel.length===opt.n?'':'disabled'} onclick="chooseDone()">決定${opt.n>1?`（${ch.sel.length}/${opt.n}）`:''}</button></div>`;
+  UI.modal={t:'full',title:opt.title,noClose:1,body:`<div class="grid">${shown.map((c,i)=>cardHTML(c,{cls:ch.sel.includes(c)?'pick':'',attr:`onclick="chooseTap(${i})"`})).join('')}</div>`,foot};
+  renderModal();
+}
+function chooseTap(i){const ch=UI.ch;const c=ch.shown[i];const k=ch.sel.indexOf(c);if(k>=0)ch.sel.splice(k,1);else{if(ch.opt.n===1)ch.sel=[c];else if(ch.sel.length<ch.opt.n)ch.sel.push(c)}drawChoose()}
+function chooseDone(cancel){const ch=UI.ch;UI.ch=null;UI.modal=null;renderModal();ch.res(cancel?[]:ch.sel)}
+
+/* ================= 保存 ================= */
+function save(){if(!S||S.screen==='over'||S.screen==='victory')return;if(S.screen==='combat'&&(!C||C.phase!=='player'||UI.busy))return;try{localStorage.setItem(SAVE,JSON.stringify(S))}catch(e){}}
+function loadMeta(){try{return Object.assign({runs:0,wins:{},best:0},JSON.parse(localStorage.getItem(META)||'{}'))}catch(e){return {runs:0,wins:{},best:0}}}
+function saveMeta(m){try{localStorage.setItem(META,JSON.stringify(m))}catch(e){}}
+window.addEventListener('resize',()=>{if(inC())layoutHand()});
+render();
+</script>
+</body></html>
