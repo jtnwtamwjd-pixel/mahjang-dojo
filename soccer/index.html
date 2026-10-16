@@ -1,0 +1,924 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0a1410"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<title>監督キャリア</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap">
+<style>
+:root{
+  --bg:#0a1410; --bg2:#0f1d17; --card:#13241d; --card2:#1a2f26; --line:rgba(255,255,255,.10);
+  --text:#eef6f1; --muted:#9fb5aa; --acc:#3ddc84; --acc2:#1fae62; --gold:#ffd23f; --red:#ff4d5e; --blue:#4db3ff; --orange:#ff9f43;
+  --display:"Dela Gothic One","Hiragino Kaku Gothic StdN","Yu Gothic",system-ui,sans-serif;
+  --body:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Yu Gothic",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);font-size:14px;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
+body{min-height:100vh}
+button{font-family:var(--body);font-size:14px;cursor:pointer;border:1px solid var(--line);background:var(--card2);color:var(--text);border-radius:10px;padding:9px 12px;font-weight:700}
+button:active{transform:scale(.97)}
+button.pri{background:linear-gradient(180deg,var(--acc),var(--acc2));color:#04210f;border:none}
+button.gold{background:linear-gradient(180deg,#ffe27a,#f0b90b);color:#2b1d00;border:none}
+button.danger{background:#3a1519;border-color:#7a2630;color:#ffb3bb}
+button.sm{padding:6px 9px;font-size:12px;border-radius:8px}
+button:disabled{opacity:.4}
+select,input[type=text]{font-family:var(--body);font-size:14px;background:var(--card2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px 8px}
+input[type=range]{width:100%;accent-color:var(--acc)}
+#app{max-width:560px;margin:0 auto;padding-bottom:calc(74px + env(safe-area-inset-bottom,0px))}
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:10px 14px;padding-top:max(10px,env(safe-area-inset-top,0px));background:rgba(10,20,16,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .tinfo{flex:1;min-width:0}
+.top b{display:block;font-family:var(--display);font-weight:400;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top small{color:var(--muted);font-size:12px}
+.top .money{font-weight:800;color:var(--gold);font-size:14px;text-align:right}
+.top .money small{display:block;color:var(--muted);font-weight:500;font-size:10px}
+.badge{flex:none;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50% 50% 46% 46%;font-family:var(--display);font-size:11px;letter-spacing:-.5px;border:2px solid rgba(255,255,255,.35)}
+.badge.s{width:24px;height:24px;font-size:8px;border-width:1.5px}
+.badge.l{width:56px;height:56px;font-size:16px}
+main{padding:12px 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.card h3{margin:0 0 10px;font-family:var(--display);font-weight:400;font-size:15px;letter-spacing:.5px}
+.lbl{color:var(--muted);font-size:12px;margin-bottom:6px}
+.row{display:flex;align-items:center;gap:8px}
+.between{justify-content:space-between}
+.wrap{flex-wrap:wrap}
+.muted{color:var(--muted)}
+.gold{color:var(--gold)} .green{color:var(--acc)} .redt{color:var(--red)}
+.nav{position:fixed;bottom:0;left:0;right:0;z-index:30;display:flex;justify-content:center;background:rgba(10,20,16,.96);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.nav .in{display:flex;width:100%;max-width:560px}
+.nav button{flex:1;background:none;border:none;border-radius:0;padding:8px 0 9px;color:var(--muted);font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:2px}
+.nav button i{font-style:normal;font-size:19px;filter:grayscale(.6)}
+.nav button.on{color:var(--acc)} .nav button.on i{filter:none}
+.vs{display:flex;align-items:center;justify-content:space-between;gap:6px;margin:8px 0 10px}
+.vs .side{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;min-width:0}
+.vs .side span{font-weight:800;font-size:13px}
+.vs .side em{font-style:normal;color:var(--muted);font-size:11px}
+.vs .vsx{font-family:var(--display);color:var(--muted);font-size:18px}
+.btns{display:flex;gap:8px}.btns button{flex:1;padding:12px}
+.warn{background:#3a2a10;border:1px solid #7a5a1a;color:#ffd99a;border-radius:10px;padding:9px 10px;font-size:12px;margin:8px 0;line-height:1.6}
+.stats4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center}
+.stats4 div{background:var(--card2);border-radius:10px;padding:8px 2px}
+.stats4 b{display:block;font-size:18px;font-family:var(--display);font-weight:400}
+.stats4 small{color:var(--muted);font-size:10px}
+.bar{height:8px;background:#0a1712;border-radius:6px;overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:6px}
+.form{display:inline-flex;gap:3px}
+.form i{font-style:normal;width:18px;height:18px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#051}
+.fW{background:var(--acc)} .fD{background:#c8c8c8} .fL{background:var(--red);color:#fff!important}
+.seg{display:flex;background:var(--card2);border-radius:10px;padding:3px;margin-bottom:10px;gap:3px}
+.seg button{flex:1;border:none;background:none;padding:7px 4px;font-size:12px;color:var(--muted);border-radius:8px}
+.seg button.on{background:var(--acc);color:#04210f}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{padding:7px 10px;font-size:12px;border-radius:20px}
+.chips button.on{background:var(--acc);color:#04210f;border-color:transparent}
+.plist{display:flex;flex-direction:column;gap:5px}
+.pr{display:flex;align-items:center;gap:8px;background:var(--card2);border-radius:10px;padding:7px 9px;cursor:pointer;border:1px solid transparent}
+.pr:active{border-color:var(--acc)}
+.pr .nm{flex:1;min-width:0}
+.pr .nm b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
+.pr .nm small{color:var(--muted);font-size:11px}
+.pos{flex:none;width:36px;text-align:center;font-size:10px;font-weight:800;border-radius:6px;padding:3px 0}
+.gGK{background:#f0b90b;color:#2b1d00}.gDF{background:#3b82f6;color:#fff}.gMF{background:#22c55e;color:#03230f}.gFW{background:#ef4444;color:#fff}
+.ovr{flex:none;width:36px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:15px}
+.o1{background:#2a3a33;color:#cfd9d4}.o2{background:#5b4a1a;color:#ffe08a}.o3{background:#6b5310;color:#ffd23f}.o4{background:linear-gradient(135deg,#ffe27a,#d99a00);color:#2b1d00}
+.potv{flex:none;width:44px;text-align:center;font-size:11px;color:var(--muted)}
+.potv b{display:block;color:var(--text);font-size:13px}
+.mini{flex:none;width:38px}
+.ic{font-size:12px}
+table.tb{width:100%;border-collapse:collapse;font-size:12px}
+.tb th{color:var(--muted);font-weight:500;font-size:11px;padding:4px 2px;text-align:center}
+.tb td{padding:7px 2px;text-align:center;border-top:1px solid var(--line)}
+.tb td.l,.tb th.l{text-align:left}
+.tb tr.me td{background:rgba(61,220,132,.13)}
+.tb tr.me td:first-child{box-shadow:inset 3px 0 var(--acc)}
+.tb .tm{display:flex;align-items:center;gap:6px;font-weight:700;white-space:nowrap}
+.pitch{position:relative;width:100%;aspect-ratio:68/80;border-radius:12px;overflow:hidden;background:repeating-linear-gradient(180deg,#1d6b3f 0 10%,#1a6239 10% 20%);border:2px solid rgba(255,255,255,.35);margin-bottom:10px}
+.pitch:before{content:"";position:absolute;left:50%;top:0;width:40%;height:15%;transform:translateX(-50%);border:2px solid rgba(255,255,255,.3);border-top:none}
+.pitch:after{content:"";position:absolute;left:50%;bottom:0;width:40%;height:15%;transform:translateX(-50%);border:2px solid rgba(255,255,255,.3);border-bottom:none}
+.slot{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;width:64px;z-index:2;cursor:pointer}
+.slot .c{width:40px;height:40px;border-radius:50%;background:#0d1a14;border:2px solid #fff;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.slot .c b{font-family:var(--display);font-weight:400;font-size:14px}
+.slot .c small{font-size:8px;color:var(--muted)}
+.slot .n{margin-top:2px;font-size:10px;font-weight:800;background:rgba(0,0,0,.55);padding:1px 5px;border-radius:5px;max-width:64px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot.bad .c{border-color:var(--red);background:#3a1519}
+.slot.oop .c{border-color:var(--orange)}
+.slot .fb{width:34px;height:3px;background:#000;border-radius:2px;margin-top:2px;overflow:hidden}.slot .fb i{display:block;height:100%}
+#modal{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center}
+#modal .sheet{width:100%;max-width:560px;max-height:88vh;overflow:auto;background:var(--bg2);border-radius:18px 18px 0 0;border:1px solid var(--line);padding:16px 14px calc(18px + env(safe-area-inset-bottom,0px));animation:up .2s ease}
+@keyframes up{from{transform:translateY(40px);opacity:.4}}
+.sheet h2{margin:0 0 10px;font-family:var(--display);font-weight:400;font-size:18px}
+.x{float:right;background:none;border:none;font-size:22px;padding:0 4px;color:var(--muted)}
+.pcard{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.big{width:64px;height:64px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--display);font-size:26px;line-height:1}
+.big small{font-family:var(--body);font-size:10px;font-weight:800}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+.kv div{background:var(--card2);border-radius:9px;padding:7px 9px}
+.kv small{display:block;color:var(--muted);font-size:10px}
+.kv b{font-size:14px}
+.inbox .msg{border-top:1px solid var(--line);padding:9px 0}
+.inbox .msg:first-of-type{border-top:none}
+.msg b{font-size:13px}.msg p{margin:4px 0 0;color:var(--muted);font-size:12px;line-height:1.55;white-space:pre-line}
+.msg .new{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--acc);margin-right:5px;vertical-align:middle}
+#toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:90;background:#0f2b1e;border:1px solid var(--acc);color:var(--text);padding:9px 14px;border-radius:10px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .25s;max-width:90vw;text-align:center}
+#toast.on{opacity:1}
+/* match */
+#match{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;flex-direction:column;max-width:560px;margin:0 auto}
+.sb{padding:12px 12px 10px;padding-top:max(12px,env(safe-area-inset-top,0px));background:linear-gradient(180deg,#123222,#0b1a13);border-bottom:1px solid var(--line)}
+.sbr{display:flex;align-items:center;justify-content:space-between}
+.sbt{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;text-align:center}
+.sbt span{font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.score{font-family:var(--display);font-size:40px;letter-spacing:2px;min-width:120px;text-align:center;line-height:1}
+.clock{display:block;text-align:center;font-size:13px;color:var(--gold);font-weight:800;margin-top:4px;font-family:var(--body);letter-spacing:0}
+.possb{display:flex;height:6px;border-radius:4px;overflow:hidden;margin:10px 0 4px}
+.mstat{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.feed{flex:1;overflow:auto;padding:8px 12px}
+.ev{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;line-height:1.45}
+.ev .t{flex:none;width:40px;color:var(--muted);font-weight:800;font-size:12px}
+.ev .d{flex:none;width:6px;border-radius:3px}
+.ev.goal{background:rgba(255,210,63,.1);font-weight:800}
+.ev.bold{font-weight:800}
+.mctl{display:flex;gap:6px;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--bg2)}
+.mctl button{flex:1;padding:11px 4px;font-size:13px}
+.flash{animation:fl 1s ease}
+@keyframes fl{0%{background:rgba(255,210,63,.6)}100%{background:transparent}}
+.subrow{display:flex;align-items:center;gap:6px;background:var(--card2);border-radius:9px;padding:6px 8px;margin-bottom:4px;border:1px solid transparent;cursor:pointer}
+.subrow.sel{border-color:var(--gold);background:#2d2a12}
+.subrow .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700;font-size:13px}
+.title{min-height:100vh;padding:24px 16px calc(24px + env(safe-area-inset-bottom,0px));padding-top:max(24px,env(safe-area-inset-top,0px));max-width:560px;margin:0 auto}
+.logo{text-align:center;margin:10px 0 20px}
+.logo h1{font-family:var(--display);font-weight:400;font-size:34px;margin:0;line-height:1.15;background:linear-gradient(180deg,#fff,#9ff5c4);-webkit-background-clip:text;background-clip:text;color:transparent}
+.logo p{color:var(--muted);margin:6px 0 0}
+.tpick{display:flex;align-items:center;gap:10px;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:10px;margin-bottom:7px;cursor:pointer}
+.tpick.on{border-color:var(--acc);background:#163527}
+.tpick .nm{flex:1}
+.tpick .nm b{display:block;font-size:14px}
+.tpick .nm small{color:var(--muted);font-size:11px}
+.stars{color:var(--gold);font-size:11px;letter-spacing:-1px}
+.rt{font-family:var(--display);font-size:13px;padding:2px 6px;border-radius:6px;background:#22352c}
+.rt.hi{background:#1f6e3f}.rt.lo{background:#6e1f2a}
+.help{font-size:13px;line-height:1.75;color:#d5e3dc}
+.help b{color:var(--acc)}
+</style></head><body>
+<div id="app"></div>
+<div id="modal" hidden></div>
+<div id="match" hidden></div>
+<div id="toast"></div>
+<script>
+'use strict';
+/* ================= utils ================= */
+const $=s=>document.querySelector(s);
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const ri=(a,b)=>Math.floor(rnd(a,b+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const sig=x=>1/(1+Math.exp(-x));
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function wpick(items,wf){let tot=0;const ws=items.map(it=>{const w=Math.max(0,wf(it));tot+=w;return w;});if(tot<=0)return items[0];let r=Math.random()*tot;for(let i=0;i<items.length;i++){r-=ws[i];if(r<=0)return items[i];}return items[items.length-1];}
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function fmtM(v){const s=v<0?'-':'';v=Math.abs(v);if(v>=10000)return s+(v/10000).toFixed(v>=1000000?0:1)+'億円';return s+(Math.round(v/10)*10).toLocaleString()+'万円';}
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2200);}
+
+/* ================= data ================= */
+const TEAMS=[
+ ['東京ブレイズ','東京','TKB','#d7263d','#ffffff',84],
+ ['大阪サンダーボルト','大阪','OSB','#1d4ed8','#facc15',80],
+ ['横浜オーシャンズ','横浜','YOC','#0ea5e9','#ffffff',76],
+ ['名古屋キャッスルズ','名古屋','NGC','#f59e0b','#1f2937',72],
+ ['神戸ミストラル','神戸','KBM','#6d28d9','#ffffff',68],
+ ['広島アローズ','広島','HRA','#a21caf','#fde047',64],
+ ['福岡ハヤブサ','福岡','FKH','#0f766e','#ffffff',61],
+ ['札幌スノーウルブズ','札幌','SPW','#e5e7eb','#111827',57],
+ ['仙台フォレスターズ','仙台','SDF','#15803d','#facc15',54],
+ ['京都レガリア','京都','KTR','#7f1d1d','#fbbf24',50],
+ ['新潟リバーサイド','新潟','NGR','#ea580c','#ffffff',46],
+ ['沖縄コーラルズ','沖縄','OKC','#ec4899','#ffffff',42],
+];
+const JP_S='佐藤 鈴木 高橋 田中 伊藤 渡辺 山本 中村 小林 加藤 吉田 山田 佐々木 山口 松本 井上 木村 清水 山崎 森 池田 橋本 阿部 石川 前田 藤田 小川 岡田 後藤 長谷川 村上 近藤 石井 坂本 遠藤 青木 藤井 西村 福田 太田 三浦 岡本 松田 中川 中野 原田 小野 竹内 金子 和田 中山 石田 上田 森田 柴田 酒井 工藤 横山 宮崎 宮本 内田 高木 安藤 谷口 大野 丸山 今井 河野 藤原 小島 久保 千葉 松井 野口 菅原 杉山 新井 浅野 平野 大塚 桜井 荒木 東 片山 北村 星野 黒田 永井 早川 白石'.split(' ');
+const JP_G='翔 蓮 大翔 悠真 陽斗 湊 颯太 大和 拓海 健太 亮 大輝 隼人 海斗 優斗 陸 樹 蒼 晴 新 匠 誠 剛 直樹 康介 和也 勇気 航 慎吾 一輝 駿 輝 涼 光 瑛太 奏太 悠人 律 大地 創 将 浩二 達也 智也 雄大 俊介 啓太 拓真 蒼空 侑 凌 暖 歩夢 怜 碧 岳 周 晃'.split(' ');
+const FN='アレックス マルコ ルーカス ガブリエル ディエゴ マテウス ラファエル ジョアン ニコ ルカ イヴァン トマス ダニエル アンドレ セルジオ パブロ ミゲル ヨナス エリック ケヴィン ステファン オマール ユセフ カリム ノア レオ サミュエル アダム ヴィクトル エミル ブルーノ フェリペ ティアゴ ハビエル'.split(' ');
+const LN='シルバ サントス オリヴェイラ ペレイラ ロドリゲス ゴメス フェルナンデス ミュラー シュミット ヤンセン デ・ブール ペトロヴィッチ ノヴァク コヴァチ イヴァノフ ディアロ トラオレ ケイタ ジョンソン ウィリアムズ ブラウン ロッシ ビアンキ ガルシア マルティネス ロペス ハンセン ニルセン キム パク リマ カルドーゾ モラレス ベルナール'.split(' ');
+const NAT={
+ br:{f:'🇧🇷',fn:'ガブリエル マテウス ラファエル ジョアン ブルーノ フェリペ ティアゴ ルーカス ヴィニシウス エヴェルトン ダニーロ ホドリゴ アンデルソン カイオ ヴィトール ウィリアン',ln:'シルバ サントス オリヴェイラ ペレイラ リマ カルドーゾ アウヴェス ソウザ コスタ ヒベイロ アラウージョ メンデス ノゲイラ バホス',mono:'ジュニーニョ パウリーニョ マルキーニョス ラフィーニャ エヂーニョ チアギーニョ ドゥドゥ ゼ・ホベルト カカー ホナウド ネネ フレッジ ジーコ ヂエゴ ハミーニャ セルジーニョ ヴァギネル フッキ'},
+ es:{f:'🇪🇸',fn:'ハビエル パブロ ミゲル セルヒオ アレハンドロ ダビド イケル アルバロ ペドロ マルコス ディエゴ アドリアン ラウール フェルナンド',ln:'ガルシア マルティネス ロペス ゴメス フェルナンデス サンチェス モラレス ナバーロ ルイス ラモス ヒメネス トーレス アロンソ ベガ'},
+ ar:{f:'🇦🇷',fn:'ルシアーノ マティアス ニコラス フランコ エセキエル ゴンサロ ファクンド セバスティアン ラウタロ ヘルマン',ln:'ロドリゲス ゴンサレス ディ・マリア ペッセージャ ファリアス アクーニャ メディナ ソサ ロメロ パラシオス'},
+ en:{f:'🏴',fn:'ジェームズ ハリー ジャック オリヴァー トーマス ダニエル ジョージ ライアン ルーク カラム メイソン ジョーダン',ln:'スミス ジョンソン ウィリアムズ ブラウン ウォーカー ライト ハリス クラーク ターナー ヒューズ ベル ワード'},
+ de:{f:'🇩🇪',fn:'ヨナス レオン ニクラス ティモ ルーカス マクシミリアン フェリックス ユリアン カイ セバスティアン',ln:'ミュラー シュミット シュナイダー フィッシャー ヴェーバー ベッカー ホフマン ヴァーグナー ケラー クライン'},
+ nl:{f:'🇳🇱',fn:'デニス ルーク ステフェン ヤスパー ティム バルト フレンキー マタイス',ln:'デ・ブール ファン・ダイク ヤンセン デ・ヨング ファン・デル・ベルフ ベルフハイス フィッサー バッカー'},
+ it:{f:'🇮🇹',fn:'マルコ ルカ アレッサンドロ フェデリコ ロレンツォ マッテオ ジャンルカ ダニエレ アンドレア シモーネ',ln:'ロッシ ビアンキ ロマーノ コロンボ リッチ マリーノ グレコ ブルーノ ガッロ コンティ'},
+ fr:{f:'🇫🇷',fn:'アントワーヌ テオ ルーカス ユーゴ マキシム キリアン バンジャマン ナタン クレマン',ln:'ベルナール デュボワ モロー ローラン ルフェーヴル ルセル フルニエ ジルー マルシャン'},
+ af:{f:'🌍',fn:'ママドゥ イブラヒマ ムサ セク アマドゥ ユスフ サディオ ケレチ オマール カリム',ln:'ディアロ トラオレ ケイタ ジャロ カマラ サンガレ シセ ンディアイ バ オコンクォ'},
+ sl:{f:'🇭🇷',fn:'ルカ イヴァン マテオ ドゥシャン ニコラ ミラン ステファン ヨシップ ボリス',ln:'ペトロヴィッチ ノヴァク コヴァチ イヴァノフ モドリッチ ヨヴィッチ ポポヴィッチ シュクリニアル ニコリッチ'},
+ kr:{f:'🇰🇷',fn:'ミンジュン ソジュン ドユン ジフン ヒョヌ ジウ ユジュン ソンミン',ln:'キム イ パク チェ チョン カン ユン ハン'},
+};
+for(const k in NAT){for(const x of['fn','ln','mono'])if(NAT[k][x])NAT[k][x]=NAT[k][x].split(' ');}
+const JP_G2='一 二 三 和 光 太 斗 也 平 介 吾 輔 樹 真'.split(' ');
+function genName(){
+ const r=Math.random();
+ if(r<.58){const s=pick(JP_S);let g=pick(JP_G);
+  const q=Math.random();if(q<.12)g=pick(['大','翔','健','雄','拓','陽','俊','康','優','直'])+pick(JP_G2); // 例: 健太, 雄介
+  return[s+' '+g,s,'jp'];}
+ const k=wpick(Object.keys(NAT),k=>({br:3,es:2,ar:1.5,en:2,de:1.5,nl:1,it:1.5,fr:1.5,af:2,sl:1.5,kr:1.2})[k]);const n=NAT[k];
+ if(k==='br'&&Math.random()<.45){const m=pick(n.mono);return[m,m,k];}
+ const f=pick(n.fn),l=pick(n.ln);
+ if(k==='kr')return[l+'・'+f,l+'・'+f,k];
+ if((k==='es'||k==='ar')&&Math.random()<.25){const l2=pick(n.ln);if(l2!==l)return[f+'・'+l+'・'+l2,l,k];}
+ return[f+'・'+l,l,k];}
+const POS_GROUP={GK:'GK',CB:'DF',LB:'DF',RB:'DF',CDM:'MF',CM:'MF',CAM:'MF',LM:'MF',RM:'MF',LW:'FW',RW:'FW',ST:'FW'};
+const POS_JP={GK:'GK',CB:'CB',LB:'LB',RB:'RB',CDM:'CDM',CM:'CM',CAM:'CAM',LM:'LM',RM:'RM',LW:'LW',RW:'RW',ST:'ST'};
+const POS_ORDER=['GK','LB','CB','RB','CDM','CM','LM','RM','CAM','LW','RW','ST'];
+const NEAR={GK:[],LB:['LM','CB','RB'],RB:['RM','CB','LB'],CB:['CDM','LB','RB'],CDM:['CB','CM'],CM:['CDM','CAM','LM','RM'],CAM:['CM','ST','LW','RW'],LM:['LW','LB','CM','RM'],RM:['RW','RB','CM','LM'],LW:['LM','RW','ST','CAM'],RW:['RM','LW','ST','CAM'],ST:['CAM','LW','RW']};
+function posPenalty(pos,role){if(pos===role)return 0;if(pos==='GK'||role==='GK')return 40;if(NEAR[pos].includes(role))return 4;if(POS_GROUP[pos]===POS_GROUP[role])return 7;return 16;}
+const B4=[['GK',50,90],['LB',13,70],['CB',37,76],['CB',63,76],['RB',87,70]];
+const FORMS={
+ '4-4-2':[...B4,['LM',13,45],['CM',37,52],['CM',63,52],['RM',87,45],['ST',37,20],['ST',63,20]],
+ '4-3-3':[...B4,['CM',27,50],['CDM',50,58],['CM',73,50],['LW',15,24],['ST',50,16],['RW',85,24]],
+ '4-2-3-1':[...B4,['CDM',35,60],['CDM',65,60],['LM',14,37],['CAM',50,38],['RM',86,37],['ST',50,15]],
+ '4-1-2-1-2':[...B4,['CDM',50,61],['CM',27,49],['CM',73,49],['CAM',50,36],['ST',36,17],['ST',64,17]],
+ '4-5-1':[...B4,['LM',12,40],['CM',31,50],['CDM',50,59],['CM',69,50],['RM',88,40],['ST',50,16]],
+ '3-5-2':[['GK',50,90],['CB',24,74],['CB',50,77],['CB',76,74],['LM',10,45],['CM',32,54],['CAM',50,39],['CM',68,54],['RM',90,45],['ST',37,18],['ST',63,18]],
+ '5-3-2':[['GK',50,90],['LB',8,62],['CB',29,74],['CB',50,78],['CB',71,74],['RB',92,62],['CM',28,48],['CDM',50,55],['CM',72,48],['ST',37,20],['ST',63,20]],
+};
+const ROLEW={GK:[0,0,3],CB:[.05,.2,1.1],LB:[.2,.3,.85],RB:[.2,.3,.85],CDM:[.2,.9,.7],CM:[.4,1,.35],CAM:[.75,.9,.1],LM:[.55,.75,.3],RM:[.55,.75,.3],LW:[.9,.35,.05],RW:[.9,.35,.05],ST:[1.1,.2,.03]};
+const REF=[0,0,0];FORMS['4-4-2'].forEach(f=>{const w=ROLEW[f[0]];REF[0]+=w[0];REF[1]+=w[1];REF[2]+=w[2];});
+const STY={
+ 'バランス':{own:1,opp:1,conv:1,p:0,drain:1,desc:'攻守のバランス重視'},
+ '攻撃的':{own:1.2,opp:1.12,conv:1,p:.02,drain:1.1,desc:'チャンス増・被弾リスク増'},
+ '守備的':{own:.78,opp:.8,conv:1,p:-.03,drain:.95,desc:'失点を抑えるが攻撃は減る'},
+ 'カウンター':{own:.9,opp:.93,conv:1.18,p:-.04,drain:1,ctr:1,desc:'持たれても鋭い速攻で決める'},
+ 'ハイプレス':{own:1.08,opp:.94,conv:1,p:.05,drain:1.4,desc:'支配率UP・体力消耗大'},
+};
+const TRAIN={'軽め':{rec:30,g:.75,inj:0,desc:'回復重視・成長は控えめ'},'普通':{rec:22,g:1,inj:.003,desc:'標準的なメニュー'},'ハード':{rec:14,g:1.4,inj:.012,desc:'成長UP・疲労とケガのリスク'}};
+const SQUAD_ROLES=['GK','GK','GK','CB','CB','CB','CB','LB','LB','RB','RB','CDM','CDM','CM','CM','CM','CAM','LM','RM','LW','RW','ST','ST','ST'];
+const SAVE_KEY='soccerManagerCareer_v1';
+
+/* ================= state ================= */
+let S=null;
+const U={tab:'home',sq:'pos',tf:{mode:'market',pos:'ALL',sort:'ovr',budget:false},lg:'table',fxMd:null,slot:null};
+const P=id=>S.players[id];
+const T=id=>S.teams.find(t=>t.id===id);
+const myTeam=()=>T(S.team);
+const teamPlayers=tid=>Object.values(S.players).filter(p=>p.tid===tid);
+const baseOf=rep=>58+rep*.215;
+
+function genPlayer(pos,ovr,age,tid){
+ const[name,short,nat]=genName();
+ ovr=clamp(ovr,38,91);
+ let pot=ovr;if(age<=20)pot+=rnd(6,22);else if(age<=23)pot+=rnd(3,14);else if(age<=26)pot+=rnd(0,6);
+ pot=Math.round(clamp(pot,ovr,94));
+ const id=S.nextId++;
+ const p={id,name,short,nat,pos,age,ovr,pot,pl:pot-ri(1,5),ph:Math.min(99,pot+ri(1,5)),tid,fit:100,mor:65,inj:0,susp:0,yc:0,con:ri(1,4),st:{a:0,g:0,as:0,r:0},car:{a:0,g:0,as:0},list:false,focus:false,lp:-1,wage:0};
+ p.wage=calcWage(p);S.players[id]=p;return p;
+}
+function valueOf(p){const o=p.ovr;let v=1000*Math.pow(10,(o-55)/11);const a=p.age,gap=Math.max(0,p.pot-o);
+ if(a<=21)v*=1+gap/22;else if(a<=24)v*=1+gap/35;else if(a<=29)v*=1;else if(a<=31)v*=.75;else if(a<=33)v*=.5;else v*=.3;
+ if(p.con<=1&&p.tid>0)v*=.85;return Math.max(50,Math.round(v/10)*10);}
+function calcWage(p){return Math.round((200+valueOf(p)*.15)/10)*10;}
+function genSquad(tid,rep){
+ const b=baseOf(rep);const cnt={};
+ SQUAD_ROLES.forEach(r=>{cnt[r]=(cnt[r]||0)+1;const k=cnt[r];
+  const o=k===1?b+gauss()*3:k===2?b-5+gauss()*3.5:b-10+gauss()*4;
+  let age=Math.round(clamp(26+gauss()*4,18,35));if(k===3&&Math.random()<.5)age=ri(18,21);
+  let ov=o;if(age<=21)ov-=rnd(2,6);genPlayer(r,ov,age,tid);});
+ for(let i=0;i<2;i++)genPlayer(pick(SQUAD_ROLES.slice(3)),b-15+gauss()*3,ri(17,19),tid);
+}
+function genFreeAgents(n){for(let i=0;i<n;i++){const age=ri(22,34);genPlayer(pick(SQUAD_ROLES),rnd(52,70)-(age>31?2:0),age,0).con=0;}}
+
+function effOvr(p,role){return p.ovr-posPenalty(p.pos,role);}
+const avail=p=>p&&p.inj===0&&p.susp===0;
+function autoPick(tid,form){
+ const roles=FORMS[form].map(f=>f[0]);const av=teamPlayers(tid).filter(avail);
+ const pairs=[];roles.forEach((r,i)=>av.forEach(p=>pairs.push([effOvr(p,r)*(.85+.15*p.fit/100),i,p.id])));
+ pairs.sort((x,y)=>y[0]-x[0]);
+ const lineup=Array(roles.length).fill(null),used=new Set();
+ for(const[s,i,id]of pairs){if(lineup[i]==null&&!used.has(id)){lineup[i]=id;used.add(id);}}
+ const rest=av.filter(p=>!used.has(p.id)).sort((a,b)=>b.ovr-a.ovr);
+ const bench=[];const gk=rest.find(p=>p.pos==='GK');if(gk)bench.push(gk.id);
+ for(const p of rest){if(bench.length>=7)break;if(!bench.includes(p.id))bench.push(p.id);}
+ return{lineup,bench};
+}
+function teamRating(tid){const t=T(tid);const form=tid===S.team?S.tactics.form:t.form;const l=tid===S.team?S.tactics.lineup:autoPick(tid,form).lineup;const roles=FORMS[form];
+ let s=0,n=0;l.forEach((id,i)=>{const p=P(id);if(p&&p.tid===tid){s+=effOvr(p,roles[i][0]);n++;}});return n?Math.round(s/11):0;}
+function strengthRating(tid){const t=T(tid);const l=autoPick(tid,t.form&&tid!==S.team?t.form:'4-4-2').lineup;let s=0;l.forEach(id=>{if(id!=null)s+=P(id).ovr;});return s/11;}
+function defaultTactics(tid){const form=T(tid).form;const a=autoPick(tid,form);return{form,style:'バランス',lineup:a.lineup,bench:a.bench,train:'普通'};}
+
+function makeFixtures(ids){const n=ids.length;const arr=shuffle(ids.slice());const rounds=[];
+ for(let r=0;r<n-1;r++){const m=[];for(let i=0;i<n/2;i++){const a=arr[i],b=arr[n-1-i];m.push((r+i)%2?[a,b]:[b,a]);}rounds.push(m);arr.splice(1,0,arr.pop());}
+ return rounds.concat(rounds.map(m=>m.map(([h,a])=>[a,h])));}
+
+function newGame(tid,mgr){
+ S={v:1,nextId:1,season:1,md:0,phase:'season',team:tid,mgr:{name:mgr||'監督',w:0,d:0,l:0,trophies:0,clubs:[tid]},players:{},teams:[],fixtures:[],results:[],inbox:[],offers:[],neg:{},hist:[],board:60,obj:null,fin:null,endInfo:null,msgId:1};
+ const forms=Object.keys(FORMS);
+ TEAMS.forEach((d,i)=>{const id=i+1;const rep=d[5];
+  S.teams.push({id,name:d[0],city:d[1],ab:d[2],c1:d[3],c2:d[4],rep,budget:Math.round(rep*rep*50),form:i<3?pick(['4-3-3','4-2-3-1','4-3-3']):pick(forms.slice(0,6)),style:rep>75?pick(['攻撃的','ハイプレス','バランス']):pick(['バランス','バランス','守備的','カウンター','攻撃的'])});
+  genSquad(id,rep);});
+ genFreeAgents(30);
+ S.tactics=defaultTactics(tid);
+ startSeasonCommon();
+ inbox('ようこそ、'+(mgr||'監督')+'！',`${myTeam().name}の新監督就任おめでとうございます。\n理事会の今季目標は「${S.obj.text}」です。\nスカッドを確認し、作戦を整えて開幕戦に臨みましょう。`);
+ save();
+}
+function startSeasonCommon(){
+ S.fixtures=makeFixtures(S.teams.map(t=>t.id));S.results=[];S.md=0;S.phase='season';S.offers=[];S.neg={};S.endInfo=null;
+ S.fin={gate:0,tv:0,tin:0,prize:0,wage:0,tout:0};
+ makeCup();
+ const ranked=S.teams.map(t=>[t.id,strengthRating(t.id)]).sort((a,b)=>b[1]-a[1]);
+ const er=ranked.findIndex(x=>x[0]===S.team)+1;
+ const target=er<=2?1:er<=4?3:er<=6?5:er<=9?8:11;
+ S.obj={exp:er,target,text:target===1?'リーグ優勝':target===11?'最下位回避（11位以内）':target+'位以内'};
+}
+
+function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S));}catch(e){}}
+function load(){try{const s=localStorage.getItem(SAVE_KEY);if(s){S=JSON.parse(s);return true;}}catch(e){}return false;}
+function inbox(title,body,extra){S.inbox.unshift(Object.assign({id:S.msgId++,s:S.season,md:S.md,title,body,read:false},extra||{}));if(S.inbox.length>60)S.inbox.length=60;}
+
+/* ================= lineup helpers ================= */
+function fixUserLineup(){
+ const tc=S.tactics,roles=FORMS[tc.form].map(f=>f[0]);const changes=[];
+ const ok=id=>{const p=P(id);return p&&p.tid===S.team&&avail(p);};
+ if(!Array.isArray(tc.lineup)||tc.lineup.length!==roles.length)tc.lineup=Array(roles.length).fill(null);
+ tc.bench=(tc.bench||[]).filter(ok);
+ const used=new Set();
+ tc.lineup=tc.lineup.map(id=>{if(ok(id)&&!used.has(id)){used.add(id);return id;}return null;});
+ tc.bench=tc.bench.filter(id=>!used.has(id));
+ roles.forEach((r,i)=>{if(tc.lineup[i]!=null)return;
+  const cand=teamPlayers(S.team).filter(p=>avail(p)&&!used.has(p.id)).sort((a,b)=>effOvr(b,r)-effOvr(a,r))[0];
+  if(cand){tc.lineup[i]=cand.id;used.add(cand.id);tc.bench=tc.bench.filter(x=>x!==cand.id);changes.push(cand.short+' → '+r);}});
+ const rest=teamPlayers(S.team).filter(p=>avail(p)&&!used.has(p.id)&&!tc.bench.includes(p.id)).sort((a,b)=>b.ovr-a.ovr);
+ if(!tc.bench.some(id=>P(id).pos==='GK')){const g=rest.find(p=>p.pos==='GK');if(g&&tc.bench.length<7)tc.bench.push(g.id);}
+ for(const p of rest){if(tc.bench.length>=7)break;if(!tc.bench.includes(p.id))tc.bench.push(p.id);}
+ return changes;
+}
+function lineupIssues(){const tc=S.tactics,out=[];
+ tc.lineup.forEach(id=>{const p=P(id);if(!p||p.tid!==S.team)out.push('先発に空きがあります');else if(p.inj)out.push(`${p.name} は負傷中（残り${p.inj}試合）`);else if(p.susp)out.push(`${p.name} は出場停止（残り${p.susp}試合）`);else if(p.fit<55)out.push(`${p.name} の体力が低下（${Math.round(p.fit)}%）`);});
+ return[...new Set(out)];}
+function hardIssues(){return S.tactics.lineup.some(id=>{const p=P(id);return!p||p.tid!==S.team||!avail(p);});}
+function changeFormation(form){const tc=S.tactics;const old=tc.lineup.filter(id=>id!=null);tc.form=form;
+ const roles=FORMS[form].map(f=>f[0]);const pool=old.map(P).filter(Boolean);const pairs=[];
+ roles.forEach((r,i)=>pool.forEach(p=>pairs.push([effOvr(p,r),i,p.id])));pairs.sort((a,b)=>b[0]-a[0]);
+ const l=Array(roles.length).fill(null),used=new Set();for(const[s,i,id]of pairs){if(l[i]==null&&!used.has(id)){l[i]=id;used.add(id);}}
+ tc.lineup=l;fixUserLineup();}
+
+/* ================= match engine ================= */
+function makeSide(tid,auto){
+ const isU=tid===S.team;let form,lineup,bench,style;
+ if(isU){fixUserLineup();form=S.tactics.form;lineup=FORMS[form].map((f,i)=>({role:f[0],pid:S.tactics.lineup[i]}));bench=S.tactics.bench.slice();style=S.tactics.style;}
+ else{const t=T(tid);form=t.form;const a=autoPick(tid,form);lineup=FORMS[form].map((f,i)=>({role:f[0],pid:a.lineup[i]}));bench=a.bench;style=t.style;}
+ const s={tid,form,lineup,bench,style,auto:auto||!isU,subs:5,energy:{},goals:0,shots:0,sot:0,ycl:[],reds:[],injs:[],played:[],rating:{},isU};
+ lineup.forEach(sl=>{if(sl.pid!=null)enter(s,sl.pid,sl.role);});
+ bench.forEach(id=>{s.energy[id]=P(id).fit;});
+ return s;
+}
+function enter(s,pid,role){const p=P(pid);s.energy[pid]=p.fit;if(!s.played.includes(pid))s.played.push(pid);s.rating[pid]=6.1+rnd(-.4,.5)+(effOvr(p,role)-70)*.015;}
+function newMatch(h,a,auto,cup){return{cup:!!cup,h:makeSide(h,auto),a:makeSide(a,auto),min:0,half:1,add1:ri(1,4),add2:ri(2,6),log:[],gl:[],done:false,possSum:0,possN:0,poss:.5,ht:false};}
+function moraleF(p){return .97+.06*(p.mor/100);}
+function sideStr(s){let sa=0,sm=0,sd=0,wa=0,wm=0,wd=0,miss=0;
+ for(const sl of s.lineup){if(sl.pid==null){miss++;continue;}const p=P(sl.pid),w=ROLEW[sl.role];
+  const e=effOvr(p,sl.role)*(.8+.2*clamp(s.energy[sl.pid],0,100)/100)*moraleF(p);
+  sa+=e*w[0];wa+=w[0];sm+=e*w[1];wm+=w[1];sd+=e*w[2];wd+=w[2];}
+ const f=(x,w,r)=>w>0?x/w+12*(w/r-1):40;
+ return{a:f(sa,wa,REF[0])-miss*4,m:f(sm,wm,REF[1])-miss*4,d:f(sd,wd,REF[2])-miss*4};}
+function dispMin(M){return M.half===1?(M.min<=45?M.min+"'":"45+"+(M.min-45)+"'"):(M.min<=90?M.min+"'":"90+"+(M.min-90)+"'");}
+function lg(M,side,txt,cls){M.log.push({t:M.min?dispMin(M):'',s:side,txt,cls:cls||''});}
+const nm=pid=>{const p=P(pid);return p?p.short:'?';};
+function onPitch(s){return s.lineup.filter(sl=>sl.pid!=null);}
+function stepMinute(M){
+ if(M.done)return;
+ M.min++;
+ const hs=sideStr(M.h),as=sideStr(M.a),sh=STY[M.h.style],sa=STY[M.a.style];
+ let poss=sig((hs.m+1.5-as.m)/12)+sh.p-sa.p;poss=clamp(poss,.3,.7);M.poss=poss;M.possSum+=poss;M.possN++;
+ const pcH=.115*poss*2*sh.own*sa.opp,pcA=.115*(1-poss)*2*sa.own*sh.opp;
+ if(Math.random()<pcH)chance(M,'h',hs,as,poss);
+ if(Math.random()<pcA)chance(M,'a',as,hs,1-poss);
+ for(const k of['h','a']){const s=M[k];
+  const dr=.22*STY[s.style].drain;onPitch(s).forEach(sl=>{const p=P(sl.pid);s.energy[sl.pid]-=dr*(p.age>31?1.12:1)*rnd(.7,1.3);});
+  if(Math.random()<.017*(s.style==='ハイプレス'?1.3:1))card(M,k,false);
+  if(Math.random()<.0004)card(M,k,true);
+  if(Math.random()<.0013)injury(M,k);
+  if(s.auto)aiManage(M,k);
+ }
+ if(Math.random()<.06)flavor(M);
+ if(M.half===1&&M.min>=45+M.add1){lg(M,null,'⏸ 前半終了 '+M.h.goals+' - '+M.a.goals,'bold');M.half=2;M.min=45;M.ht=true;}
+ else if(M.half===2&&M.min>=90+M.add2){lg(M,null,'🏁 試合終了 '+M.h.goals+' - '+M.a.goals,'bold');M.done=true;finalizeRatings(M);if(M.cup)cupPK(M);}
+}
+function shooterOf(s){return wpick(onPitch(s),sl=>{const g=POS_GROUP[sl.role];const p=P(sl.pid);return({GK:.01,DF:.8,MF:sl.role==='CAM'?3.5:2.2,FW:6})[g]*Math.pow(effOvr(p,sl.role)/70,3);}).pid;}
+function chance(M,k,As,Ds,poss){
+ const s=M[k],o=M[k==='h'?'a':'h'];const st=STY[s.style];
+ let conv=.14*2*sig((As.a-Ds.d+(k==="h"?1:0))/12)*(st.ctr?(poss<.5?st.conv:1):st.conv);conv=clamp(conv,.04,.33);
+ const sp=shooterOf(s);if(sp==null)return;s.shots++;
+ const gkSl=o.lineup.find(sl=>sl.role==='GK'&&sl.pid!=null);const gk=gkSl?gkSl.pid:null;
+ if(Math.random()<conv){
+  s.goals++;s.sot++;s.rating[sp]+=1.05;let ast=null;
+  if(Math.random()<.75){const c=onPitch(s).filter(sl=>sl.pid!==sp);if(c.length){ast=wpick(c,sl=>({GK:.05,DF:1.2,MF:sl.role==='CAM'?5:3.6,FW:3})[POS_GROUP[sl.role]]).pid;s.rating[ast]+=.6;}}
+  if(gk)o.rating[gk]-=.3;onPitch(o).forEach(sl=>{if(POS_GROUP[sl.role]==='DF')o.rating[sl.pid]-=.12;});
+  M.gl.push({min:dispMin(M),k,pid:sp,ast});
+  lg(M,k,pick(['⚽ ゴール！ '+nm(sp)+'が決めた！','⚽ '+nm(sp)+'のシュートがネットを揺らす！','⚽ '+nm(sp)+'、見事なフィニッシュ！','⚽ ゴーーール！ '+nm(sp)+'！'])+(ast?'（アシスト: '+nm(ast)+'）':'')+'　'+M.h.goals+'-'+M.a.goals,'goal');
+ }else{const r=Math.random();s.rating[sp]-=.04;
+  if(r<.38){s.sot++;if(gk)o.rating[gk]+=.18;lg(M,k,pick([nm(sp)+'のシュートはGK'+(gk?nm(gk):'')+'がセーブ',(gk?nm(gk):'GK')+'がファインセーブ！ '+nm(sp)+'の決定機を阻止',nm(sp)+'の強烈なミドル！ しかしGKが弾く']));}
+  else if(r<.48)lg(M,k,pick([nm(sp)+'のシュートはポストに嫌われる！','クロスバー直撃！ '+nm(sp)+'、惜しい！']));
+  else lg(M,k,pick([nm(sp)+'のシュートは枠の外',nm(sp)+'、ふかしてしまった',nm(sp)+'のヘディングはわずかに外れる',nm(sp)+'が狙うも枠を捉えられず']));
+ }
+}
+function card(M,k,straight){const s=M[k];const c=onPitch(s);if(!c.length)return;
+ const sl=wpick(c,x=>({GK:.2,DF:3,MF:2,FW:1})[POS_GROUP[x.role]]);const pid=sl.pid;
+ if(straight||s.ycl.includes(pid)){s.reds.push({pid,two:!straight});s.rating[pid]-=1.5;sl.pid=null;lg(M,k,(straight?'🟥 ':'🟨🟥 ')+nm(pid)+(straight?'が一発退場！':'、2枚目のイエローで退場！'),'bold');}
+ else{s.ycl.push(pid);s.rating[pid]-=.3;lg(M,k,'🟨 '+nm(pid)+'にイエローカード');}}
+function bestBench(s,role){let best=null,bv=-1;s.bench.forEach(id=>{const p=P(id);if(!p)return;const v=effOvr(p,role)*(.8+.2*s.energy[id]/100);if(v>bv){bv=v;best=id;}});return best;}
+function doSub(M,k,slotIdx,inPid,why){const s=M[k];const sl=s.lineup[slotIdx];const out=sl.pid;sl.pid=inPid;s.bench=s.bench.filter(x=>x!==inPid);s.subs--;enter(s,inPid,sl.role);s.energy[inPid]=P(inPid).fit;
+ lg(M,k,'🔄 '+(why||'選手交代')+'：'+nm(inPid)+' IN ⇄ '+(out!=null?nm(out):'')+' OUT');}
+function injury(M,k){const s=M[k];const c=onPitch(s);if(!c.length)return;const sl=pick(c);const pid=sl.pid;const len=wpick([1,1,1,2,2,3,4,6,8],()=>1);s.injs.push([pid,len]);
+ lg(M,k,'🚑 '+nm(pid)+'が負傷… プレー続行は難しそうだ','bold');
+ const idx=s.lineup.indexOf(sl);const b=s.subs>0?bestBench(s,sl.role):null;if(b!=null)doSub(M,k,idx,b,'負傷交代');else{sl.pid=null;lg(M,k,'交代枠がなく、数的不利に…');}}
+function aiManage(M,k){const s=M[k],o=M[k==='h'?'a':'h'];
+ if([58,66,74,82].includes(M.min)&&M.half===2&&s.subs>0){
+  let worst=null,wi=-1;s.lineup.forEach((sl,i)=>{if(sl.pid==null||sl.role==='GK')return;const e=s.energy[sl.pid];if(e<72&&(worst==null||e<s.energy[worst])){worst=sl.pid;wi=i;}});
+  if(wi>=0){const b=bestBench(s,s.lineup[wi].role);if(b!=null&&P(b).pos!=='GK')doSub(M,k,wi,b);}}
+ if(M.half===2&&M.min===70&&s.goals<o.goals&&s.style!=='攻撃的'){s.style='攻撃的';lg(M,k,'📣 '+T(s.tid).name+'が攻撃的な布陣にシフト');}
+ if(M.half===2&&M.min===80&&s.goals>o.goals&&s.style!=='守備的'){s.style='守備的';lg(M,k,'📣 '+T(s.tid).name+'は守備を固める');}
+}
+function flavor(M){const k=Math.random()<M.poss?'h':'a';const s=M[k];const c=onPitch(s);if(!c.length)return;const n=nm(pick(c).pid);
+ lg(M,k,pick([T(s.tid).ab+'がボールを保持し、じっくりと組み立てる',n+'のドリブル突破！ 相手が慌てて対応',n+'から鋭いスルーパス、しかし惜しくも通らず','中盤で激しいボールの奪い合い',n+'のロングフィードでサイドを変える',n+'のクロスはDFがクリア','コーナーキックを獲得。'+n+'がキッカー',n+'が粘り強いプレスでボールを奪う']));}
+function finalizeRatings(M){for(const[s,o]of[[M.h,M.a],[M.a,M.h]]){const res=Math.sign(s.goals-o.goals);
+ s.played.forEach(pid=>{const g=POS_GROUP[P(pid).pos];let r=s.rating[pid]+res*.35;if(o.goals===0&&(g==='GK'||g==='DF'))r+=.6;s.rating[pid]=Math.round(clamp(r,3,10)*10)/10;});}}
+function simFull(M){let g=0;while(!M.done&&g++<200){stepMinute(M);M.ht=false;}}
+
+/* ================= matchday processing ================= */
+function myFixture(){return S.fixtures[S.md].find(f=>f[0]===S.team||f[1]===S.team);}
+function processMatchday(userM){
+  const md=S.md,fx=S.fixtures[md];
+ let cupOut=null;if(cupDue())cupOut=playCupRound(null);
+ Object.values(S.players).forEach(p=>{if(p.susp>0)p.susp--;if(p.inj>0)p.inj--;});
+ const res=[];let myRes=null;
+ for(const[h,a]of fx){let M;if(h===S.team||a===S.team){M=userM||newMatch(h,a,true);if(!M.done)simFull(M);}else{M=newMatch(h,a,true);simFull(M);}
+  const r=applyMatch(M);res.push(r);if(h===S.team||a===S.team)myRes={r,M};}
+ S.results[md]=res;
+ afterUserMatch(myRes);
+ weekly();
+ S.md++;
+ if(S.md>=S.fixtures.length)seasonEnd();
+ save();
+ return{res,myRes,cupOut};
+}
+/* ================= cup ================= */
+const CUP_MD=[3,8,13,18],CUP_NAMES=['1回戦','準々決勝','準決勝','決勝'],CUP_NAME='スターカップ';
+function makeCup(){const ord=(S.lastRank&&S.lastRank.length===S.teams.length)?S.lastRank.slice():S.teams.map(t=>[t.id,strengthRating(t.id)]).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
+ const seeds=ord.slice(0,4),rest=shuffle(ord.slice(4));const ties=[];for(let i=0;i<4;i++)ties.push([rest[i*2],rest[i*2+1]]);
+ S.cup={r:0,seeds,rounds:[{ties,res:null}],winner:null,out:null};}
+function cupDue(){const c=S.cup;return!!(c&&S.phase==='season'&&c.r<4&&S.md===CUP_MD[c.r]);}
+function userCupTie(){if(!cupDue())return null;return S.cup.rounds[S.cup.r].ties.find(t=>t.includes(S.team))||null;}
+function cupWinner(r){if(r.hg!==r.ag)return r.hg>r.ag?r.h:r.a;return r.pk[0]>r.pk[1]?r.h:r.a;}
+function cupPK(M){if(M.h.goals!==M.a.goals||M.pk)return;const gk=s=>{const g=s.lineup.find(x=>x.role==='GK'&&x.pid!=null);return g?P(g.pid).ovr:50;};
+ const ph=clamp(.76-(gk(M.a)-70)*.004,.6,.88),pa=clamp(.76-(gk(M.h)-70)*.004,.6,.88);let h=0,a=0;
+ for(let i=0;i<5;i++){if(Math.random()<ph)h++;if(Math.random()<pa)a++;}let g=0;while(h===a&&g++<30){if(Math.random()<ph)h++;if(Math.random()<pa)a++;}if(h===a)h++;
+ M.pk=[h,a];lg(M,null,`🥅 PK戦 ${h}-${a}！ ${T(h>a?M.h.tid:M.a.tid).name}が勝ち上がり！`,'bold');}
+function playCupRound(userM){const c=S.cup,ri_=c.r,R=c.rounds[ri_];const res=[];
+ Object.values(S.players).forEach(p=>{if(p.susp>0)p.susp--;});
+ for(const[h,a]of R.ties){const mine=h===S.team||a===S.team;const M=mine&&userM?userM:newMatch(h,a,true,true);M.cup=true;if(!M.done)simFull(M);cupPK(M);
+  const r=applyMatch(M,true);r.w=cupWinner(r);res.push(r);
+  if(h!==a){const ht=T(h);ht.budget+=ht.rep*90;if(h===S.team)S.fin.gate+=ht.rep*90;}
+  if(mine){const won=r.w===S.team;S.board=clamp(S.board+(won?2:-1.5),0,100);if(!won)c.out=CUP_NAMES[ri_];}}
+ R.res=res;
+ S.teams.forEach(t=>teamPlayers(t.id).forEach(p=>{p.fit=clamp(p.fit+8,0,100);}));
+ const W=res.map(r=>r.w);c.r++;
+ if(c.r===1){const w=shuffle(W.slice());c.rounds.push({ties:c.seeds.map((sd,i)=>[sd,w[i]]),res:null});}
+ else if(c.r<4){const w=shuffle(W.slice());const t=[];for(let i=0;i<w.length;i+=2)t.push([w[i],w[i+1]]);c.rounds.push({ties:t,res:null});}
+ else{const win=W[0];c.winner=win;const fr=res[0];const ru=fr.h===win?fr.a:fr.h;T(win).budget+=50000;T(ru).budget+=20000;
+  if(win===S.team){S.fin.prize+=50000;S.mgr.trophies++;S.board=clamp(S.board+10,0,100);c.out='優勝';inbox('🏆 '+CUP_NAME+'優勝！',`決勝で${T(ru).name}を下し、${CUP_NAME}を制しました！ 賞金 ${fmtM(50000)}`);}
+  else{if(ru===S.team){S.fin.prize+=20000;}inbox(CUP_NAME+' 決勝',`${T(win).name}が${T(ru).name}を破り、${CUP_NAME}優勝。`);}}
+ save();return{round:ri_,res};}
+function finishCup(M){const out=playCupRound(M);showCupResults(out,!M);render();}
+function showCupResults(out,showMine){const mr=out.res.find(r=>r.h===S.team||r.a===S.team);
+ let h=`<button class="x" onclick="closeModal()">×</button><h2>🏆 ${CUP_NAME} ${CUP_NAMES[out.round]}</h2>`;
+ if(mr&&showMine){const won=mr.w===S.team;h+=`<div class="card" style="text-align:center"><div style="font-family:var(--display);font-size:20px">${won?'🎉 勝ち上がり！':'敗退…'}</div><div class="vs"><div class="side">${badge(T(mr.h))}<span>${esc(T(mr.h).city)}</span></div><div class="score" style="font-size:30px">${mr.hg} - ${mr.ag}</div><div class="side">${badge(T(mr.a))}<span>${esc(T(mr.a).city)}</span></div></div>${mr.pk?`<div class="muted">PK ${mr.pk[0]}-${mr.pk[1]}</div>`:''}</div>`;}
+ h+=cupResRows(out.res)+`<button class="pri" style="width:100%;padding:12px;margin-top:10px" onclick="closeModal()">OK</button>`;openModal(h);}
+function cupResRows(res){return res.map(r=>`<div class="row" style="padding:6px 0;border-top:1px solid var(--line);${r.h===S.team||r.a===S.team?'background:rgba(61,220,132,.1)':''}"><span style="flex:1;text-align:right;font-size:12px;font-weight:${r.w===r.h?800:500}">${esc(T(r.h).city)}</span>${badge(T(r.h),'s')}<b style="width:64px;text-align:center;line-height:1.1">${r.hg} - ${r.ag}${r.pk?`<br><small class="muted" style="font-size:10px">PK ${r.pk[0]}-${r.pk[1]}</small>`:''}</b>${badge(T(r.a),'s')}<span style="flex:1;font-size:12px;font-weight:${r.w===r.a?800:500}">${esc(T(r.a).city)}</span></div>`).join('');}
+function applyMatch(M,cup){
+ for(const s of[M.h,M.a]){
+  s.played.forEach(pid=>{const p=P(pid);if(!p)return;p.car.a++;p.fit=Math.round(clamp(s.energy[pid],5,100));if(cup)return;p.st.a++;p.st.r+=s.rating[pid];p.lr=s.rating[pid];p.lp=S.md;});
+  if(!cup)s.ycl.forEach(pid=>{const p=P(pid);p.yc++;if(p.yc%4===0){p.susp=Math.max(p.susp,1);if(s.isU)inbox('出場停止',p.name+'が累積警告（4枚）で次節出場停止です。');}});
+  s.reds.forEach(({pid,two})=>{const p=P(pid);p.susp=Math.max(p.susp,two?1:ri(1,3));if(s.isU)inbox('退場処分',p.name+'は退場により'+p.susp+'試合の出場停止です。');});
+  s.injs.forEach(([pid,len])=>{const p=P(pid);p.inj=Math.max(p.inj,len);if(s.isU)inbox('負傷情報',p.name+'が負傷しました。全治'+len+'試合の見込みです。');});
+ }
+ M.gl.forEach(g=>{const p=P(g.pid);if(cup){p.cg=(p.cg||0)+1;p.car.g++;return;}p.st.g++;p.car.g++;if(g.ast!=null){const q=P(g.ast);q.st.as++;q.car.as++;}});
+ return{h:M.h.tid,a:M.a.tid,hg:M.h.goals,ag:M.a.goals,gl:M.gl.map(g=>[g.min,g.k,g.pid]),pk:M.pk||null};
+}
+function afterUserMatch(x){if(!x)return;const{r}=x;const home=r.h===S.team;const gf=home?r.hg:r.ag,ga=home?r.ag:r.hg;const opp=home?r.a:r.h;
+ const res=Math.sign(gf-ga);if(res>0)S.mgr.w++;else if(res<0)S.mgr.l++;else S.mgr.d++;
+ const diff=strengthRating(opp)-strengthRating(S.team);
+ let dc=res>0?3+Math.max(0,diff)*.3:res<0?-3+Math.max(0,diff)*.25:(diff>2?1.5:-.5);S.board=clamp(S.board+dc,0,100);
+ const top11=S.tactics.lineup;
+ teamPlayers(S.team).forEach(p=>{let d=0;if(p.lp===S.md){d+=2+res*2;}else{const core=autoPick(S.team,S.tactics.form).lineup.includes(p.id);d-=core?3:1.2;}d+=(65-p.mor)*.05;p.mor=clamp(p.mor+d,10,100);});
+ if(home)S.fin.gate+=myTeam().rep*120;}
+function weekly(){
+ const tr=TRAIN[S.tactics.train];
+ Object.values(S.players).forEach(p=>{
+  if(p.tid===0){p.fit=100;return;}
+  const isU=p.tid===S.team;
+  const rec=isU?tr.rec:22;p.fit=clamp(p.fit+rec*rnd(.8,1.2),0,100);
+  let mult=(p.lp===S.md?1.25:.8);if(isU){mult*=tr.g;if(p.focus)mult*=1.5;}
+  grow(p,mult);
+  if(isU&&tr.inj&&p.inj===0&&Math.random()<tr.inj){p.inj=ri(1,3);inbox('練習中の負傷',p.name+'が練習中に負傷しました（全治'+p.inj+'試合）。');}
+ });
+ awaken();
+ const me=myTeam();
+ const wages=teamPlayers(S.team).reduce((s,p)=>s+p.wage,0)/S.fixtures.length;me.budget-=wages;S.fin.wage+=wages;
+ me.budget+=1500;S.fin.tv+=1500;
+ const myFx=S.fixtures[S.md].find(f=>f[0]===S.team);if(myFx)me.budget+=me.rep*120;
+ S.teams.forEach(t=>{if(t.id!==S.team)t.budget+=t.rep*70;});
+ // offers
+ S.offers=S.offers.filter(o=>{if(o.exp<=S.md||!P(o.pid)||P(o.pid).tid!==S.team){const m=S.inbox.find(x=>x.offer===o.id);if(m)m.done='期限切れ';return false;}return true;});
+ teamPlayers(S.team).forEach(p=>{
+  const v=valueOf(p);let fee=0;
+  if(p.loan)return;
+  if(p.list&&Math.random()<.42)fee=v*rnd(.72,1.08);
+  else if(!p.list&&p.ovr>=strengthRating(S.team)+2&&Math.random()<.035)fee=v*rnd(1.1,1.5);
+  if(fee&&!S.offers.some(o=>o.pid===p.id)){fee=Math.round(fee/100)*100;
+   const buyers=S.teams.filter(t=>t.id!==S.team&&t.budget>=fee&&teamPlayers(t.id).length<30);if(!buyers.length)return;
+   const b=pick(buyers);const o={id:S.msgId+1000,pid:p.id,tid:b.id,fee,exp:S.md+3};S.offers.push(o);
+   inbox('移籍オファー: '+p.name,`${b.name}が${p.name}（${POS_JP[p.pos]} / 総合${Math.round(p.ovr)}）に${fmtM(fee)}のオファーを提示しました。\n市場価値: ${fmtM(v)}`,{offer:o.id});}
+ });
+ if(Math.random()<.35)aiTransfer();
+ if(S.md===14){const ex=teamPlayers(S.team).filter(p=>p.con<=1&&!p.loan);if(ex.length)inbox('契約満了が近い選手',ex.map(p=>p.name).join('、')+' の契約が今季で満了します。残したい選手は選手画面から契約延長しましょう。');}
+ if(me.budget<0&&Math.random()<.5){S.board=clamp(S.board-2,0,100);inbox('理事会より','クラブの資金がマイナスです。人件費の見直しを求めます。');}
+}
+function awaken(){
+ Object.values(S.players).forEach(p=>{if(p.tid<=0||p.age>21||p.awk||p.pot>=95)return;const isU=p.tid===S.team;
+  let c=isU?.005+(p.lp===S.md?.005:0)+(p.focus?.008:0)+(p.lp===S.md&&p.lr>=8?.12:0):.003;
+  if(Math.random()>=c)return;
+  const b=ri(5,12),o0=Math.round(p.ovr);p.awk=1;p.pot=Math.min(95,p.pot+b);p.ovr=Math.min(p.pot,p.ovr+ri(2,5));p.pl=p.pot-ri(1,4);p.ph=Math.min(99,p.pot+ri(1,4));p.mor=95;
+  const why=p.lp===S.md&&p.lr>=8?'前節の大活躍をきっかけに':pick(['練習で何かをつかんだ','先輩のアドバイスで','自主練の成果が出て','試合中に突然']);
+  if(isU){S.events=S.events||[];S.events.push(`✨ ${p.name}が覚醒！ 総合 ${o0}→${Math.round(p.ovr)}、潜在 ${p.pot}`);
+   inbox('✨ 覚醒: '+p.name,`${p.age}歳の${p.name}（${POS_JP[p.pos]}）が${why}覚醒しました！\n総合力 ${o0} → ${Math.round(p.ovr)}、潜在能力は ${p.pot} まで上昇。`);}
+  else if(p.ovr>=64)inbox('【注目の若手】'+p.name,`${T(p.tid).name}の${p.age}歳 ${p.name}（${POS_JP[p.pos]}）が急成長中との噂。`);
+ });}
+function grow(p,mult){const a=p.age;let g=a<=20?.38:a<=23?.26:a<=26?.12:a<=29?.03:a<=31?-.07:a<=33?-.17:-.3;
+ if(g>0){const gap=p.pot-p.ovr;g=gap<=0?0:g*Math.min(1,gap/6)*mult;}g*=rnd(.4,1.6);p.ovr=clamp(p.ovr+g,35,94);}
+function aiTransfer(){
+ const t=pick(S.teams.filter(x=>x.id!==S.team));const sq=teamPlayers(t.id);if(sq.length>=28)return;
+ const l=autoPick(t.id,t.form).lineup;const roles=FORMS[t.form].map(f=>f[0]);
+ let wi=0,wv=999;l.forEach((id,i)=>{if(id==null){wi=i;wv=0;return;}const v=effOvr(P(id),roles[i]);if(v<wv){wv=v;wi=i;}});
+ const role=roles[wi];
+ const cands=Object.values(S.players).filter(p=>!p.loan&&p.tid!==t.id&&p.tid!==S.team&&effOvr(p,role)>wv+2&&(p.tid===0||valueOf(p)*1.1<=t.budget)&&(p.tid===0||teamPlayers(p.tid).length>18));
+ if(!cands.length)return;const p=cands.sort((a,b)=>effOvr(b,role)-effOvr(a,role))[Math.min(cands.length-1,ri(0,3))];
+ const fee=p.tid===0?0:Math.round(valueOf(p)*rnd(1,1.25)/100)*100;const from=p.tid;
+ if(from)T(from).budget+=fee;t.budget-=fee;p.tid=t.id;p.con=ri(2,4);p.wage=calcWage(p);p.list=false;
+ if(p.ovr>=68||Math.random()<.3)inbox('【移籍ニュース】'+p.name,`${p.name}（${POS_JP[p.pos]}・${Math.round(p.ovr)}）が${from?T(from).name:'フリー'}から${t.name}へ移籍。${fee?'移籍金 '+fmtM(fee):'（フリー移籍）'}`);
+}
+
+/* ================= transfers ================= */
+function askPrice(p){if(p.tid===0)return 0;const t=T(p.tid);const top=autoPick(p.tid,t.form).lineup.includes(p.id);let a=valueOf(p)*(top?1.3:1.05);if(p.con<=1)a*=.8;return Math.round(a/100)*100;}
+function wageDemand(p){return Math.round(Math.max(p.wage*1.15,calcWage(p)*1.1)/10)*10;}
+function buyPlayer(p,fee){const me=myTeam();
+ if(me.budget<fee)return'資金が足りません';if(teamPlayers(S.team).length>=32)return'スカッドが満員です（最大32人）';
+ const from=p.tid;if(from)T(from).budget+=fee;me.budget-=fee;S.fin.tout+=fee;
+ p.wage=wageDemand(p);p.tid=S.team;p.con=p.age<30?4:2;p.mor=78;p.list=false;p.focus=false;
+ inbox('契約成立: '+p.name,`${p.name}が${from?T(from).name:'フリー'}から加入しました。${fee?'移籍金 '+fmtM(fee)+' / ':''}年俸 ${fmtM(p.wage)}`);
+ fixUserLineup();save();return null;}
+function sellPlayer(p,tid,fee){const me=myTeam();me.budget+=fee;S.fin.tin+=fee;const t=T(tid);t.budget-=fee;p.tid=tid;p.list=false;p.focus=false;p.con=ri(2,4);p.wage=calcWage(p);
+ S.tactics.lineup=S.tactics.lineup.map(id=>id===p.id?null:id);S.tactics.bench=S.tactics.bench.filter(id=>id!==p.id);fixUserLineup();
+ S.offers=S.offers.filter(o=>{if(o.pid===p.id){const m=S.inbox.find(x=>x.offer===o.id);if(m&&!m.done)m.done='無効';return false;}return true;});
+ inbox('売却完了: '+p.name,`${p.name}が${t.name}へ移籍しました。移籍金 ${fmtM(fee)}`);save();}
+function acceptOffer(oid){const o=S.offers.find(x=>x.id===oid);if(!o)return;const p=P(o.pid);if(!p||p.tid!==S.team)return;
+ if(teamPlayers(S.team).length<=16){toast('スカッドが16人を下回るため売却できません');return;}
+ const m=S.inbox.find(x=>x.offer===oid);sellPlayer(p,o.tid,o.fee);if(m)m.done='受諾';toast(p.name+'を売却しました');render();}
+function rejectOffer(oid){S.offers=S.offers.filter(o=>o.id!==oid);const m=S.inbox.find(x=>x.offer===oid);if(m)m.done='拒否';save();render();}
+
+/* ================= season end ================= */
+function table(){const t={};S.teams.forEach(x=>t[x.id]={id:x.id,p:0,w:0,d:0,l:0,gf:0,ga:0,pts:0,form:[]});
+ S.results.forEach(md=>md&&md.forEach(r=>{const H=t[r.h],A=t[r.a];H.p++;A.p++;H.gf+=r.hg;H.ga+=r.ag;A.gf+=r.ag;A.ga+=r.hg;
+  if(r.hg>r.ag){H.w++;A.l++;H.pts+=3;H.form.push('W');A.form.push('L');}else if(r.hg<r.ag){A.w++;H.l++;A.pts+=3;H.form.push('L');A.form.push('W');}else{H.d++;A.d++;H.pts++;A.pts++;H.form.push('D');A.form.push('D');}}));
+ return Object.values(t).sort((a,b)=>b.pts-a.pts||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf);}
+function scorers(n){return Object.values(S.players).filter(p=>p.st.g>0).sort((a,b)=>b.st.g-a.st.g||b.st.as-a.st.as).slice(0,n);}
+function seasonEnd(){
+ const tb=table();const pos=tb.findIndex(r=>r.id===S.team)+1;const row=tb[pos-1];const champ=tb[0].id;S.lastRank=tb.map(r=>r.id);
+ tb.forEach((r,i)=>{const t=T(r.id);const prize=(13-(i+1))*8000;t.budget+=prize;if(r.id===S.team)S.fin.prize+=prize;t.rep=clamp(t.rep+(6.5-(i+1))*.7,35,92);});
+ const tgt=S.obj.target;let dc=pos<=tgt?15+(tgt-pos)*4:-(pos-tgt)*9;if(pos===1)dc+=10;S.board=clamp(S.board+dc,0,100);
+ const fired=S.board<25;
+ const best=Object.values(S.players).filter(p=>p.st.a>=8).sort((a,b)=>b.st.r/b.st.a-a.st.r/a.st.a)[0];
+ const ts=scorers(1)[0];
+ if(pos===1)S.mgr.trophies++;
+ S.hist.push({s:S.season,tid:S.team,pos,w:row.w,d:row.d,l:row.l,pts:row.pts,obj:S.obj.text,ok:pos<=tgt,cup:S.cup?(S.cup.out||'-'):'-'});
+ const myRep=myTeam().rep;let offers=[];
+ if(fired)offers=shuffle(S.teams.filter(t=>t.id!==S.team&&t.rep<myRep)).slice(0,3).map(t=>t.id);
+ else if(pos<=Math.max(1,tgt-2)||pos===1)offers=shuffle(S.teams.filter(t=>t.id!==S.team&&t.rep>myRep+3)).slice(0,2).map(t=>t.id);
+ if(fired&&offers.length<2)offers=shuffle(S.teams.filter(t=>t.id!==S.team)).slice(-3).map(t=>t.id);
+ S.endInfo={pos,champ,ok:pos<=tgt,fired,offers,ts:ts?[ts.name,ts.tid,ts.st.g]:null,mvp:best?[best.name,best.tid,Math.round(best.st.r/best.st.a*100)/100]:null,pts:row.pts};
+ S.phase='end';
+ inbox('シーズン'+S.season+' 終了',`最終順位: ${pos}位（勝点${row.pts}）\n目標「${S.obj.text}」: ${pos<=tgt?'達成 ✅':'未達成 ❌'}\n${fired?'理事会はあなたの解任を決定しました…':'理事会の信頼度: '+Math.round(S.board)+'%'}`);
+}
+function newSeason(){
+ const retired=[],back=[];
+ Object.values(S.players).forEach(p=>{if(!p.loan)return;const from=p.loan.from,o0=p.loan.o0;
+  if(from===S.team)back.push(`${p.name}（${T(p.tid).ab}で${p.st.a}試合${p.st.g}得点、総合 ${R(o0)}→${R(p.ovr)}）`);
+  else if(p.tid===S.team)inbox('レンタル終了',p.name+'がレンタル期間を終えて'+T(from).name+'へ戻りました。');
+  p.tid=from;delete p.loan;});
+ if(back.length)inbox('レンタル選手が復帰',back.join('\n'));
+ Object.values(S.players).forEach(p=>{
+  p.age++;
+  const rc=p.age>=33?(p.age-32)*.2+(p.ovr<62?.15:0):0;
+  if(p.tid===0&&(p.age>=31||Math.random()<.4)){delete S.players[p.id];return;}
+  if(Math.random()<rc){if(p.tid===S.team)retired.push(p.name);delete S.players[p.id];return;}
+  if(p.tid>0){p.con--;if(p.con<=0){if(p.tid===S.team){inbox('契約満了',p.name+'は契約満了でクラブを去りました。');p.tid=0;p.list=false;p.focus=false;}else if(Math.random()<.75){p.con=ri(1,3);p.wage=calcWage(p);}else p.tid=0;}}
+  p.st={a:0,g:0,as:0,r:0};p.yc=0;p.susp=0;p.fit=100;p.mor=clamp(p.mor*.5+33,30,90);
+ });
+ if(retired.length)inbox('現役引退',retired.join('、')+' が現役を引退しました。');
+ S.teams.forEach(t=>{const b=baseOf(t.rep);const n=t.id===S.team?ri(2,3):2;const ys=[];
+  for(let i=0;i<n;i++){const p=genPlayer(pick(SQUAD_ROLES),b-17+gauss()*3.5,ri(16,18),t.id);p.con=3;p.wage=calcWage(p);ys.push(p);}
+  if(t.id===S.team)inbox('ユース昇格','アカデミーから '+ys.map(p=>`${p.name}（${POS_JP[p.pos]}・${p.age}歳・総合${Math.round(p.ovr)}・潜在${p.pot}）`).join('、')+' がトップチームに昇格しました。');
+  if(t.id!==S.team){let sq=teamPlayers(t.id);
+   while(sq.length>28){const w=sq.sort((a,b)=>a.ovr-b.ovr)[0];w.tid=0;sq=teamPlayers(t.id);}
+   const need={GK:3,DF:8,MF:8,FW:4};
+   for(const g of Object.keys(need)){let c=sq.filter(p=>POS_GROUP[p.pos]===g).length;while(c<need[g]){const roles=SQUAD_ROLES.filter(r=>POS_GROUP[r]===g);genPlayer(pick(roles),b-4+gauss()*4,ri(21,30),t.id);c++;}sq=teamPlayers(t.id);}
+   t.budget+=Math.round(t.rep*t.rep*20);}
+ });
+ genFreeAgents(Math.max(0,30-teamPlayers(0).length));
+ {const sq=teamPlayers(S.team);const need={GK:2,DF:6,MF:6,FW:3};const add=[];for(const g of Object.keys(need)){let c=sq.filter(p=>POS_GROUP[p.pos]===g).length;while(c<need[g]){const fa=teamPlayers(0).filter(p=>POS_GROUP[p.pos]===g).sort((a,b)=>a.ovr-b.ovr)[0]||genPlayer(pick(SQUAD_ROLES.filter(r=>POS_GROUP[r]===g)),55,ri(24,30),0);fa.tid=S.team;fa.con=1;fa.wage=calcWage(fa);add.push(fa.name);c++;}}
+  if(add.length)inbox('緊急補強','選手が不足したため、理事会がフリーの '+add.join('、')+' と1年契約を結びました。');}
+ S.season++;startSeasonCommon();fixUserLineup();
+ inbox('シーズン'+S.season+' 開幕',`理事会の今季目標は「${S.obj.text}」です。（戦力評価 ${S.obj.exp}位）`);
+ save();}
+function takeJob(tid){teamPlayers(S.team).forEach(p=>{p.list=false;p.focus=false;});const old=myTeam().name;S.team=tid;S.board=55;S.tactics=defaultTactics(tid);if(!S.mgr.clubs.includes(tid))S.mgr.clubs.push(tid);
+ inbox('新天地へ',`${old}を離れ、${myTeam().name}の監督に就任しました。`);newSeason();}
+
+/* ================= UI ================= */
+const badge=(t,c)=>`<span class="badge ${c||''}" style="background:${t.c1};color:${t.c2}">${t.ab}</span>`;
+const oc=o=>o>=80?'o4':o>=73?'o3':o>=66?'o2':'o1';
+const R=o=>Math.round(o);
+const stars=r=>{const n=clamp(Math.round((r-35)/11),1,5);return'★'.repeat(n)+'<span style="opacity:.25">'+'★'.repeat(5-n)+'</span>';};
+function fitColor(f){return f>=80?'var(--acc)':f>=60?'var(--gold)':'var(--red)';}
+function morIcon(m){return m>=80?'😄':m>=60?'🙂':m>=40?'😐':'😟';}
+function statusIc(p){let s='';if(p.inj)s+='🚑'+p.inj+' ';if(p.susp)s+='🟥'+p.susp+' ';if(p.list)s+='💰';if(p.focus)s+='📈';if(p.loan)s+='🔁';if(p.awk&&p.tid===S.team)s+='✨';if(p.tid===S.team&&p.con<=1)s+='📝';return s;}
+function formHTML(tid,n){const r=table().find(x=>x.id===tid);return'<span class="form">'+r.form.slice(-(n||5)).map(f=>`<i class="f${f}">${({W:'勝',D:'分',L:'負'})[f]}</i>`).join('')+'</span>';}
+function rankOf(tid){return table().findIndex(r=>r.id===tid)+1;}
+const flag=p=>p.nat==='jp'?'🇯🇵':(p.nat&&NAT[p.nat]?NAT[p.nat].f:'');
+function potHTML(p){return p.tid===S.team?`<b>${p.pot}</b>潜在`:`<b>${p.pl}-${p.ph}</b>潜在`;}
+function prow(p,extra){return`<div class="pr" onclick="openPlayer(${p.id})"><span class="pos g${POS_GROUP[p.pos]}">${POS_JP[p.pos]}</span><span class="ovr ${oc(p.ovr)}">${R(p.ovr)}</span>
+ <div class="nm"><b>${esc(p.name)} <span class="ic">${statusIc(p)}</span></b><small>${flag(p)} ${p.age}歳 · ${extra||''}</small></div>
+ <span class="potv">${potHTML(p)}</span>
+ <div class="mini"><div class="bar"><i style="width:${p.fit}%;background:${fitColor(p.fit)}"></i></div><small class="muted" style="font-size:10px">${morIcon(p.mor)} ${R(p.fit)}%</small></div></div>`;}
+
+function render(){if(!S){renderStart();return;}renderMain();}
+let startSel=1;
+function renderStart(){
+ const hasSave=!!localStorage.getItem(SAVE_KEY);
+ $('#app').innerHTML=`<div class="title"><div class="logo"><div style="font-size:44px">⚽</div><h1>監督キャリア</h1><p>クラブを率いて、リーグの頂点へ。</p></div>
+ <div class="card"><div class="lbl">監督名</div><input type="text" id="mgrName" maxlength="12" placeholder="あなたの名前" style="width:100%"></div>
+ <div class="card"><h3>率いるクラブを選択</h3><div class="lbl">★が少ないクラブほど予算は少なく、目標も低めです。</div>
+ ${TEAMS.map((d,i)=>`<div class="tpick ${startSel===i+1?'on':''}" onclick="startSel=${i+1};renderStart()"><span class="badge" style="background:${d[3]};color:${d[4]}">${d[2]}</span><div class="nm"><b>${d[0]}</b><small>予算 ${fmtM(d[5]*d[5]*50)} ・ 本拠地 ${d[1]}</small></div><span class="stars">${stars(d[5])}</span></div>`).join('')}
+ </div>
+ <div class="btns" style="margin-bottom:10px"><button class="pri" onclick="beginCareer()">キャリア開始</button></div>
+ <button style="width:100%" onclick="showHelp()">遊び方</button>
+ </div>`;
+ const n=$('#mgrName');if(n&&renderStart.name_)n.value=renderStart.name_;if(n)n.oninput=()=>renderStart.name_=n.value;
+}
+function beginCareer(){if(localStorage.getItem(SAVE_KEY)&&!confirm('既存のセーブデータを上書きして新しいキャリアを始めますか？'))return;newGame(startSel,($('#mgrName').value||'').trim());U.tab='home';render();window.scrollTo(0,0);}
+
+const TABS=[['home','🏟️','ホーム'],['squad','👥','スカッド'],['tactics','📋','作戦'],['transfer','🔁','移籍'],['league','🏆','リーグ'],['club','🏢','クラブ']];
+function renderMain(){const t=myTeam();const unread=S.inbox.filter(m=>!m.read).length;
+ $('#app').innerHTML=`<header class="top">${badge(t)}<div class="tinfo"><b>${esc(t.name)}</b><small>シーズン${S.season} · ${S.phase==='end'?'シーズン終了':'第'+(S.md+1)+'節 / '+S.fixtures.length}</small></div><div class="money"><small>クラブ資金</small>${fmtM(t.budget)}</div></header>
+ <main>${VIEWS[U.tab]()}</main>
+ <nav class="nav"><div class="in">${TABS.map(([k,i,l])=>`<button class="${U.tab===k?'on':''}" onclick="goTab('${k}')"><i>${i}</i>${l}${k==='home'&&unread?' •':''}</button>`).join('')}</div></nav>`;}
+function goTab(k){U.tab=k;render();window.scrollTo(0,0);}
+
+const VIEWS={};
+VIEWS.home=()=>{
+ const tb=table();const pos=tb.findIndex(r=>r.id===S.team)+1;const row=tb[pos-1];let h='';
+ if(S.phase==='end')h+=seasonEndCard();
+ else{const ct=userCupTie();const fx=ct||myFixture();const H=T(fx[0]),A=T(fx[1]);const opp=fx[0]===S.team?A:H;const iss=lineupIssues();
+  h+=`<div class="card"><div class="lbl">${ct?`<b class="gold">🏆 ${CUP_NAME} ${CUP_NAMES[S.cup.r]}</b>（一発勝負・同点ならPK戦）`:'次の試合 · 第'+(S.md+1)+'節'} · ${fx[0]===S.team?'ホーム':'アウェイ'}</div>
+  <div class="vs"><div class="side">${badge(H,'l')}<span>${esc(H.name)}</span><em>総合 ${teamRating(H.id)} · ${rankOf(H.id)}位</em></div><div class="vsx">VS</div><div class="side">${badge(A,'l')}<span>${esc(A.name)}</span><em>総合 ${teamRating(A.id)} · ${rankOf(A.id)}位</em></div></div>
+  <div class="row between muted" style="font-size:12px;margin-bottom:8px"><span>相手: ${opp.form} · ${opp.style}</span>${S.md?formHTML(opp.id):''}</div>
+  ${iss.length?`<div class="warn">⚠ ${iss.map(esc).join('<br>')}${hardIssues()?'<br><button class="sm" style="margin-top:6px" onclick="autoFix()">先発を自動修正</button>':''}</div>`:''}
+  <div class="btns"><button class="pri" onclick="startLive()">▶ 試合開始</button><button onclick="quickSim()">⏩ 結果のみ</button></div></div>`;}
+ h+=`<div class="card"><div class="stats4"><div><b>${pos}<small style="font-size:12px">位</small></b><small>順位</small></div><div><b>${row.pts}</b><small>勝点</small></div><div><b style="font-size:15px;line-height:22px">${row.w}-${row.d}-${row.l}</b><small>勝-分-負</small></div><div><b>${row.gf-row.ga>0?'+':''}${row.gf-row.ga}</b><small>得失点</small></div></div></div>`;
+ h+=`<div class="card"><div class="row between"><div><div class="lbl">理事会の目標</div><b>${S.obj.text}</b></div><div style="text-align:right"><div class="lbl">信頼度</div><b class="${S.board>=60?'green':S.board>=35?'gold':'redt'}">${R(S.board)}%</b></div></div>
+ <div class="bar" style="margin-top:8px"><i style="width:${S.board}%;background:${S.board>=60?'var(--acc)':S.board>=35?'var(--gold)':'var(--red)'}"></i></div></div>`;
+ const last=[];for(let i=S.results.length-1;i>=0&&last.length<3;i--){const r=S.results[i].find(x=>x.h===S.team||x.a===S.team);if(r)last.push([i,r]);}
+ if(last.length)h+=`<div class="card"><h3>最近の試合</h3>${last.map(([i,r])=>{const me=r.h===S.team;const gf=me?r.hg:r.ag,ga=me?r.ag:r.hg;const c=gf>ga?'W':gf<ga?'L':'D';
+  return`<div class="row" style="padding:5px 0;border-top:1px solid var(--line)"><span class="form"><i class="f${c}">${({W:'勝',D:'分',L:'負'})[c]}</i></span><span class="muted" style="width:44px;font-size:12px">第${i+1}節</span>${badge(T(r.h),'s')}<b style="flex:1;text-align:center">${r.hg} - ${r.ag}</b>${badge(T(r.a),'s')}<button class="sm" onclick="showMatchDetail(${i},${r.h})">詳細</button></div>`;}).join('')}</div>`;
+ h+=`<div class="card inbox"><div class="row between"><h3 style="margin:0">受信箱</h3>${S.inbox.some(m=>!m.read)?'<button class="sm" onclick="readAll()">すべて既読</button>':''}</div>
+ ${S.inbox.slice(0,12).map(m=>{const o=m.offer&&S.offers.find(x=>x.id===m.offer);
+  return`<div class="msg"><b>${m.read?'':'<span class="new"></span>'}${esc(m.title)}</b> <small class="muted">S${m.s} 第${Math.min(m.md+1,22)}節</small><p>${esc(m.body)}</p>
+  ${o&&!m.done?`<div class="row" style="margin-top:6px"><button class="sm pri" onclick="acceptOffer(${o.id})">受諾（${fmtM(o.fee)}）</button><button class="sm" onclick="rejectOffer(${o.id})">拒否</button><button class="sm" onclick="openPlayer(${o.pid})">選手</button></div>`:m.done?`<small class="muted">→ ${m.done}</small>`:''}</div>`;}).join('')||'<p class="muted">メッセージはありません</p>'}</div>`;
+ setTimeout(()=>{S.inbox.slice(0,12).forEach(m=>{if(!m.offer||m.done)m.read=true;});},0);
+ return h;};
+function readAll(){S.inbox.forEach(m=>m.read=true);save();render();}
+function autoFix(){const c=fixUserLineup();save();toast(c.length?'先発を修正しました':'修正の必要はありません');render();}
+function seasonEndCard(){const e=S.endInfo;const ch=T(e.champ);
+ let h=`<div class="card" style="border-color:${e.fired?'var(--red)':e.ok?'var(--acc)':'var(--gold)'}"><h3>🏁 シーズン${S.season} 終了</h3>
+ <div style="text-align:center;margin:6px 0 12px">${e.pos===1?'<div style="font-size:48px">🏆</div><div class="gold" style="font-family:var(--display);font-size:20px">リーグ優勝！</div>':`<div style="font-family:var(--display);font-size:34px">${e.pos}位</div>`}<div class="muted">勝点 ${e.pts} · 目標「${S.obj.text}」 ${e.ok?'<b class="green">達成</b>':'<b class="redt">未達成</b>'}</div></div>
+ <div class="kv"><div><small>リーグ優勝</small><b>${esc(ch.name)}</b></div>${S.cup&&S.cup.winner?`<div><small>${CUP_NAME}優勝</small><b>${esc(T(S.cup.winner).name)}</b></div><div><small>あなたのカップ戦</small><b>${S.cup.out||'-'}</b></div>`:''}<div><small>理事会の信頼度</small><b>${R(S.board)}%</b></div>
+ ${e.ts?`<div><small>得点王</small><b>${esc(e.ts[0])}</b><small>${T(e.ts[1])?esc(T(e.ts[1]).ab):''} · ${e.ts[2]}点</small></div>`:''}${e.mvp?`<div><small>シーズンMVP（平均評価）</small><b>${esc(e.mvp[0])}</b><small>${T(e.mvp[1])?esc(T(e.mvp[1]).ab):''} · ${e.mvp[2]}</small></div>`:''}</div>`;
+ if(e.fired){h+=`<div class="warn" style="background:#3a1519;border-color:#7a2630;color:#ffc2c8">理事会はあなたの解任を決定しました。他クラブからのオファーを受けて再出発しましょう。</div>${e.offers.map(id=>{const t=T(id);return`<div class="tpick" onclick="takeJob(${id});render()">${badge(t)}<div class="nm"><b>${esc(t.name)}</b><small>就任オファー</small></div><span class="stars">${stars(t.rep)}</span></div>`;}).join('')}`;}
+ else{if(e.offers.length)h+=`<div class="lbl" style="margin-top:6px">📨 他クラブから監督就任のオファーが届いています</div>${e.offers.map(id=>{const t=T(id);return`<div class="tpick" onclick="if(confirm('${t.name}の監督に就任しますか？')){takeJob(${id});render();}">${badge(t)}<div class="nm"><b>${esc(t.name)}</b><small>タップで就任</small></div><span class="stars">${stars(t.rep)}</span></div>`;}).join('')}`;
+  const ex=teamPlayers(S.team).filter(p=>p.con<=1&&!p.loan);if(ex.length)h+=`<div class="warn">📝 契約満了で退団する選手: ${ex.map(p=>`<a style="text-decoration:underline" onclick="openPlayer(${p.id})">${esc(p.name)}</a>`).join('、')}<br>残したい選手はタップして契約延長しましょう。</div>`;
+  h+=`<button class="pri" style="width:100%;padding:13px;margin-top:6px" onclick="newSeason();render();window.scrollTo(0,0)">${e.offers.length?'このクラブに残って':''}次のシーズンへ ▶</button>`;}
+ return h+'</div>';}
+
+VIEWS.squad=()=>{const sq=teamPlayers(S.team);const s=U.sq;
+ const srt={pos:(a,b)=>POS_ORDER.indexOf(a.pos)-POS_ORDER.indexOf(b.pos)||b.ovr-a.ovr,ovr:(a,b)=>b.ovr-a.ovr,age:(a,b)=>a.age-b.age,pot:(a,b)=>b.pot-a.pot,val:(a,b)=>valueOf(b)-valueOf(a)};
+ sq.sort(srt[s]);const wages=sq.reduce((x,p)=>x+p.wage,0);
+ return`<div class="card"><div class="row between"><div><div class="lbl">選手数</div><b>${sq.length}人</b></div><div><div class="lbl">平均総合</div><b>${R(sq.reduce((x,p)=>x+p.ovr,0)/sq.length)}</b></div><div><div class="lbl">年俸総額</div><b>${fmtM(wages)}</b></div></div></div>
+ <div class="chips" style="margin-bottom:10px">${[['pos','ポジション'],['ovr','総合力'],['pot','潜在能力'],['age','年齢'],['val','市場価値']].map(([k,l])=>`<button class="${s===k?'on':''}" onclick="U.sq='${k}';render()">${l}</button>`).join('')}</div>
+ <div class="plist">${sq.map(p=>prow(p,fmtM(valueOf(p))+(S.tactics.lineup.includes(p.id)?' · <span class="green">先発</span>':S.tactics.bench.includes(p.id)?' · 控え':''))).join('')}</div>
+ ${(()=>{const lo=Object.values(S.players).filter(p=>p.loan&&p.loan.from===S.team);return lo.length?`<div class="card" style="margin-top:12px"><h3>🔁 レンタル放出中</h3><div class="plist">${lo.map(p=>prow(p,esc(T(p.tid).ab)+'でプレー · '+p.st.a+'試合 '+p.st.g+'得点 · 総合 '+R(p.loan.o0)+'→'+R(p.ovr))).join('')}</div><p class="muted" style="font-size:11px;margin:6px 0 0">シーズン終了後にチームへ戻ります。</p></div>`:'';})()}
+ <p class="muted" style="font-size:11px;margin-top:10px">🚑負傷 🟥出場停止 💰売却リスト 📈重点育成 📝契約残り1年 🔁レンタル ✨覚醒</p>`;};
+
+VIEWS.tactics=()=>{const tc=S.tactics;const roles=FORMS[tc.form];
+ const slots=roles.map((f,i)=>{const p=P(tc.lineup[i]);const bad=!p||p.tid!==S.team||!avail(p);const e=p?R(effOvr(p,f[0])):'-';const pen=p&&posPenalty(p.pos,f[0])>0;
+  return`<div class="slot ${bad?'bad':pen?'oop':''} " style="left:${f[1]}%;top:${f[2]}%" onclick="pickSlot(${i})"><div class="c"><b>${e}</b><small>${f[0]}</small></div><div class="n">${p?esc(p.short):'空き'}</div>${p?`<div class="fb"><i style="width:${p.fit}%;background:${fitColor(p.fit)}"></i></div>`:''}</div>`;}).join('');
+ return`<div class="card"><div class="row between" style="margin-bottom:8px"><h3 style="margin:0">フォーメーション</h3><span class="rt">チーム総合 ${teamRating(S.team)}</span></div>
+ <div class="chips" style="margin-bottom:10px">${Object.keys(FORMS).map(f=>`<button class="${tc.form===f?'on':''}" onclick="changeFormation('${f}');save();render()">${f}</button>`).join('')}</div>
+ <div class="pitch">${slots}</div>
+ <div class="row"><button style="flex:1" onclick="bestXI()">⭐ ベストメンバー自動選択</button></div>
+ <div class="lbl" style="margin-top:12px">💾 保存したフォーメーション・メンバー</div>
+ ${[0,1,2,3,4].map(i=>{const pr=(S.presets||[])[i];return`<div class="row" style="margin-bottom:5px;background:var(--card2);border-radius:9px;padding:6px 8px"><b style="flex:1;font-size:12px">${pr?esc(pr.name)+' <span class="muted">'+pr.form+' · '+pr.style+'</span>':'<span class="muted">空きスロット '+(i+1)+'</span>'}</b>${pr?`<button class="sm pri" onclick="loadPreset(${i})">呼出</button>`:''}<button class="sm" onclick="savePreset(${i})">${pr?'上書き':'保存'}</button>${pr?`<button class="sm danger" onclick="delPreset(${i})">×</button>`:''}</div>`;}).join('')}
+ <p class="muted" style="font-size:11px;margin:8px 0 0">選手をタップで入れ替え。枠がオレンジ＝本職外（能力ダウン）、赤＝出場不可。</p></div>
+ <div class="card"><h3>控え（${tc.bench.length}/7）</h3><div class="plist">${tc.bench.map((id,i)=>{const p=P(id);return p?`<div class="pr" onclick="pickBench(${i})"><span class="pos g${POS_GROUP[p.pos]}">${p.pos}</span><span class="ovr ${oc(p.ovr)}">${R(p.ovr)}</span><div class="nm"><b>${esc(p.name)} ${statusIc(p)}</b><small>体力 ${R(p.fit)}%</small></div><span class="muted">⇄</span></div>`:'';}).join('')}
+ ${tc.bench.length<7?`<button onclick="pickBench(${tc.bench.length})">＋ 控えを追加</button>`:''}</div></div>
+ <div class="card"><h3>戦術スタイル</h3><div class="chips">${Object.keys(STY).map(k=>`<button class="${tc.style===k?'on':''}" onclick="S.tactics.style='${k}';save();render()">${k}</button>`).join('')}</div><p class="muted" style="font-size:12px;margin:8px 0 0">${STY[tc.style].desc}</p></div>
+ <div class="card"><h3>トレーニング強度</h3><div class="chips">${Object.keys(TRAIN).map(k=>`<button class="${tc.train===k?'on':''}" onclick="S.tactics.train='${k}';save();render()">${k}</button>`).join('')}</div><p class="muted" style="font-size:12px;margin:8px 0 0">${TRAIN[tc.train].desc}　📈重点育成: ${teamPlayers(S.team).filter(p=>p.focus).map(p=>esc(p.short)).join('、')||'なし'}（選手画面で最大3人まで指定）</p></div>`;};
+function savePreset(i){S.presets=S.presets||[];const tc=S.tactics;const old=S.presets[i];const nm_=prompt('保存名を入力',old?old.name:tc.form+' '+tc.style);if(nm_==null)return;
+ S.presets[i]={name:(nm_||tc.form).slice(0,14),form:tc.form,style:tc.style,lineup:tc.lineup.slice(),bench:tc.bench.slice()};save();toast('「'+S.presets[i].name+'」を保存しました');render();}
+function loadPreset(i){const pr=S.presets[i];if(!pr)return;const tc=S.tactics;tc.form=pr.form;tc.style=pr.style;tc.lineup=pr.lineup.slice();tc.bench=pr.bench.slice();const c=fixUserLineup();save();
+ toast('「'+pr.name+'」を呼び出しました'+(c.length?'（出場できない'+c.length+'人を自動で入れ替え）':''));render();}
+function delPreset(i){if(!confirm('このスロットを削除しますか？'))return;S.presets[i]=null;save();render();}
+function bestXI(){const a=autoPick(S.team,S.tactics.form);S.tactics.lineup=a.lineup;S.tactics.bench=a.bench;fixUserLineup();save();toast('ベストメンバーを選択しました');render();}
+function pickSlot(i){const tc=S.tactics;const role=FORMS[tc.form][i][0];const cur=tc.lineup[i];
+ const list=teamPlayers(S.team).sort((a,b)=>(avail(b)-avail(a))||effOvr(b,role)-effOvr(a,role));
+ openModal(`<button class="x" onclick="closeModal()">×</button><h2>${role} に起用する選手</h2><div class="plist">${list.map(p=>{const where=tc.lineup.indexOf(p.id)>=0?'先発('+FORMS[tc.form][tc.lineup.indexOf(p.id)][0]+')':tc.bench.includes(p.id)?'控え':'';const ok=avail(p);
+  return`<div class="pr" style="${p.id===cur?'border-color:var(--acc)':''};${ok?'':'opacity:.45'}" onclick="${ok?`assignSlot(${i},${p.id})`:''}"><span class="pos g${POS_GROUP[p.pos]}">${p.pos}</span><span class="ovr ${oc(effOvr(p,role))}">${R(effOvr(p,role))}</span><div class="nm"><b>${esc(p.name)} ${statusIc(p)}</b><small>本来 ${R(p.ovr)} · 体力${R(p.fit)}% ${where}</small></div></div>`;}).join('')}</div>`);}
+function assignSlot(i,pid){const tc=S.tactics;const cur=tc.lineup[i];const j=tc.lineup.indexOf(pid);const b=tc.bench.indexOf(pid);
+ if(j>=0){tc.lineup[j]=cur;}else if(b>=0){if(cur!=null)tc.bench[b]=cur;else tc.bench.splice(b,1);}
+ tc.lineup[i]=pid;fixUserLineup();save();closeModal();render();}
+function pickBench(i){const tc=S.tactics;const cur=tc.bench[i];const list=teamPlayers(S.team).filter(p=>!tc.lineup.includes(p.id)).sort((a,b)=>(avail(b)-avail(a))||b.ovr-a.ovr);
+ openModal(`<button class="x" onclick="closeModal()">×</button><h2>控え選手を選択</h2>${cur!=null?`<button class="danger" style="width:100%;margin-bottom:8px" onclick="S.tactics.bench.splice(${i},1);save();closeModal();render()">この枠を外す</button>`:''}<div class="plist">${list.map(p=>{const ok=avail(p);return`<div class="pr" style="${p.id===cur?'border-color:var(--acc)':''};${ok?'':'opacity:.45'}" onclick="${ok?`assignBench(${i},${p.id})`:''}"><span class="pos g${POS_GROUP[p.pos]}">${p.pos}</span><span class="ovr ${oc(p.ovr)}">${R(p.ovr)}</span><div class="nm"><b>${esc(p.name)} ${statusIc(p)}</b><small>体力${R(p.fit)}% ${tc.bench.includes(p.id)?'控え':''}</small></div></div>`;}).join('')}</div>`);}
+function assignBench(i,pid){const tc=S.tactics;const k=tc.bench.indexOf(pid);if(k>=0){tc.bench[k]=tc.bench[i];tc.bench[i]=pid;tc.bench=tc.bench.filter(x=>x!=null);}else{if(i<tc.bench.length)tc.bench[i]=pid;else tc.bench.push(pid);}save();closeModal();render();}
+
+VIEWS.transfer=()=>{const f=U.tf;const me=myTeam();
+ let h=`<div class="seg">${[['market','移籍市場'],['free','フリー'],['sell','売却・オファー']].map(([k,l])=>`<button class="${f.mode===k?'on':''}" onclick="U.tf.mode='${k}';render()">${l}</button>`).join('')}</div>`;
+ if(f.mode==='sell'){const listed=teamPlayers(S.team).filter(p=>p.list);
+  h+=`<div class="card"><h3>売却リスト</h3>${listed.length?'<div class="plist">'+listed.map(p=>prow(p,'市場価値 '+fmtM(valueOf(p)))).join('')+'</div>':'<p class="muted">登録された選手はいません。選手画面から「売却リストに登録」すると、他クラブからオファーが届きやすくなります。</p>'}</div>
+  <div class="card"><h3>届いているオファー</h3>${S.offers.length?S.offers.map(o=>{const p=P(o.pid);return`<div class="msg" style="padding:8px 0;border-top:1px solid var(--line)"><b>${esc(p.name)}</b> <small class="muted">← ${esc(T(o.tid).name)}</small><p>提示額 <b class="gold">${fmtM(o.fee)}</b>（市場価値 ${fmtM(valueOf(p))}）</p><div class="row" style="margin-top:5px"><button class="sm pri" onclick="acceptOffer(${o.id})">受諾</button><button class="sm" onclick="rejectOffer(${o.id})">拒否</button></div></div>`;}).join(''):'<p class="muted">現在オファーはありません。</p>'}</div>`;return h;}
+ let list=Object.values(S.players).filter(p=>p.tid!==S.team&&!(p.loan&&p.loan.from===S.team)&&(f.mode==='free'?p.tid===0:p.tid>0));
+ if(f.pos!=='ALL')list=list.filter(p=>POS_GROUP[p.pos]===f.pos);
+ if(f.budget)list=list.filter(p=>valueOf(p)<=me.budget);
+ const srt={ovr:(a,b)=>b.ovr-a.ovr,pot:(a,b)=>b.pot-a.pot,cheap:(a,b)=>valueOf(a)-valueOf(b),young:(a,b)=>a.age-b.age||b.ovr-a.ovr};list.sort(srt[f.sort]);
+ h+=`<div class="card" style="padding:10px"><div class="chips" style="margin-bottom:8px">${[['ALL','全員'],['GK','GK'],['DF','DF'],['MF','MF'],['FW','FW']].map(([k,l])=>`<button class="${f.pos===k?'on':''}" onclick="U.tf.pos='${k}';render()">${l}</button>`).join('')}</div>
+ <div class="row"><select onchange="U.tf.sort=this.value;render()" style="flex:1">${[['ovr','総合力順'],['pot','潜在能力順'],['cheap','安い順'],['young','若い順']].map(([k,l])=>`<option value="${k}" ${f.sort===k?'selected':''}>${l}</option>`).join('')}</select>
+ <label class="row" style="font-size:12px"><input type="checkbox" ${f.budget?'checked':''} onchange="U.tf.budget=this.checked;render()">予算内のみ</label></div></div>
+ <div class="plist">${list.slice(0,60).map(p=>prow(p,(p.tid?esc(T(p.tid).ab):'フリー')+' · '+(p.tid?fmtM(valueOf(p)):'年俸 '+fmtM(wageDemand(p))))).join('')||'<p class="muted">該当する選手がいません</p>'}</div>`;
+ return h;};
+
+VIEWS.league=()=>{const m=U.lg;let h=`<div class="seg">${[['table','順位表'],['cup','カップ戦'],['scorers','得点'],['fixtures','日程']].map(([k,l])=>`<button class="${m===k?'on':''}" onclick="U.lg='${k}';render()">${l}</button>`).join('')}</div>`;
+ if(m==='table'){const tb=table();h+=`<div class="card" style="padding:8px"><table class="tb"><tr><th>#</th><th class="l">クラブ</th><th>試</th><th>勝</th><th>分</th><th>負</th><th>差</th><th>点</th></tr>
+ ${tb.map((r,i)=>{const t=T(r.id);return`<tr class="${r.id===S.team?'me':''}" onclick="showTeam(${r.id})"><td>${i+1}</td><td class="l"><span class="tm">${badge(t,'s')}${esc(t.city)}</span></td><td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td><td>${r.gf-r.ga>0?'+':''}${r.gf-r.ga}</td><td><b>${r.pts}</b></td></tr>`;}).join('')}</table></div><p class="muted" style="font-size:11px">クラブをタップで詳細</p>`;}
+ else if(m==='cup'){h+=cupView();}
+ else if(m==='scorers'){const sc=scorers(20);const as=Object.values(S.players).filter(p=>p.st.as>0).sort((a,b)=>b.st.as-a.st.as).slice(0,10);
+  h+=`<div class="card" style="padding:8px"><h3 style="margin:6px">⚽ 得点</h3><table class="tb">${sc.map((p,i)=>`<tr class="${p.tid===S.team?'me':''}" onclick="openPlayer(${p.id})"><td>${i+1}</td><td class="l"><b>${esc(p.name)}</b></td><td>${p.tid?badge(T(p.tid),'s'):''}</td><td><b>${p.st.g}</b></td></tr>`).join('')||'<tr><td class="muted">まだ得点はありません</td></tr>'}</table></div>
+  <div class="card" style="padding:8px"><h3 style="margin:6px">🅰️ アシスト</h3><table class="tb">${as.map((p,i)=>`<tr class="${p.tid===S.team?'me':''}" onclick="openPlayer(${p.id})"><td>${i+1}</td><td class="l"><b>${esc(p.name)}</b></td><td>${p.tid?badge(T(p.tid),'s'):''}</td><td><b>${p.st.as}</b></td></tr>`).join('')||'<tr><td class="muted">まだありません</td></tr>'}</table></div>`;}
+ else{if(U.fxMd==null||U.fxMd>=S.fixtures.length)U.fxMd=Math.min(S.md,S.fixtures.length-1);const i=U.fxMd;const res=S.results[i];
+  h+=`<div class="card"><div class="row between" style="margin-bottom:8px"><button class="sm" ${i<=0?'disabled':''} onclick="U.fxMd--;render()">◀</button><b>第${i+1}節</b><button class="sm" ${i>=S.fixtures.length-1?'disabled':''} onclick="U.fxMd++;render()">▶</button></div>
+  ${S.fixtures[i].map(([hh,aa])=>{const r=res&&res.find(x=>x.h===hh);const me=hh===S.team||aa===S.team;return`<div class="row" style="padding:7px 4px;border-top:1px solid var(--line);${me?'background:rgba(61,220,132,.1);border-radius:6px':''}" ${r?`onclick="showMatchDetail(${i},${hh})"`:''}><span style="flex:1;text-align:right;font-size:12px;font-weight:700">${esc(T(hh).city)}</span>${badge(T(hh),'s')}<b style="width:52px;text-align:center">${r?r.hg+' - '+r.ag:'vs'}</b>${badge(T(aa),'s')}<span style="flex:1;font-size:12px;font-weight:700">${esc(T(aa).city)}</span></div>`;}).join('')}</div>`;}
+ return h;};
+function cupView(){const c=S.cup;if(!c)return'<div class="card muted">カップ戦は次のシーズンから開催されます。</div>';
+ let h=`<div class="card"><h3>🏆 ${CUP_NAME}</h3><p class="muted" style="font-size:12px;margin:0 0 6px">12クラブによる一発勝負のトーナメント。前季上位4クラブは準々決勝から登場。同点ならPK戦。優勝賞金 ${fmtM(50000)}。</p>
+ ${c.winner?`<div style="text-align:center;margin:8px 0"><div style="font-size:36px">🏆</div><b class="gold">${esc(T(c.winner).name)}</b> が優勝</div>`:''}
+ ${c.out&&c.out!=='優勝'?`<div class="muted" style="font-size:12px">あなたのクラブ: ${c.out}で敗退</div>`:''}</div>`;
+ for(let i=0;i<4;i++){const R=c.rounds[i];h+=`<div class="card" style="padding:10px"><div class="lbl">${CUP_NAMES[i]} · 第${CUP_MD[i]+1}節の週${S.cup.r===i&&S.phase==='season'?' <b class="green">次のラウンド</b>':''}</div>`;
+  if(!R)h+='<p class="muted" style="font-size:12px;margin:0">組み合わせ未定</p>';
+  else if(R.res)h+=cupResRows(R.res);
+  else h+=R.ties.map(([a,b])=>`<div class="row" style="padding:6px 0;border-top:1px solid var(--line);${a===S.team||b===S.team?'background:rgba(61,220,132,.1)':''}"><span style="flex:1;text-align:right;font-size:12px;font-weight:700">${esc(T(a).city)}</span>${badge(T(a),'s')}<b style="width:64px;text-align:center">vs</b>${badge(T(b),'s')}<span style="flex:1;font-size:12px;font-weight:700">${esc(T(b).city)}</span></div>`).join('');
+  if(i===0)h+=`<div class="muted" style="font-size:11px;margin-top:6px">シード: ${c.seeds.map(id=>esc(T(id).city)).join('・')}</div>`;
+  h+='</div>';}
+ return h;}
+function showTeam(tid){const t=T(tid);const sq=teamPlayers(tid).sort((a,b)=>POS_ORDER.indexOf(a.pos)-POS_ORDER.indexOf(b.pos)||b.ovr-a.ovr);
+ openModal(`<button class="x" onclick="closeModal()">×</button><div class="row" style="margin-bottom:10px">${badge(t,'l')}<div><h2 style="margin:0">${esc(t.name)}</h2><small class="muted">${t.form} · ${tid===S.team?S.tactics.style:t.style} · 総合 ${teamRating(tid)} · ${rankOf(tid)}位</small></div></div>${S.md?'<div style="margin-bottom:10px">直近 '+formHTML(tid)+'</div>':''}<div class="plist">${sq.map(p=>prow(p,fmtM(valueOf(p)))).join('')}</div>`);}
+function showMatchDetail(md,h){const r=S.results[md].find(x=>x.h===h);const H=T(r.h),A=T(r.a);
+ openModal(`<button class="x" onclick="closeModal()">×</button><div class="lbl">第${md+1}節</div><div class="vs"><div class="side">${badge(H,'l')}<span>${esc(H.name)}</span></div><div class="score">${r.hg} - ${r.ag}</div><div class="side">${badge(A,'l')}<span>${esc(A.name)}</span></div></div>
+ ${r.gl.map(([m,k,pid])=>{const p=P(pid);return`<div class="row" style="justify-content:${k==='h'?'flex-start':'flex-end'};padding:3px 0">⚽ ${p?esc(p.name):'（退団選手）'} <span class="muted">${m}</span></div>`;}).join('')||'<p class="muted" style="text-align:center">得点なし</p>'}`);}
+
+VIEWS.club=()=>{const t=myTeam(),f=S.fin;const inc=f.gate+f.tv+f.tin+f.prize,exp=f.wage+f.tout;const m=S.mgr;const tot=m.w+m.d+m.l;
+ return`<div class="card"><h3>💴 今季の収支</h3><div class="kv"><div><small>入場料収入</small><b>${fmtM(f.gate)}</b></div><div><small>放映権料</small><b>${fmtM(f.tv)}</b></div><div><small>移籍金収入</small><b>${fmtM(f.tin)}</b></div><div><small>賞金</small><b>${fmtM(f.prize)}</b></div><div><small>人件費</small><b class="redt">-${fmtM(f.wage)}</b></div><div><small>移籍金支出</small><b class="redt">-${fmtM(f.tout)}</b></div></div>
+ <div class="row between"><span class="muted">収支</span><b class="${inc-exp>=0?'green':'redt'}">${inc-exp>=0?'+':''}${fmtM(inc-exp)}</b></div><div class="row between" style="margin-top:4px"><span class="muted">クラブ資金</span><b class="gold">${fmtM(t.budget)}</b></div><div class="row between" style="margin-top:4px"><span class="muted">クラブ評価</span><span class="stars">${stars(t.rep)}</span></div></div>
+ <div class="card"><h3>🧑‍💼 監督 ${esc(m.name)}</h3><div class="stats4"><div><b>${tot}</b><small>試合</small></div><div><b>${m.w}</b><small>勝</small></div><div><b>${tot?R(m.w/tot*100):0}%</b><small>勝率</small></div><div><b>${m.trophies}</b><small>🏆 優勝</small></div></div></div>
+ <div class="card"><h3>📜 キャリア履歴</h3>${S.hist.length?`<table class="tb"><tr><th>季</th><th class="l">クラブ</th><th>順位</th><th>勝点</th><th>杯</th><th>目標</th></tr>${S.hist.slice().reverse().map(x=>`<tr><td>${x.s}</td><td class="l"><span class="tm">${badge(T(x.tid),'s')}${esc(T(x.tid).city)}</span></td><td>${x.pos===1?'🏆':x.pos+'位'}</td><td>${x.pts}</td><td style="font-size:11px">${x.cup==='優勝'?'🏆':x.cup||'-'}</td><td>${x.ok?'✅':'❌'}</td></tr>`).join('')}</table>`:'<p class="muted">シーズンを終えると記録されます。</p>'}</div>
+ <div class="card"><h3>⚙️ その他</h3><div class="row wrap"><button onclick="showHelp()">遊び方</button><button class="danger" onclick="resetGame()">データを削除して最初から</button></div><p class="muted" style="font-size:11px;margin:8px 0 0">進行はこの端末のブラウザに自動保存されます。</p></div>`;};
+function resetGame(){if(!confirm('セーブデータを削除して最初からやり直しますか？'))return;localStorage.removeItem(SAVE_KEY);S=null;render();}
+function showHelp(){openModal(`<button class="x" onclick="closeModal()">×</button><h2>遊び方</h2><div class="help">
+ <p>あなたは監督として、12クラブで争うリーグを全22節（ホーム＆アウェイ）戦います。</p>
+ <p><b>📋 作戦</b>：フォーメーションと先発・控えを決め、戦術スタイルとトレーニング強度を選びます。本職以外のポジションに置くと能力が下がります。</p>
+ <p><b>▶ 試合</b>：実況つきで試合が進みます。一時停止して戦術変更や選手交代（最大5人）ができます。疲れた選手は能力が落ちるので交代で活性化しましょう。</p>
+ <p><b>🔁 移籍</b>：他クラブの選手にオファーを出して獲得。相手の要求額は主力ほど高くなります。売却リストに登録するとオファーが届きます。</p>
+ <p><b>📈 育成</b>：若手は試合に出るほど成長。潜在能力が高い選手を「重点育成」に指定すると伸びが速くなります。30歳を過ぎると衰えます。</p>
+ <p><b>🏢 理事会</b>：目標を達成すると信頼度が上がり、上位クラブからオファーが届くことも。信頼度が25%未満でシーズンを終えると解任です。</p>
+ <p><b>💴 財政</b>：収入は入場料・放映権・賞金。人件費に注意して資金をマイナスにしないように。</p></div>`);}
+
+/* ===== player modal ===== */
+function openPlayer(id){const p=P(id);if(!p)return;const own=p.tid===S.team;const t=p.tid?T(p.tid):null;const v=valueOf(p);const st=p.st;
+ let h=`<button class="x" onclick="closeModal()">×</button><div class="pcard"><div class="big ${oc(p.ovr)}">${R(p.ovr)}<small>${p.pos}</small></div><div style="flex:1;min-width:0"><h2 style="margin:0 0 3px">${esc(p.name)}</h2><div class="muted" style="font-size:12px">${flag(p)} ${p.age}歳 · ${({GK:'ゴールキーパー',DF:'ディフェンダー',MF:'ミッドフィルダー',FW:'フォワード'})[POS_GROUP[p.pos]]}</div><div class="row" style="margin-top:4px;font-size:12px">${t?badge(t,'s')+' '+esc(t.name):'<span class="muted">フリー（所属なし）</span>'}</div></div></div>
+ <div class="kv"><div><small>潜在能力</small><b>${own?p.pot:p.pl+'-'+p.ph}</b></div><div><small>市場価値</small><b>${fmtM(v)}</b></div><div><small>年俸</small><b>${fmtM(p.wage)}</b></div><div><small>契約残り</small><b>${p.tid?p.con+'年':'-'}</b></div><div><small>体力</small><b style="color:${fitColor(p.fit)}">${R(p.fit)}%</b></div><div><small>士気</small><b>${morIcon(p.mor)} ${R(p.mor)}</b></div>
+ <div><small>今季 出場/得点/A</small><b>${st.a} / ${st.g} / ${st.as}</b></div><div><small>平均評価</small><b>${st.a?(st.r/st.a).toFixed(2):'-'}</b></div></div>
+ ${p.inj?`<div class="warn">🚑 負傷中：残り${p.inj}試合</div>`:''}${p.susp?`<div class="warn">🟥 出場停止：残り${p.susp}試合</div>`:''}`;
+ if(p.loan){h+=`<div class="warn" style="background:#10283a;border-color:#1f5a7a;color:#bfe6ff">🔁 ${p.loan.from===S.team?T(p.tid).name+'へレンタル中（シーズン終了後に復帰）':T(p.loan.from).name+'からレンタル'+(own?'加入':'')+'中（シーズン終了まで）'}</div>`;}
+ if(own&&p.loan){h+=`<div class="row wrap" style="gap:6px">${p.age<=23?`<button onclick="toggleFocus(${id})">${p.focus?'重点育成を解除':'📈 重点育成に指定'}</button>`:''}</div>`;}
+ else if(p.loan){}
+ else if(own){h+=`<div class="row wrap" style="gap:6px">
+  <button onclick="toggleList(${id})">${p.list?'売却リストから外す':'💰 売却リストに登録'}</button>
+  ${p.age<=23?`<button onclick="toggleFocus(${id})">${p.focus?'重点育成を解除':'📈 重点育成に指定'}</button>`:''}
+  <button onclick="renewUI(${id})">📝 契約延長</button>
+  ${S.phase==='season'?`<button onclick="loanOutUI(${id})">🔁 レンタルに出す</button>`:''}
+  <button class="danger" onclick="releaseP(${id})">即時放出（${fmtM(Math.round(v*.6/100)*100)}）</button></div><div id="pact"></div>`;}
+ else{const blocked=S.neg[id]===S.md;h+=`<div id="pact">${blocked?'<div class="warn">この節は交渉を拒否されています。次節以降に再挑戦しましょう。</div>':`<button class="pri" style="width:100%;padding:12px" onclick="offerUI(${id})">${p.tid?'💼 移籍オファーを出す':'✍️ 契約を提示する'}</button>${p.tid&&S.phase==='season'?`<button style="width:100%;padding:11px;margin-top:6px" onclick="loanInUI(${id})">🔁 レンタル移籍を打診</button>`:''}`}</div>`;}
+ openModal(h);}
+function loanOutUI(id){const p=P(id);if(teamPlayers(S.team).length<=18){$('#pact').innerHTML='<div class="warn">スカッドが18人以下のため、これ以上レンタルに出せません。</div>';return;}
+ const cl=loanTargets(p);$('#pact').innerHTML=`<div class="card" style="margin-top:10px"><div class="lbl">レンタル先を選択（今季終了まで。年俸は先方が負担）</div>${cl.map(([t,start])=>`<div class="tpick" onclick="doLoanOut(${id},${t.id})">${badge(t)}<div class="nm"><b>${esc(t.name)}</b><small>${start?'<span class="green">先発で起用される見込み</span>':'控えになる可能性あり'}</small></div><span class="stars">${stars(t.rep)}</span></div>`).join('')}</div>`;}
+function loanTargets(p){return S.teams.filter(t=>t.id!==S.team).map(t=>{const roles=FORMS[t.form].map(f=>f[0]);const l=autoPick(t.id,t.form).lineup;
+ const start=roles.some((r,i)=>{const q=P(l[i]);return!q||effOvr(p,r)>effOvr(q,r);});return[t,start];}).sort((a,b)=>(b[1]-a[1])||(a[0].rep-b[0].rep)).slice(0,4);}
+function doLoanOut(id,tid){const p=P(id);p.loan={from:S.team,o0:p.ovr};p.tid=tid;p.list=false;p.st={a:p.st.a,g:p.st.g,as:p.st.as,r:p.st.r};
+ S.tactics.lineup=S.tactics.lineup.map(x=>x===id?null:x);S.tactics.bench=S.tactics.bench.filter(x=>x!==id);fixUserLineup();
+ S.offers=S.offers.filter(o=>o.pid!==id);inbox('レンタル放出: '+p.name,`${p.name}を${T(tid).name}へ今季終了までレンタルに出しました。`);save();closeModal();toast(p.name+'をレンタルに出しました');render();}
+function loanInUI(id){const p=P(id);const t=T(p.tid);const fee=Math.max(100,Math.round(valueOf(p)*.08/100)*100);const wd=p.wage;
+ if(autoPick(p.tid,t.form).lineup.includes(id)){$('#pact').innerHTML=`<div class="warn">${esc(t.name)}「主力選手なのでレンタルには出せない」</div>`;return;}
+ if(teamPlayers(p.tid).length<=18){$('#pact').innerHTML=`<div class="warn">${esc(t.name)}は選手層が薄いためレンタルを拒否しました。</div>`;return;}
+ $('#pact').innerHTML=`<div class="card" style="margin-top:10px"><div class="lbl">${esc(t.name)}がレンタルに応じる条件</div><p>レンタル料 <b class="gold">${fmtM(fee)}</b> · 年俸はこちらが全額負担（${fmtM(wd)}）<br><small class="muted">期間は今季終了まで。シーズン後に${esc(t.name)}へ戻ります。</small></p><button class="pri" style="width:100%" onclick="doLoanIn(${id},${fee})">レンタルで獲得する</button></div>`;}
+function doLoanIn(id,fee){const p=P(id);const me=myTeam();if(me.budget<fee){toast('資金が足りません');return;}if(teamPlayers(S.team).length>=32){toast('スカッドが満員です');return;}
+ const from=p.tid;T(from).budget+=fee;me.budget-=fee;S.fin.tout+=fee;p.loan={from,o0:p.ovr};p.tid=S.team;p.mor=75;
+ inbox('レンタル加入: '+p.name,`${p.name}が${T(from).name}からレンタルで加入しました（今季終了まで）。レンタル料 ${fmtM(fee)}`);fixUserLineup();save();closeModal();toast(p.name+'をレンタルで獲得しました');render();}
+function toggleList(id){const p=P(id);p.list=!p.list;save();openPlayer(id);render();}
+function toggleFocus(id){const p=P(id);if(!p.focus&&teamPlayers(S.team).filter(x=>x.focus).length>=3){toast('重点育成は最大3人までです');return;}p.focus=!p.focus;save();openPlayer(id);render();}
+function releaseP(id){const p=P(id);if(teamPlayers(S.team).length<=16){toast('スカッドが16人を下回るため放出できません');return;}const fee=Math.round(valueOf(p)*.6/100)*100;
+ if(!confirm(p.name+'を'+fmtM(fee)+'で即時売却しますか？'))return;const buyers=S.teams.filter(t=>t.id!==S.team);const b=buyers.filter(t=>t.budget>=fee);sellPlayer(p,pick(b.length?b:buyers).id,fee);closeModal();toast(p.name+'を放出しました');render();}
+function renewUI(id){const p=P(id);const w=Math.round(calcWage(p)*1.1/10)*10;
+ if(p.mor<30){$('#pact').innerHTML='<div class="warn">士気が低く、延長交渉に応じてくれません。</div>';return;}
+ if(p.con>=4){$('#pact').innerHTML='<div class="warn">契約は十分に残っています。</div>';return;}
+ $('#pact').innerHTML=`<div class="card" style="margin-top:10px"><div class="lbl">要求年俸 <b class="gold">${fmtM(w)}</b>（現在 ${fmtM(p.wage)}）</div><div class="chips">${[1,2,3,4,5].filter(y=>y>p.con).map(y=>`<button onclick="renew(${id},${y},${w})">${y}年契約</button>`).join('')}</div></div>`;}
+function renew(id,y,w){const p=P(id);p.con=y;p.wage=w;p.mor=clamp(p.mor+8,0,100);save();toast(p.name+'と'+y+'年契約を結びました');openPlayer(id);render();}
+function offerUI(id){const p=P(id);const v=valueOf(p);const wd=wageDemand(p);const me=myTeam();
+ if(p.tid===0){$('#pact').innerHTML=`<div class="card"><div class="lbl">フリーの選手です。移籍金は不要です。</div><p>要求年俸 <b class="gold">${fmtM(wd)}</b> · 契約 ${p.age<30?4:2}年</p><button class="pri" style="width:100%" onclick="doBuy(${id},0)">契約する</button></div>`;return;}
+ const mx=Math.max(v*2.5,100);U.offer=Math.round(v/100)*100;
+ $('#pact').innerHTML=`<div class="card"><div class="lbl">提示する移籍金</div><div style="font-family:var(--display);font-size:24px;text-align:center" id="ofv">${fmtM(U.offer)}</div>
+ <input type="range" min="${Math.round(v*.4/100)*100}" max="${Math.round(mx/100)*100}" step="100" value="${U.offer}" oninput="U.offer=+this.value;$('#ofv').textContent=fmtM(U.offer)">
+ <p class="muted" style="font-size:12px">市場価値 ${fmtM(v)} · 予算 ${fmtM(me.budget)} · 獲得後の年俸 ${fmtM(wd)}</p><button class="pri" style="width:100%" onclick="sendOffer(${id})">オファー送信</button><div id="ores"></div></div>`;}
+function sendOffer(id){const p=P(id);const fee=U.offer;const me=myTeam();if(me.budget<fee){$('#ores').innerHTML='<div class="warn">資金が足りません</div>';return;}
+ if(teamPlayers(p.tid).length<=18){$('#ores').innerHTML='<div class="warn">'+esc(T(p.tid).name)+'は選手層が薄いため放出を拒否しました。</div>';S.neg[id]=S.md;save();return;}
+ const ask=askPrice(p);
+ if(fee>=ask){$('#ores').innerHTML=`<div class="warn" style="background:#123b25;border-color:var(--acc);color:#c9ffe0">${esc(T(p.tid).name)}がオファーを受諾！ 選手も個人合意しました。</div><button class="pri" style="width:100%" onclick="doBuy(${id},${fee})">契約を完了する</button>`;}
+ else if(fee>=ask*.82){$('#ores').innerHTML=`<div class="warn">${esc(T(p.tid).name)}からカウンターオファー：<b>${fmtM(ask)}</b> なら応じるとのこと。</div><button class="gold" style="width:100%" onclick="doBuy(${id},${ask})">${fmtM(ask)}で合意する</button>`;}
+ else{S.neg[id]=S.md;save();$('#ores').innerHTML=`<div class="warn" style="background:#3a1519;border-color:#7a2630;color:#ffc2c8">${esc(T(p.tid).name)}はオファーを一蹴しました。この節はもう交渉できません。</div>`;}}
+function doBuy(id,fee){const p=P(id);const err=buyPlayer(p,fee);if(err){toast(err);return;}closeModal();toast(p.name+'を獲得しました！');render();}
+
+function openModal(h){const m=$('#modal');m.innerHTML=`<div class="sheet" onclick="event.stopPropagation()">${h}</div>`;m.hidden=false;m.onclick=closeModal;}
+function closeModal(){$('#modal').hidden=true;$('#modal').innerHTML='';}
+
+/* ===== live match ===== */
+let LM=null;
+function startLive(){const c=hardIssues()?fixUserLineup():[];if(c.length)toast('出場できない選手を自動で入れ替えました');
+ const ct=userCupTie();const[h,a]=ct||myFixture();const M=newMatch(h,a,false,!!ct);M.uk=h===S.team?'h':'a';LM={M,speed:1,paused:false,timer:null,selOut:null,selIn:null};
+ lg(M,null,(ct?'🏆 '+CUP_NAME+' '+CUP_NAMES[S.cup.r]+' ':'🏟️ ')+'キックオフ！ '+T(h).name+' vs '+T(a).name,'bold');$('#match').hidden=false;document.body.style.overflow='hidden';renderMatch();tick();}
+function tick(){clearTimeout(LM.timer);if(LM.paused||LM.M.done)return;LM.timer=setTimeout(()=>{const M=LM.M;const g=M.h.goals+M.a.goals;stepMinute(M);
+ if(M.ht){M.ht=false;LM.paused=true;renderMatch();matchTactics(true);return;}
+ renderMatch(M.h.goals+M.a.goals>g);if(M.done){renderMatch();return;}tick();},[320,150,55][LM.speed]);}
+function renderMatch(flash){const M=LM.M,H=T(M.h.tid),A=T(M.a.tid);const pos=M.possN?M.possSum/M.possN:.5;
+ const feed=M.log.slice().reverse().slice(0,80).map(e=>`<div class="ev ${e.cls}"><span class="t">${e.t}</span><span class="d" style="background:${e.s?T(M[e.s].tid).c1:'transparent'}"></span><span>${esc(e.txt)}</span></div>`).join('');
+ let ctl;if(M.done)ctl=`<button class="pri" onclick="matchSummary()">試合結果へ ▶</button>`;
+ else ctl=`<button onclick="LM.paused=!LM.paused;renderMatch();tick()">${LM.paused?'▶ 再開':'⏸ 一時停止'}</button><button onclick="LM.speed=(LM.speed+1)%3;renderMatch()">速度 ×${[1,2,4][LM.speed]}</button><button onclick="LM.paused=true;renderMatch();matchTactics(false)">🔄 作戦</button><button onclick="skipMatch()">⏭</button>`;
+ $('#match').innerHTML=`<div class="sb ${flash?'flash':''}"><div class="sbr"><div class="sbt">${badge(H,'l')}<span>${esc(H.name)}</span></div><div class="score">${M.h.goals} - ${M.a.goals}<span class="clock">${M.done?'試合終了':M.min?dispMin(M):'0\''}${LM.paused&&!M.done?' ⏸':''}</span></div><div class="sbt">${badge(A,'l')}<span>${esc(A.name)}</span></div></div>
+ <div class="possb"><i style="width:${pos*100}%;background:${H.c1}"></i><i style="flex:1;background:${A.c1}"></i></div>
+ <div class="mstat"><span>支配率 ${R(pos*100)}% · シュート ${M.h.shots}（枠内${M.h.sot}）</span><span>${M.a.shots}（${M.a.sot}） · ${R(100-pos*100)}%</span></div></div>
+ <div class="feed">${feed}</div><div class="mctl">${ctl}</div>`;}
+function skipMatch(){const M=LM.M;clearTimeout(LM.timer);LM.paused=false;let g=0;while(!M.done&&g++<200){stepMinute(M);M.ht=false;}renderMatch();}
+function matchTactics(isHT){const M=LM.M,k=M.uk,s=M[k];LM.selOut=null;LM.selIn=null;
+ const draw=()=>{const pitch=s.lineup.map((sl,i)=>{if(sl.pid==null)return`<div class="subrow" style="opacity:.4"><span class="pos g${POS_GROUP[sl.role]}">${sl.role}</span><span class="nm">（退場/不在）</span></div>`;const p=P(sl.pid);const e=R(s.energy[sl.pid]);
+   return`<div class="subrow ${LM.selOut===i?'sel':''}" onclick="LM.selOut=${i};matchTactics.d()"><span class="pos g${POS_GROUP[sl.role]}">${sl.role}</span><span class="nm">${esc(p.short)} ${s.ycl.includes(sl.pid)?'🟨':''}</span><span class="rt ${s.rating[sl.pid]>=7?'hi':s.rating[sl.pid]<5.8?'lo':''}">${s.rating[sl.pid].toFixed(1)}</span><div style="width:46px"><div class="bar"><i style="width:${e}%;background:${fitColor(e)}"></i></div></div></div>`;}).join('');
+  const bench=s.bench.map(id=>{const p=P(id);const role=LM.selOut!=null?s.lineup[LM.selOut].role:p.pos;return`<div class="subrow ${LM.selIn===id?'sel':''}" onclick="LM.selIn=${id};matchTactics.d()"><span class="pos g${POS_GROUP[p.pos]}">${p.pos}</span><span class="nm">${esc(p.short)}</span><span class="ovr ${oc(effOvr(p,role))}" style="height:24px;width:30px;font-size:12px">${R(effOvr(p,role))}</span></div>`;}).join('')||'<p class="muted">控えがいません</p>';
+  openModal(`<h2>${isHT?'ハーフタイム':'作戦ボード'} <small class="muted" style="font-size:12px">交代枠 残り${s.subs}</small></h2>
+  <div class="lbl">戦術スタイル</div><div class="chips" style="margin-bottom:12px">${Object.keys(STY).map(x=>`<button class="${s.style===x?'on':''}" onclick="LM.M['${k}'].style='${x}';lg(LM.M,'${k}','📣 戦術を「${x}」に変更');matchTactics.d()">${x}</button>`).join('')}</div>
+  <div class="row" style="align-items:flex-start;gap:8px"><div style="flex:1.2;min-width:0"><div class="lbl">ピッチ（OUT）</div>${pitch}</div><div style="flex:1;min-width:0"><div class="lbl">ベンチ（IN）</div>${bench}</div></div>
+  <button class="gold" style="width:100%;margin:8px 0" ${LM.selOut!=null&&LM.selIn!=null&&s.subs>0?'':'disabled'} onclick="userSub()">🔄 交代する</button>
+  <button class="pri" style="width:100%;padding:12px" onclick="closeModal();LM.paused=false;renderMatch();tick()">▶ ${isHT?'後半開始':'試合再開'}</button>`);
+  $('#modal').onclick=null;};
+ matchTactics.d=draw;draw();}
+function userSub(){const M=LM.M,k=M.uk,s=M[k];if(LM.selOut==null||LM.selIn==null||s.subs<=0)return;doSub(M,k,LM.selOut,LM.selIn);LM.selOut=null;LM.selIn=null;renderMatch();matchTactics.d();}
+function matchSummary(){const M=LM.M;const k=M.uk,s=M[k];const ids=s.played.slice().sort((a,b)=>s.rating[b]-s.rating[a]);
+ const all=[...M.h.played.map(id=>[id,M.h.rating[id]]),...M.a.played.map(id=>[id,M.a.rating[id]])].sort((a,b)=>b[1]-a[1]);const motm=all[0];
+ const gf=s.goals,ga=M[k==='h'?'a':'h'].goals;
+ $('#match').innerHTML=`<div class="sb"><div class="sbr"><div class="sbt">${badge(T(M.h.tid),'l')}<span>${esc(T(M.h.tid).name)}</span></div><div class="score">${M.h.goals} - ${M.a.goals}<span class="clock">${M.pk?`PK ${M.pk[0]}-${M.pk[1]} `+((M.pk[0]>M.pk[1])===(k==='h')?'🎉 勝ち上がり！':'敗退…'):gf>ga?'🎉 勝利！':gf<ga?'敗戦…':'引き分け'}</span></div><div class="sbt">${badge(T(M.a.tid),'l')}<span>${esc(T(M.a.tid).name)}</span></div></div></div>
+ <div class="feed"><div class="card"><div class="lbl">得点</div>${M.gl.map(g=>`<div class="row" style="justify-content:${g.k==='h'?'flex-start':'flex-end'}">⚽ ${esc(P(g.pid).name)} <span class="muted">${g.min}</span></div>`).join('')||'<span class="muted">なし</span>'}</div>
+ <div class="card"><div class="lbl">⭐ マン・オブ・ザ・マッチ</div><b>${esc(P(motm[0]).name)}</b> <span class="muted">${esc(T(P(motm[0]).tid)?.ab||'')}</span> <span class="rt hi">${motm[1].toFixed(1)}</span></div>
+ <div class="card"><div class="lbl">選手評価</div>${ids.map(id=>{const p=P(id);return`<div class="row" style="padding:4px 0;border-top:1px solid var(--line)"><span class="pos g${POS_GROUP[p.pos]}">${p.pos}</span><b style="flex:1">${esc(p.name)}</b>${M.gl.filter(g=>g.pid===id).map(()=>'⚽').join('')}${M.gl.filter(g=>g.ast===id).map(()=>'🅰️').join('')}${s.ycl.includes(id)?'🟨':''}${s.reds.some(r=>r.pid===id)?'🟥':''}${s.injs.some(r=>r[0]===id)?'🚑':''}<span class="rt ${s.rating[id]>=7?'hi':s.rating[id]<5.8?'lo':''}">${s.rating[id].toFixed(1)}</span></div>`;}).join('')}</div></div>
+ <div class="mctl"><button class="pri" onclick="finishLive()">続ける ▶</button></div>`;}
+function finishLive(){const M=LM.M;LM=null;$('#match').hidden=true;document.body.style.overflow='';if(M.cup){const out=playCupRound(M);showCupResults(out,false);render();return;}const md=S.md;const out=processMatchday(M);showRoundResults(md,out);render();}
+function quickSim(){if(hardIssues()){fixUserLineup();}if(userCupTie()){const out=playCupRound(null);showCupResults(out,true);render();return;}const md=S.md;const out=processMatchday(null);showRoundResults(md,out,true);render();}
+function showRoundResults(md,out,showMine){const mr=out.myRes&&out.myRes.r;
+ let h=`<button class="x" onclick="closeModal()">×</button><h2>第${md+1}節 結果</h2>`;
+ if(S.events&&S.events.length){h+=`<div class="warn" style="background:#2b2410;border-color:var(--gold);color:#ffe9a8;font-weight:700">${S.events.map(esc).join('<br>')}</div>`;S.events=[];save();}
+ if(showMine&&mr){const me=mr.h===S.team;const gf=me?mr.hg:mr.ag,ga=me?mr.ag:mr.hg;h+=`<div class="card" style="text-align:center"><div style="font-family:var(--display);font-size:20px">${gf>ga?'🎉 勝利！':gf<ga?'敗戦…':'引き分け'}</div><div class="vs"><div class="side">${badge(T(mr.h))}<span>${esc(T(mr.h).city)}</span></div><div class="score" style="font-size:30px">${mr.hg} - ${mr.ag}</div><div class="side">${badge(T(mr.a))}<span>${esc(T(mr.a).city)}</span></div></div>${mr.gl.map(([m,k,pid])=>`<div style="font-size:12px;text-align:${k==='h'?'left':'right'}">⚽ ${esc(P(pid)?.name||'')} ${m}</div>`).join('')}</div>`;}
+ h+=out.res.map(r=>`<div class="row" style="padding:6px 0;border-top:1px solid var(--line);${r.h===S.team||r.a===S.team?'background:rgba(61,220,132,.1)':''}"><span style="flex:1;text-align:right;font-size:12px;font-weight:700">${esc(T(r.h).city)}</span>${badge(T(r.h),'s')}<b style="width:52px;text-align:center">${r.hg} - ${r.ag}</b>${badge(T(r.a),'s')}<span style="flex:1;font-size:12px;font-weight:700">${esc(T(r.a).city)}</span></div>`).join('');
+ if(out.cupOut)h+=`<div class="lbl" style="margin-top:12px">🏆 ${CUP_NAME} ${CUP_NAMES[out.cupOut.round]}</div>`+cupResRows(out.cupOut.res);
+ const tb=table();const pos=tb.findIndex(r=>r.id===S.team)+1;h+=`<p style="text-align:center;margin-top:12px">現在 <b class="gold">${pos}位</b>（勝点${tb[pos-1].pts}）</p><button class="pri" style="width:100%;padding:12px" onclick="closeModal()">${S.phase==='end'?'シーズン総括へ':'OK'}</button>`;
+ openModal(h);}
+
+/* ===== init ===== */
+load();if(S&&!S.v)S=null;render();
+</script></body></html>
