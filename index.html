@@ -299,6 +299,25 @@ table.effq tr.top td{background:rgba(99,212,142,.12)}
 table.effq tr.mine td{outline:1px solid var(--ng);outline-offset:-1px}
 table.effq .you{font-size:10px;color:var(--ng);margin-left:4px;vertical-align:middle}
 @media (orientation:portrait){.levels3{grid-template-columns:1fr}}
+/* 振り返り：採点部分を詰めて、受け入れ一覧を大きく */
+.gover .obody:has(.effq){gap:6px;padding-block:6px}
+.effhead{gap:10px}
+.grade{font-size:26px;flex-direction:row;gap:4px;align-items:baseline}
+.grade small{font-size:11px}
+.effscore{font-size:20px}
+.effsub{font-size:11px}
+.effc{font-size:12.5px;line-height:1.45;min-width:160px}
+.revhand{--tw:min(calc((100vw - 80px) / 18), 24px)}
+.revhand .grp em{font-size:10px}
+.revhand .tile.pick{transform:translateY(-4px)}
+table.effq{font-size:15px}
+table.effq th{font-size:12px;padding:3px 8px}
+table.effq td{padding:4px 8px}
+table.effq td .tile{--tw:30px}
+table.effq .mini{gap:2px;--tw:26px}
+table.effq .mini .tile{--tw:26px}
+table.effq td b{font-size:18px}
+table.effq .you{font-size:11px;display:block;margin:2px 0 0}
 
 @media (orientation:portrait){
   :root{--tw:min(calc((100vw - 56px) / 9), 42px)}
