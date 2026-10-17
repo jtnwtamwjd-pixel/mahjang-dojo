@@ -356,6 +356,10 @@ table.effq .you{font-size:11px;display:block;margin:2px 0 0}
 .pond .tile.same{opacity:1;box-shadow:0 0 0 2px #39b6ff,0 0 9px #39b6ff}
 .pond .tile.same::after{content:'';position:absolute;inset:0;border-radius:inherit;background:rgba(57,182,255,.38);pointer-events:none}
 
+.waitchip .wsel{color:var(--gold);display:inline-flex;align-items:center;gap:2px}
+.waitchip{z-index:4;background:rgba(6,37,32,.85);border-radius:8px;padding:2px 6px}
+.waitchip:empty{display:none}
+
 @media (orientation:portrait){
   :root{--tw:min(calc((100vw - 56px) / 9), 42px)}
   body{overflow:auto}
@@ -1898,7 +1902,16 @@ function renderMyHand(g) {
   }).join('');
   $('#mymelds').innerHTML = g.melds[0].map(m => `<div class="ts">${tilesHTML(meldTiles(m))}</div>`).join('');
   let wc = '';
-  if (hand.length % 3 === 1) {
+  if (hand.length % 3 === 2 && g.sel >= 0 && g.phase === 'discard') {
+    // 選んだ牌を切った後に聴牌なら、その待ちと残り枚数を表示（リーチの打牌選びに使う）
+    const rest13 = hand.slice(); removeTile(rest13, disp[g.sel]);
+    const waits = waitsOf(rest13, g.melds[0].length);
+    if (waits.length) {
+      const left = remainingFor(g, 0), n = waits.reduce((a, w) => a + left[w], 0);
+      const furi = waits.some(w => w === disp[g.sel] || g.ponds[0].some(d => d.t === w));
+      wc = `<span class="wsel">${tileHTML(disp[g.sel])}切りで聴牌</span> 待ち ${waits.map(t => tileHTML(t)).join('')} <span>残り${n}枚</span>${furi ? ' <span style="color:var(--ng)">フリテン</span>' : ''}`;
+    } else if (g.riichiSel) wc = `${tileHTML(disp[g.sel])}切りでは聴牌しません`;
+  } else if (hand.length % 3 === 1) {
     const waits = waitsOf(hand, g.melds[0].length);
     if (waits.length) {
       const furi = waits.some(w => g.ponds[0].some(d => d.t === w));
