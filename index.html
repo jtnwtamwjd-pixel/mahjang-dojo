@@ -276,7 +276,8 @@ td.l,th.l{text-align:left}
 /* 対局の設定 */
 .setup{flex:1;display:flex;flex-direction:column;justify-content:center;gap:12px;padding-block:8px}
 .setup-q{margin:0;color:var(--muted);font-size:14px}
-.levels3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.levels3{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.ps .sty{display:block;font-size:10px;line-height:1.1;color:var(--gold);white-space:nowrap}
 .mode.lv .k{font-size:clamp(20px,3.4vw,28px)}
 .mode.lv[aria-pressed="true"]{border-color:var(--gold)}
 /* 振り返り */
@@ -454,6 +455,7 @@ table.effq .you{font-size:11px;display:block;margin:2px 0 0}
       <button class="mode lv" data-level="easy"><span class="k">弱い</span><span class="d">ときどき適当に捨てる。リーチされても気にせず攻める。</span></button>
       <button class="mode lv" data-level="normal"><span class="k">普通</span><span class="d">手を進める牌を選ぶ。リーチには安全な牌で少し守る。</span></button>
       <button class="mode lv" data-level="hard"><span class="k">強い</span><span class="d">受け入れが最も広い牌を切る。リーチには安全牌でしっかり降りる。</span></button>
+      <button class="mode lv ml" data-level="mleague"><span class="k">Mリーガー</span><span class="d">3人が別々の打ち筋。下家は多井風（速度と守備）、対面は佐々木風（攻め）、上家は瀬戸熊風（門前で高打点）。</span></button>
     </div>
     <label class="toggle"><input type="checkbox" id="optReview"> 各局のあとに、自分の打牌を1手ずつ牌効率で採点する</label>
   </div>
@@ -1341,7 +1343,15 @@ document.addEventListener('keydown', e => {
 // ===== 対局モード（東風戦・CPU3人） =====
 const SEATS = ['あなた', '下家', '対面', '上家'];
 const GS = { callConfirm: store.get('g:call', true), pointsOnly: store.get('g:ptsonly', false), level: store.get('g:level', 'normal'), review: store.get('g:review', true) };
-const LEVEL_NAME = { easy:'弱い', normal:'普通', hard:'強い' };
+const LEVEL_NAME = { easy:'弱い', normal:'普通', hard:'強い', mleague:'Mリーガー' };
+// Mリーガー：席ごとに打ち筋を変える（本人ではなく、プレースタイルを参考にした傾向）
+const MSTYLE = {
+  1: { key:'balance', name:'多井風' },  // 速度と守備のバランス。危ない時は早めに降りる
+  2: { key:'attack',  name:'佐々木風' }, // 攻め重視。リーチ即押し、ほとんど降りない
+  3: { key:'menzen',  name:'瀬戸熊風' }, // 門前で打点重視。鳴かずに高い手を狙う
+};
+const styleOf = p => GS.level === 'mleague' && p ? MSTYLE[p].key : null;
+const nm = p => GS.level === 'mleague' && p ? `${SEATS[p]}（${MSTYLE[p].name}）` : SEATS[p];
 const ABORT = { abort: true };
 let G = null;
 
@@ -1358,7 +1368,7 @@ function toast(html, ms = 1500) {
   clearTimeout(toast.t);
   toast.t = setTimeout(() => { el.innerHTML = ''; }, ms);
 }
-const announce = (p, word) => toast(`<b>${word}</b>${SEATS[p]}`, 1100);
+const announce = (p, word) => toast(`<b>${word}</b>${nm(p)}`, 1100);
 
 function newGame() {
   G = { scores:[25000,25000,25000,25000], dealer:rnd(4), passes:0, honba:0, sticks:0, quiz:{ n:0, ok:0 }, eff:{ n:0, sum:0 }, log:[] };
@@ -1380,7 +1390,7 @@ async function startHand(g) {
   for (let i = 0; i < 13; i++) for (let p = 0; p < 4; p++) g.hands[p].push(g.wall.pop());
   $('#gover').hidden = true;
   renderGame();
-  toast(`<b>東${g.passes + 1}局</b>${g.honba}本場　親は${SEATS[g.dealer]}`, 1300);
+  toast(`<b>東${g.passes + 1}局</b>${g.honba}本場　親は${nm(g.dealer)}`, 1300);
   try {
     await sleep(g, 900);
     await playHand(g);
@@ -1495,7 +1505,25 @@ function doCall(g, q, from, t, v) {
   g.ponds[from][g.ponds[from].length - 1].called = true;
 }
 
-const cpuWantsPon = (g, q, t) => !g.riichi[q] && countIn(g.hands[q], t) >= 2 && isYakuhaiFor(g, q, t);
+function cpuWantsPon(g, q, t) {
+  if (g.riichi[q] || countIn(g.hands[q], t) < 2) return false;
+  const st = styleOf(q);
+  if (st === 'menzen') return false; // 瀬戸熊風：鳴かない
+  if (isYakuhaiFor(g, q, t)) return true;
+  if (st === 'balance') {
+    // 多井風：タンヤオで仕掛けて速度を上げる（手がほぼ中張牌で、鳴くとシャンテンが進む時）
+    const tan = x => x < 27 && x % 9 > 0 && x % 9 < 8;
+    const hand = g.hands[q];
+    if (!tan(t) || g.melds[q].some(m => m.type !== 'pon' ? !(tan(m.tile) && tan(m.tile + 2)) : !tan(m.tile))) return false;
+    if (hand.filter(x => !tan(x)).length > 1) return false;
+    const c = countsOf(hand), mN = g.melds[q].length, before = shanten(c, mN);
+    c[t] -= 2;
+    let best = 9;
+    for (let x = 0; x < 34; x++) if (c[x] > 0) { c[x]--; best = Math.min(best, shanten(c, mN + 1)); c[x]++; }
+    return best < before;
+  }
+  return false;
+}
 
 async function reactions(g, from, t) {
   for (let k = 1; k < 4; k++) {
@@ -1564,6 +1592,35 @@ function cpuChooseDiscard(g, p) {
     pool.sort((a, b) => a.v - b.v);
     return pool[0].t;
   }
+  const st = styleOf(p);
+  if (st) {
+    const rest = remainingFor(g, p);
+    pool.forEach(x => { c[x.t]--; x.uke = ukeire(c, mN, rest).n; c[x.t]++; });
+    if (st === 'menzen') {
+      // 瀬戸熊風：ドラ・役牌・染め色を残し、受け入れが近いなら打点を優先
+      const suitN = [0, 0, 0]; hand.forEach(x => { if (x < 27) suitN[Math.floor(x / 9)]++; });
+      const main = suitN.indexOf(Math.max(...suitN));
+      const somete = suitN[main] + hand.filter(x => x >= 27).length >= 9;
+      pool.forEach(x => {
+        let keep = 0;
+        if (doras.includes(x.t)) keep += 3;
+        if (x.t >= 27 && isYakuhaiFor(g, p, x.t) && c[x.t] >= 2) keep += 3;
+        if (somete && (x.t >= 27 || Math.floor(x.t / 9) === main)) keep += 2;
+        x.score = (x.uke || 0) - keep * 2;
+      });
+      if (danger.length && minS >= 2) { const safes = cands.filter(x => x.safe); if (safes.length) pool = safes; }
+    } else {
+      pool.forEach(x => { x.score = x.uke || 0; });
+      if (st === 'balance' && danger.length) {
+        // 多井風：リーチにはイーシャンテン以下なら現物で降りる。聴牌でも現物で回せるなら回す
+        const safes = cands.filter(x => x.safe && (minS >= 1 || x.s === minS));
+        if (safes.length) pool = safes;
+      }
+      // 佐々木風：降りない
+    }
+    pool.sort((a, b) => a.s - b.s || (b.score || 0) - (a.score || 0) || a.v - b.v);
+    return pool[0].t;
+  }
   if (GS.level === 'hard') {
     // 強い：受け入れ枚数が最大の打牌。リーチには現物を優先して降りる
     const rest = remainingFor(g, p);
@@ -1585,6 +1642,8 @@ function cpuTurn(g, p, drawn) {
   if (drawn !== null && g.melds[p].length === 0 && g.scores[p] >= 1000 && g.wall.length >= 4) {
     const c = countsOf(hand); c[t]--;
     riichi = shanten(c, 0) === 0;
+    // 多井風：終盤や他家リーチ中の無理なリーチは控える
+    if (riichi && styleOf(p) === 'balance' && (g.wall.length < 12 || g.riichi.some((r, q) => r && q !== p))) riichi = false;
   }
   return { type:'discard', tile:t, riichi };
 }
@@ -1592,7 +1651,7 @@ function cpuTurn(g, p, drawn) {
 // ---- アガリ・流局・精算 ----
 function payTableHTML(g, d) {
   return `<table class="pay"><tr><th class="l">席</th><th>増減</th><th>持ち点</th></tr>${[0,1,2,3].map(p =>
-    `<tr><td class="l">${HONOR[seatWind(g, p) - 27]}　${SEATS[p]}</td><td class="${d[p] > 0 ? 'plus' : d[p] < 0 ? 'minus' : ''}">${d[p] > 0 ? '+' : ''}${fmt(d[p])}</td><td>${fmt(g.scores[p])}</td></tr>`).join('')}</table>`;
+    `<tr><td class="l">${HONOR[seatWind(g, p) - 27]}　${nm(p)}</td><td class="${d[p] > 0 ? 'plus' : d[p] < 0 ? 'minus' : ''}">${d[p] > 0 ? '+' : ''}${fmt(d[p])}</td><td>${fmt(g.scores[p])}</td></tr>`).join('')}</table>`;
 }
 function settle(g, winner, loser, p) {
   const d = [0,0,0,0];
@@ -1633,7 +1692,7 @@ function quizFlow(g, winner, loser, h, r) {
     const marks = {};
     const LBL = { han:'翻', fu:'符', pts:'点数' };
     let si = 0;
-    const head = `<div class="ohead"><span class="who">${SEATS[winner]}の${loser === null ? 'ツモ' : 'ロン'}！</span><span class="sub">${loser !== null ? SEATS[loser] + 'が放銃。' : ''}あなたが点数を計算しよう</span></div>`;
+    const head = `<div class="ohead"><span class="who">${nm(winner)}の${loser === null ? 'ツモ' : 'ロン'}！</span><span class="sub">${loser !== null ? nm(loser) + 'が放銃。' : ''}あなたが点数を計算しよう</span></div>`;
     const stepUI = () => {
       const st = steps[si];
       let q, sub, choices, correct;
@@ -1692,8 +1751,8 @@ async function ryuukyoku(g) {
   await sleep(g, 900);
   const ov = $('#gover');
   ov.hidden = false;
-  const hands = [0,1,2,3].filter(p => ten[p]).map(p => `<div><p style="margin:0 0 4px;font-size:13px">${SEATS[p]}（聴牌）</p><div class="hand">${`<div class="grp"><div class="ts">${tilesHTML(g.hands[p].slice().sort((a, b) => a - b))}</div></div>`}${g.melds[p].map(m => `<div class="grp"><div class="ts">${tilesHTML(meldTiles(m))}</div></div>`).join('')}</div></div>`).join('');
-  ov.innerHTML = `<div class="ohead"><span class="who">流局</span><span class="sub">聴牌：${n ? [0,1,2,3].filter(p => ten[p]).map(p => SEATS[p]).join('・') : 'なし'}。ノーテン罰符は合計3000点</span></div>
+  const hands = [0,1,2,3].filter(p => ten[p]).map(p => `<div><p style="margin:0 0 4px;font-size:13px">${nm(p)}（聴牌）</p><div class="hand">${`<div class="grp"><div class="ts">${tilesHTML(g.hands[p].slice().sort((a, b) => a - b))}</div></div>`}${g.melds[p].map(m => `<div class="grp"><div class="ts">${tilesHTML(meldTiles(m))}</div></div>`).join('')}</div></div>`).join('');
+  ov.innerHTML = `<div class="ohead"><span class="who">流局</span><span class="sub">聴牌：${n ? [0,1,2,3].filter(p => ten[p]).map(p => nm(p)).join('・') : 'なし'}。ノーテン罰符は合計3000点</span></div>
     <div class="obody">${hands}${payTableHTML(g, d)}</div>
     <div class="ofoot row" style="justify-content:flex-end"><button class="btn primary" id="ovNext">次の局へ ▶</button></div>`;
   renderGame();
@@ -1721,7 +1780,7 @@ function gameEnd(g) {
   const ov = $('#gover');
   ov.hidden = false;
   ov.innerHTML = `<div class="ohead"><span class="who">対局終了</span><span class="sub">あなたは${order.indexOf(0) + 1}位（CPU：${LEVEL_NAME[GS.level]}）。点数計算は ${g.quiz.ok}/${g.quiz.n} 問正解（${pct}%）${g.eff.n ? `、牌効率は平均${Math.round(g.eff.sum / g.eff.n)}点` : ''}</span></div>
-    <div class="obody"><table class="pay"><tr><th>順位</th><th class="l">席</th><th>持ち点</th></tr>${order.map((p, i) => `<tr><td>${i + 1}位</td><td class="l">${SEATS[p]}</td><td>${fmt(g.scores[p])}</td></tr>`).join('')}</table></div>
+    <div class="obody"><table class="pay"><tr><th>順位</th><th class="l">席</th><th>持ち点</th></tr>${order.map((p, i) => `<tr><td>${i + 1}位</td><td class="l">${nm(p)}</td><td>${fmt(g.scores[p])}</td></tr>`).join('')}</table></div>
     <div class="ofoot row" style="justify-content:flex-end"><button class="btn" data-go="home">メニューへ</button><button class="btn primary" data-game="1">もう一度対局</button></div>`;
 }
 
@@ -1751,7 +1810,7 @@ function renderGame() {
       : `<div class="srow">${p === 3 ? hand : ''}<div class="scol">${melds}${pond}</div>${p === 1 ? hand : ''}</div>`;
   }
   const pos = ['b', 'r', 't', 'l'];
-  $('#center').innerHTML = [0,1,2,3].map(p => `<div class="ps ${pos[p]} ${p === g.dealer ? 'dealer' : ''} ${p === g.turn ? 'turn' : ''}"><span class="w">${HONOR[seatWind(g, p) - 27]}${p === g.dealer ? '・親' : ''}</span><b>${fmt(g.scores[p])}</b>${g.riichi[p] ? '<span class="tenbou" title="リーチ棒"></span>' : ''}</div>`).join('') +
+  $('#center').innerHTML = [0,1,2,3].map(p => `<div class="ps ${pos[p]} ${p === g.dealer ? 'dealer' : ''} ${p === g.turn ? 'turn' : ''}"><span class="w">${HONOR[seatWind(g, p) - 27]}${p === g.dealer ? '・親' : ''}</span><b>${fmt(g.scores[p])}</b>${styleOf(p) ? `<span class="sty">${MSTYLE[p].name}</span>` : ''}${g.riichi[p] ? '<span class="tenbou" title="リーチ棒"></span>' : ''}</div>`).join('') +
     `<div class="mid">東${g.passes + 1}局<small>残り ${g.wall.length}枚</small><small>${g.honba}本場・供託${g.sticks}</small></div>`;
   renderMyHand(g);
   renderActions(g);
@@ -1865,7 +1924,7 @@ function chime() {
 }
 function riichiFx(p) {
   const dir = ['b', 'r', 't', 'l'][p];
-  $('#fx').innerHTML = `<div class="rfx from-${dir}"><div class="rays"></div><div class="rword">リーチ</div><div class="rwho">${SEATS[p]}${p === 0 ? '' : '（' + HONOR[seatWind(G, p) - 27] + '家）'}</div><div class="stick"></div></div>`;
+  $('#fx').innerHTML = `<div class="rfx from-${dir}"><div class="rays"></div><div class="rword">リーチ</div><div class="rwho">${nm(p)}${p === 0 ? '' : '（' + HONOR[seatWind(G, p) - 27] + '家）'}</div><div class="stick"></div></div>`;
   chime();
   try { navigator.vibrate && navigator.vibrate([40, 40, 80]); } catch (e) {}
   clearTimeout(riichiFx.t);
