@@ -389,6 +389,30 @@ table.effq .you{font-size:11px;display:block;margin:2px 0 0}
 .onnote{margin:0;font-size:13px;color:var(--muted)}
 @media (orientation:portrait){.oncards{grid-template-columns:1fr}.onseats{grid-template-columns:1fr 1fr}}
 
+/* ロン・ツモの演出 */
+.wfx.ron{background:radial-gradient(circle at 50% 50%,rgba(226,85,72,.45),rgba(6,37,32,.85) 65%);animation:rfxbg 1.7s ease forwards}
+.wfx.tsumo{background:radial-gradient(circle at 50% 50%,rgba(120,210,160,.4),rgba(6,37,32,.85) 65%);animation:rfxbg 1.7s ease forwards}
+.wfx .rword{font-size:clamp(72px,26vh,190px);letter-spacing:.12em}
+.wfx.ron .rword{color:#ff6a55;text-shadow:0 0 30px rgba(255,90,70,.9),0 6px 0 var(--rail)}
+.wfx.tsumo .rword{color:#8ff0b8;text-shadow:0 0 30px rgba(120,240,170,.9),0 6px 0 var(--rail)}
+.wfx.ron .rays{background:repeating-conic-gradient(rgba(255,106,85,.25) 0 5deg,transparent 5deg 15deg)}
+.wfx.tsumo .rays{background:repeating-conic-gradient(rgba(143,240,184,.22) 0 5deg,transparent 5deg 15deg)}
+.wfx .burst{position:absolute;left:50%;top:50%;width:20px;height:20px;margin:-10px;border-radius:50%;border:4px solid #fff;opacity:0;animation:burst .8s .15s ease-out forwards}
+@keyframes burst{0%{transform:scale(.2);opacity:.9}100%{transform:scale(40);opacity:0}}
+.wfx .rword{animation:slam .45s cubic-bezier(.2,1.6,.4,1) both,shake .3s .45s both}
+@keyframes shake{0%,100%{translate:0}25%{translate:-6px 2px}50%{translate:5px -2px}75%{translate:-3px 1px}}
+/* 狭い横画面では上のバーを詰めて、全ボタンが入るようにする */
+@media (max-width:820px){
+  .gbar{gap:5px}
+  .gbar .kyoku{font-size:12px}
+  .gbar .chip{font-size:11px;padding:2px 8px}
+  .gbar .opt{padding:2px 7px;font-size:10px}
+  .gbar .back{padding:4px 8px;font-size:12px}
+}
+.gbar .sm{display:none}
+@media (max-width:820px){.gbar .lg{display:none}.gbar .sm{display:inline}#gQuizStat{display:none}.gbar .chip .tile{--tw:13px}}
+.gbar .kyoku{min-width:0;flex:0 1 auto;overflow:hidden;text-overflow:ellipsis}.gbar>*:not(.kyoku):not(.sp){flex-shrink:0}
+
 @media (orientation:portrait){
   :root{--tw:min(calc((100vw - 56px) / 9), 42px)}
   body{overflow:auto}
@@ -500,9 +524,10 @@ table.effq .you{font-size:11px;display:block;margin:2px 0 0}
     <span class="stat" id="gLeft"></span>
     <span class="sp"></span>
     <span class="stat" id="gQuizStat"></span>
-    <button class="opt" id="gOptCall" aria-pressed="true">鳴きを確認する</button>
-    <button class="opt" id="gOptQuiz" aria-pressed="false">点数だけ答える</button>
-    <button class="opt" id="gOptBgm" aria-pressed="true">♪ BGM</button>
+    <button class="opt" id="gOptCall" aria-pressed="true"><span class="lg">鳴きを確認する</span><span class="sm">鳴き確認</span></button>
+    <button class="opt" id="gOptQuiz" aria-pressed="false"><span class="lg">点数だけ答える</span><span class="sm">点数のみ</span></button>
+    <button class="opt" id="gOptBgm" aria-pressed="true">♪<span class="lg"> BGM</span></button>
+    <button class="opt" id="gOptSe" aria-pressed="true">効果音</button>
   </div>
   <div class="board">
     <div class="seat top" id="seat2"></div>
@@ -1437,7 +1462,7 @@ document.addEventListener('keydown', e => {
 
 // ===== 対局モード（東風戦・CPU3人） =====
 const SEATS = ['あなた', '下家', '対面', '上家'];
-const GS = { callConfirm: store.get('g:call', true), pointsOnly: store.get('g:ptsonly', false), level: store.get('g:level', 'normal'), review: store.get('g:review', true), bgm: store.get('g:bgm', true), len: store.get('g:len', 'tonpu'), rvMode: store.get('g:rvmode', 'total') };
+const GS = { callConfirm: store.get('g:call', true), pointsOnly: store.get('g:ptsonly', false), level: store.get('g:level', 'normal'), review: store.get('g:review', true), bgm: store.get('g:bgm', true), len: store.get('g:len', 'tonpu'), se: store.get('g:se', true), rvMode: store.get('g:rvmode', 'total') };
 const LEVEL_NAME = { easy:'弱い', normal:'普通', hard:'強い', mleague:'Mリーガー' };
 // Mリーガー：選んだ3人が下家・対面・上家に座る（本人ではなく、プレースタイルを参考にした傾向）
 const MPRO = {
@@ -1530,6 +1555,7 @@ async function playHand(g) {
     removeTile(g.hands[p], t);
     if (act.riichi) { g.riichi[p] = true; bgmSync(); }
     g.ponds[p].push({ t, rii:!!act.riichi, seq:g.seq = (g.seq || 0) + 1 });
+    clack();
     g.last = { p, i:g.ponds[p].length - 1 };
     if (!g.riichi[p]) g.skipFuriten[p] = false;
     g.drawn = null; g.sel = -1; g.riichiSel = false;
@@ -1836,8 +1862,9 @@ async function winHand(g, winner, loser, t) {
   const closed = loser === null ? g.hands[winner].slice() : g.hands[winner].concat([t]);
   const res = tryWin(g, winner, closed, t, loser === null);
   g.phase = 'wait'; renderGame();
-  announce(winner, loser === null ? 'ツモ' : 'ロン');
-  await sleep(g, 900);
+  winFx(winner, loser === null ? 'ツモ' : 'ロン');
+  if (g.remote) NET.ann(g, winner, loser === null ? 'ツモ' : 'ロン');
+  await sleep(g, 1700);
   NET.sendWin(g, winner, loser, res.h, res.r, settle(g, winner, loser, res.r.pts));
   await quizFlow(g, winner, loser, res.h, res.r);
   if (G !== g) return;
@@ -1974,6 +2001,7 @@ function renderGame() {
   $('#gOptCall').setAttribute('aria-pressed', String(GS.callConfirm));
   $('#gOptQuiz').setAttribute('aria-pressed', String(GS.pointsOnly));
   $('#gOptBgm').setAttribute('aria-pressed', String(GS.bgm));
+  $('#gOptSe').setAttribute('aria-pressed', String(GS.se));
   for (let p = 0; p < 4; p++) {
     const melds = p === 0 ? '' : `<div class="omelds">${g.melds[p].map(m => `<div class="ts">${tilesHTML(meldTiles(m))}</div>`).join('')}</div>`;
     const pond = `<div class="pond ${p === 0 || p === 2 ? 'wide' : ''}">${pondHTML(g, p)}</div>`;
@@ -2113,6 +2141,7 @@ function bgmSync() {
   bgmNow = want;
 }
 document.addEventListener('visibilitychange', bgmSync);
+$('#gOptSe').addEventListener('click', () => { GS.se = !GS.se; store.set('g:se', GS.se); if (GS.se) clack(); renderGame(); });
 $('#gOptBgm').addEventListener('click', () => { GS.bgm = !GS.bgm; store.set('g:bgm', GS.bgm); bgmSync(); renderGame(); });
 $('#gOptQuiz').addEventListener('click', () => { GS.pointsOnly = !GS.pointsOnly; store.set('g:ptsonly', GS.pointsOnly); renderGame(); });
 $('#gQuit').addEventListener('click', () => {
@@ -2128,11 +2157,66 @@ function gameBestText() {
 }
 
 // ---- リーチ演出 ----
+// 効果音：打牌のカチッ（短いノイズ＋高い音）と、アガリの太鼓と和音
+function audioCtx() {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return null;
+  const ac = chime.ac || (chime.ac = new AC());
+  if (ac.state === 'suspended') ac.resume().catch(() => {});
+  return ac;
+}
+function clack() {
+  if (!GS.se) return;
+  try {
+    const ac = audioCtx(); if (!ac) return;
+    const now = ac.currentTime, len = Math.floor(ac.sampleRate * 0.05);
+    const buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 6);
+    const src = ac.createBufferSource(); src.buffer = buf;
+    const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 2600 + Math.random() * 500; bp.Q.value = 1.2;
+    const v = ac.createGain(); v.gain.value = 0.9;
+    src.connect(bp).connect(v).connect(ac.destination); src.start(now);
+    const o = ac.createOscillator(), og = ac.createGain();
+    o.type = 'square'; o.frequency.setValueAtTime(1900, now); o.frequency.exponentialRampToValueAtTime(900, now + 0.03);
+    og.gain.setValueAtTime(0.08, now); og.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+    o.connect(og).connect(ac.destination); o.start(now); o.stop(now + 0.05);
+  } catch (e) {}
+}
+function winSound(tsumo) {
+  if (!GS.se) return;
+  try {
+    const ac = audioCtx(); if (!ac) return;
+    const now = ac.currentTime;
+    // 太鼓のドン
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(150, now); o.frequency.exponentialRampToValueAtTime(45, now + 0.5);
+    g.gain.setValueAtTime(0.9, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+    o.connect(g).connect(ac.destination); o.start(now); o.stop(now + 0.65);
+    // きらめく和音（ツモは明るく、ロンは鋭く）
+    const notes = tsumo ? [659.25, 830.61, 987.77, 1318.5] : [587.33, 739.99, 880, 1174.7];
+    notes.forEach((f, i) => {
+      const t0 = now + 0.12 + i * 0.07, oo = ac.createOscillator(), gg = ac.createGain();
+      oo.type = 'triangle'; oo.frequency.value = f;
+      gg.gain.setValueAtTime(0, t0); gg.gain.linearRampToValueAtTime(0.16, t0 + 0.02); gg.gain.exponentialRampToValueAtTime(0.001, t0 + 1.1);
+      oo.connect(gg).connect(ac.destination); oo.start(t0); oo.stop(t0 + 1.2);
+    });
+  } catch (e) {}
+}
+// アガリの演出（ロン／ツモの大きな文字と光）
+function winFx(p, word) {
+  const dir = ['b', 'r', 't', 'l'][p];
+  $('#fx').innerHTML = `<div class="rfx wfx ${word === 'ロン' ? 'ron' : 'tsumo'} from-${dir}"><div class="rays"></div><div class="burst"></div><div class="rword">${word}</div><div class="rwho">${nm(p)}</div></div>`;
+  winSound(word === 'ツモ');
+  try { navigator.vibrate && navigator.vibrate([60, 40, 120]); } catch (e) {}
+  clearTimeout(riichiFx.t);
+  riichiFx.t = setTimeout(() => { $('#fx').innerHTML = ''; }, 1700);
+}
 function chime() {
   try {
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
-    const ac = chime.ac || (chime.ac = new AC());
+    const ac = audioCtx();
+    if (!GS.se || !ac) return;
     const now = ac.currentTime;
     [[523.25, 0], [783.99, .09], [1046.5, .18]].forEach(([f, d]) => {
       const o = ac.createOscillator(), v = ac.createGain();
@@ -2564,7 +2648,7 @@ const NET = {
     const g = G;
     if (!g || !g.client) return;
     if (m.type === 'state') return this.applyState(g, m);
-    if (m.type === 'ann') return toast(`<b>${m.word}</b>${nm(m.p)}`, 1100);
+    if (m.type === 'ann') return m.word === 'ロン' || m.word === 'ツモ' ? winFx(m.p, m.word) : toast(`<b>${m.word}</b>${nm(m.p)}`, 1100);
     if (m.type === 'win') {
       g.winD = m.d; g.winAfter = m.after;
       return quizFlow(g, m.winner, m.loser, m.h, m.r).then(() => this.guestDone(g));
@@ -2585,7 +2669,7 @@ const NET = {
   },
   applyState(g, m) {
     const newHand = m.hk !== g.hk;
-    const prevRiichi = g.riichi.slice();
+    const prevRiichi = g.riichi.slice(), prevN = g.ponds.reduce((a, pd) => a + pd.length, 0);
     Object.assign(g, {
       scores:m.scores, dealer:m.dealer, passes:m.passes, honba:m.honba, sticks:m.sticks, len:m.len, doraInd:m.doraInd,
       wall:{ length:m.wallN }, turn:m.turn, drawn:m.drawn, riichi:m.riichi, melds:m.melds, ponds:m.ponds,
@@ -2604,6 +2688,7 @@ const NET = {
     }
     renderGame();
     bgmSync();
+    if (!newHand && g.ponds.reduce((a, pd) => a + pd.length, 0) > prevN) clack();
     for (let p = 0; p < 4; p++) if (g.riichi[p] && !prevRiichi[p] && !newHand) riichiFx(p);
     if (m.phase === 'discard' && m.opts && m.opts.reason) toast(m.opts.reason, 2200);
   },
