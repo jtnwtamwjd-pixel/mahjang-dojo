@@ -359,6 +359,7 @@ table.effq .you{font-size:11px;display:block;margin:2px 0 0}
 .waitchip .wsel{color:var(--gold);display:inline-flex;align-items:center;gap:2px}
 .waitchip{z-index:4;background:rgba(6,37,32,.85);border-radius:8px;padding:2px 6px}
 .waitchip:empty{display:none}
+.lenmodes{margin:0 0 8px}
 
 @media (orientation:portrait){
   :root{--tw:min(calc((100vw - 56px) / 9), 42px)}
@@ -404,7 +405,7 @@ table.effq .you{font-size:11px;display:block;margin:2px 0 0}
       <div class="rotate">スマホは横向きにすると遊びやすいです</div>
     </div>
     <div class="modes">
-      <button class="mode game" data-game="1"><span class="tiles4" id="gameDeco"></span><span class="txt"><span class="k">対局する <em>東風戦</em></span><span class="d">CPU3人と実際に打つ。誰かがアガるたびに、その手の翻・符・点数が問題になる。</span><span class="best" id="gameBest"></span></span></button>
+      <button class="mode game" data-game="1"><span class="tiles4" id="gameDeco"></span><span class="txt"><span class="k">対局する <em>東風・半荘</em></span><span class="d">CPU3人と実際に打つ。誰かがアガるたびに、その手の翻・符・点数が問題になる。</span><span class="best" id="gameBest"></span></span></button>
       <button class="mode" data-go="levels"><span class="k">点数表ドリル <em>まずはここ</em></span><span class="d">「子・30符・3翻・ロン」→ 何点？ 全6レベル。</span><span class="best" data-best="pt"></span></button>
       <button class="mode" data-mode="fu"><span class="k">符計算ドリル</span><span class="d">手牌を見て何符かを当てる。</span><span class="best" data-best="fu"></span></button>
       <button class="mode" data-mode="han"><span class="k">翻数ドリル</span><span class="d">役とドラを数えて何翻かを当てる。</span><span class="best" data-best="han"></span></button>
@@ -493,6 +494,10 @@ table.effq .you{font-size:11px;display:block;margin:2px 0 0}
 <section class="screen" id="gsetup" hidden>
   <div class="bar"><button class="back" data-go="home">◀ メニュー</button><span class="title">対局の設定</span></div>
   <div class="setup">
+    <div class="rvmodes lenmodes"><span>対局の長さ</span>
+      <button class="opt" data-len="tonpu" aria-pressed="true"><b>東風戦</b>　東1〜4局</button>
+      <button class="opt" data-len="hanchan" aria-pressed="false"><b>半荘戦（東南戦）</b>　東1局〜南4局</button>
+    </div>
     <p class="setup-q">CPUの強さを選ぶと対局が始まります</p>
     <div class="levels3">
       <button class="mode lv" data-level="easy"><span class="k">弱い</span><span class="d">ときどき適当に捨てる。リーチされても気にせず攻める。</span></button>
@@ -1390,7 +1395,7 @@ document.addEventListener('keydown', e => {
 
 // ===== 対局モード（東風戦・CPU3人） =====
 const SEATS = ['あなた', '下家', '対面', '上家'];
-const GS = { callConfirm: store.get('g:call', true), pointsOnly: store.get('g:ptsonly', false), level: store.get('g:level', 'normal'), review: store.get('g:review', true), bgm: store.get('g:bgm', true), rvMode: store.get('g:rvmode', 'total') };
+const GS = { callConfirm: store.get('g:call', true), pointsOnly: store.get('g:ptsonly', false), level: store.get('g:level', 'normal'), review: store.get('g:review', true), bgm: store.get('g:bgm', true), len: store.get('g:len', 'tonpu'), rvMode: store.get('g:rvmode', 'total') };
 const LEVEL_NAME = { easy:'弱い', normal:'普通', hard:'強い', mleague:'Mリーガー' };
 // Mリーガー：席ごとに打ち筋を変える（本人ではなく、プレースタイルを参考にした傾向）
 const MSTYLE = {
@@ -1408,7 +1413,10 @@ const ask = g => new Promise(res => { g.waiter = v => { g.waiter = null; res(v);
 const removeTile = (arr, t) => { const i = arr.indexOf(t); if (i >= 0) arr.splice(i, 1); };
 const countIn = (arr, t) => arr.filter(x => x === t).length;
 const seatWind = (g, p) => 27 + (p - g.dealer + 4) % 4;
-const isYakuhaiFor = (g, p, t) => t >= 31 || t === 27 || t === seatWind(g, p);
+const roundWind = g => 27 + Math.min(1, Math.floor(g.passes / 4)); // 東場→南場
+const kyokuName = g => `${HONOR[roundWind(g) - 27]}${g.passes % 4 + 1}局`;
+const LEN_NAME = { tonpu:'東風戦', hanchan:'半荘戦' };
+const isYakuhaiFor = (g, p, t) => t >= 31 || t === roundWind(g) || t === seatWind(g, p);
 
 function toast(html, ms = 1500) {
   const el = $('#toast');
@@ -1440,7 +1448,7 @@ async function startHand(g) {
   for (let i = 0; i < 13; i++) for (let p = 0; p < 4; p++) g.hands[p].push(g.wall.pop());
   $('#gover').hidden = true;
   renderGame();
-  toast(`<b>東${g.passes + 1}局</b>${g.honba}本場　親は${nm(g.dealer)}`, 1300);
+  toast(`<b>${kyokuName(g)}</b>${g.honba}本場　親は${nm(g.dealer)}`, 1300);
   try {
     await sleep(g, 900);
     await playHand(g);
@@ -1485,7 +1493,7 @@ async function playHand(g) {
 
 function handObj(g, p, closed, win, tsumo) {
   return { closed:closed.slice(), melds:g.melds[p].map(m => ({ type:m.type, tile:m.tile })), win, tsumo,
-    riichi:g.riichi[p], round:27, seat:seatWind(g, p), dealer:p === g.dealer, doraInd:g.doraInd, uraInd:g.uraInd };
+    riichi:g.riichi[p], round:roundWind(g), seat:seatWind(g, p), dealer:p === g.dealer, doraInd:g.doraInd, uraInd:g.uraInd };
 }
 
 function tryWin(g, p, closed, win, tsumo) {
@@ -1817,7 +1825,7 @@ async function ryuukyoku(g) {
 function nextHand(g, dealerKeeps, honbaUp) {
   if (dealerKeeps) g.honba++;
   else { g.dealer = (g.dealer + 1) % 4; g.passes++; g.honba = honbaUp ? g.honba + 1 : 0; }
-  if (g.scores.some(s => s < 0) || g.passes >= 4) return gameEnd(g);
+  if (g.scores.some(s => s < 0) || g.passes >= (GS.len === 'hanchan' ? 8 : 4)) return gameEnd(g);
   startHand(g);
 }
 
@@ -1844,7 +1852,7 @@ function pondHTML(g, p) {
 function renderGame() {
   const g = G;
   if (!g || $('#game').hidden) return;
-  $('#gKyoku').textContent = `東${g.passes + 1}局 ${g.honba}本場・CPU${LEVEL_NAME[GS.level]}`;
+  $('#gKyoku').textContent = `${LEN_NAME[GS.len]} ${kyokuName(g)} ${g.honba}本場・CPU${LEVEL_NAME[GS.level]}`;
   $('#gDora').innerHTML = `ドラ表示牌 ${tileHTML(g.doraInd[0])}`;
   $('#gQuizStat').textContent = g.quiz.n ? `点数計算 ${g.quiz.ok}/${g.quiz.n}問正解` : '';
   $('#gOptCall').setAttribute('aria-pressed', String(GS.callConfirm));
@@ -1862,7 +1870,7 @@ function renderGame() {
   }
   const pos = ['b', 'r', 't', 'l'];
   $('#center').innerHTML = [0,1,2,3].map(p => `<div class="ps ${pos[p]} ${p === g.dealer ? 'dealer' : ''} ${p === g.turn ? 'turn' : ''}"><span class="w">${HONOR[seatWind(g, p) - 27]}${p === g.dealer ? '・親' : ''}</span><b>${fmt(g.scores[p])}</b>${styleOf(p) ? `<span class="sty">${MSTYLE[p].name}</span>` : ''}${g.riichi[p] ? '<span class="tenbou" title="リーチ棒"></span>' : ''}</div>`).join('') +
-    `<div class="mid">東${g.passes + 1}局<small>残り ${g.wall.length}枚</small><small>${g.honba}本場・供託${g.sticks}</small></div>`;
+    `<div class="mid">${kyokuName(g)}<small>残り ${g.wall.length}枚</small><small>${g.honba}本場・供託${g.sticks}</small></div>`;
   renderMyHand(g);
   renderActions(g);
   fitBoard();
@@ -2169,7 +2177,7 @@ function reviewFlow(g) {
       else if (ev.mine.s > ev.best.s) comment = `${tileName(m.chosen)}を切ると${shantenName(ev.mine.s)}に戻ります（向聴戻し）。${tileName(ev.best.t)}切りなら${shantenName(ev.best.s)}を保てます。`;
       else comment = `${tileName(ev.best.t)}切りなら受け入れが${ev.best.n}枚、${tileName(m.chosen)}切りは${ev.mine.n}枚です。`;
       if (m.riichi) comment += '（リーチ宣言牌）';
-      ov.innerHTML = `<div class="ohead"><span class="who">打牌の振り返り</span><span class="sub">東${g.passes + 1}局　${i + 1} / ${moves.length}手目　この局の平均 <b>${avg}点</b>　${tot ? '（総合採点：牌効率＋守り＋役・ドラ）' : '（牌効率だけで採点。守りや役は考えません）'}</span></div>
+      ov.innerHTML = `<div class="ohead"><span class="who">打牌の振り返り</span><span class="sub">${kyokuName(g)}　${i + 1} / ${moves.length}手目　この局の平均 <b>${avg}点</b>　${tot ? '（総合採点：牌効率＋守り＋役・ドラ）' : '（牌効率だけで採点。守りや役は考えません）'}</span></div>
         <div class="obody">
           <div class="effhead"><span class="grade g${mark === '◎' ? 0 : mark === '○' ? 1 : mark === '△' ? 2 : 3}">${mark}<small>${word}</small></span><div><div class="effscore">${ev.score}<small>点</small></div><div class="effsub">${m.junme}巡目・打牌前 ${shantenName(shanten(countsOf(m.hand), m.mN) )}</div></div><p class="effc">${comment}</p></div>
           <div class="hand revhand"><div class="grp"><div class="ts">${tiles}</div><em>赤枠＝あなたが切った牌　緑枠＝最善</em></div>${melds ? `<div class="grp"><div class="ts">${melds}</div></div>` : ''}</div>
@@ -2211,10 +2219,12 @@ function renderSetup() {
   document.querySelectorAll('[data-level]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.level === GS.level)));
   $('#optReview').checked = GS.review;
   document.querySelectorAll('[data-rvmode]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.rvmode === GS.rvMode)));
+  document.querySelectorAll('[data-len]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.len === GS.len)));
 }
 $('#optReview').addEventListener('change', e => { GS.review = e.target.checked; store.set('g:review', GS.review); });
 
 document.querySelectorAll('[data-rvmode]').forEach(b => b.addEventListener('click', () => { GS.rvMode = b.dataset.rvmode; store.set('g:rvmode', GS.rvMode); renderSetup(); }));
+document.querySelectorAll('[data-len]').forEach(b => b.addEventListener('click', () => { GS.len = b.dataset.len; store.set('g:len', GS.len); renderSetup(); }));
 
 $('#deco').innerHTML = [0, 13, 22, 33].map(t => tileHTML(t)).join('');
 $('#gameDeco').innerHTML = [27, 27, 27, 31].map(t => tileHTML(t)).join('');
