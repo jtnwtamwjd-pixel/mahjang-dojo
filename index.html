@@ -213,7 +213,7 @@ td.l,th.l{text-align:left}
 .mymelds .ts{display:flex;gap:1px}
 /* 待ちとボタンは自分の河の左右に置き、河に重ならないようにする */
 .board{position:relative}
-.waitchip{position:absolute;left:0;bottom:0;max-width:calc(50% - 6*var(--ptw,18px) - 14px);flex-wrap:wrap;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px;--tw:18px}
+.waitchip{position:absolute;left:0;bottom:10px;max-width:calc(50% - 6*var(--ptw,18px) - 14px);flex-wrap:wrap;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px;--tw:18px}
 .waitchip .tile{margin:0;box-shadow:0 2px 0 var(--tile-back)}
 /* 操作ボタンは中央の点数表示の上に重ねる（どの河にも重ならない）。contain:sizeで列幅に影響させない */
 .actions{grid-column:2;grid-row:2;justify-self:stretch;align-self:stretch;contain:size;z-index:3;display:flex;gap:5px;flex-wrap:wrap-reverse;align-content:flex-start;justify-content:center;align-items:flex-end;padding-bottom:4px;pointer-events:none}
@@ -343,6 +343,18 @@ table.effq .you{font-size:11px;display:block;margin:2px 0 0}
 .rvmodes .opt[aria-pressed="true"] b{color:var(--gold)}
 .effq td.dg{font-weight:700}
 .effq td.d安全{color:var(--ok)} .effq td.d低{color:var(--ok)} .effq td.d中{color:var(--gold)} .effq td.d高{color:var(--ng)}
+
+/* 河が多くて入りきらない時は中央表示を最小限にする */
+.center.tight{padding:2px 6px;gap:0 6px;font-size:10px}
+.center.tight .ps b{font-size:11px}
+.center.tight .ps .w{font-size:10px}
+.center.tight .mid{font-size:11px}
+.center.tight .mid small:last-child,.center.tight .ps .sty{display:none}
+
+/* 選んだ手牌と同じ捨て牌 */
+.pond .tile{position:relative}
+.pond .tile.same{opacity:1;box-shadow:0 0 0 2px #39b6ff,0 0 9px #39b6ff}
+.pond .tile.same::after{content:'';position:absolute;inset:0;border-radius:inherit;background:rgba(57,182,255,.38);pointer-events:none}
 
 @media (orientation:portrait){
   :root{--tw:min(calc((100vw - 56px) / 9), 42px)}
@@ -1818,7 +1830,7 @@ function gameEnd(g) {
 function pondHTML(g, p) {
   return g.ponds[p].map((d, i) => {
     const cls = [d.rii ? 'rii' : '', d.called ? 'called' : '', g.last && g.last.p === p && g.last.i === i && !d.called ? 'last' : ''].join(' ');
-    return tileHTML(d.t, cls);
+    return tileHTML(d.t, cls).replace('<span class="tile', `<span data-t="${d.t}" class="tile`);
   }).join('');
 }
 function renderGame() {
@@ -1848,10 +1860,21 @@ function renderGame() {
 }
 // 河が全部見えるまで捨て牌のサイズを縮める
 function fitBoard() {
-  const b = document.querySelector('#game .board');
+  const b = document.querySelector('#game .board'), center = $('#center');
+  const hit = (x, y) => x.left < y.right - 1 && x.right > y.left + 1 && x.top < y.bottom - 1 && x.bottom > y.top + 1;
+  const bad = () => {
+    if (b.scrollWidth > b.clientWidth + 1) return true;
+    const br = b.getBoundingClientRect(), cr = center.getBoundingClientRect();
+    return [0, 1, 2, 3].some(p => {
+      const r = $('#seat' + p).getBoundingClientRect();
+      return r.height > 0 && (hit(r, cr) || r.top < br.top - 1 || r.bottom > br.bottom + 1);
+    }) || cr.top < br.top - 1 || cr.bottom > br.bottom + 1;
+  };
+  center.classList.remove('tight');
   let tw = Math.min(21, Math.max(12, window.innerHeight * 0.05));
   b.style.setProperty('--ptw', tw + 'px');
-  while (tw > 9 && (b.scrollHeight > b.clientHeight + 1 || b.scrollWidth > b.clientWidth + 1)) { tw -= 1; b.style.setProperty('--ptw', tw + 'px'); }
+  while (tw > 9 && bad()) { tw -= 0.5; b.style.setProperty('--ptw', tw + 'px'); }
+  if (bad()) center.classList.add('tight');
 }
 function renderMyHand(g) {
   const hand = g.hands[0];
@@ -1878,6 +1901,12 @@ function renderMyHand(g) {
     }
   }
   $('#waitchip').innerHTML = wc;
+  markSame(g);
+}
+// 選んだ手牌と同じ牌が河に出ていれば色を変える
+function markSame(g) {
+  const t = g.sel >= 0 && g.disp ? g.disp[g.sel] : -1;
+  document.querySelectorAll('#game .pond [data-t]').forEach(el => el.classList.toggle('same', +el.dataset.t === t));
 }
 function renderActions(g) {
   const a = [];
