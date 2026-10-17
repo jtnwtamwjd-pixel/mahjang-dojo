@@ -469,6 +469,7 @@ table.effq .you{font-size:11px;display:block;margin:2px 0 0}
     <span class="stat" id="gQuizStat"></span>
     <button class="opt" id="gOptCall" aria-pressed="true">鳴きを確認する</button>
     <button class="opt" id="gOptQuiz" aria-pressed="false">点数だけ答える</button>
+    <button class="opt" id="gOptBgm" aria-pressed="true">♪ BGM</button>
   </div>
   <div class="board">
     <div class="seat top" id="seat2"></div>
@@ -1135,6 +1136,7 @@ const S = { mode:null, i:0, score:0, streak:0, maxStreak:0, correct:0, q:null, a
 function show(id) {
   document.querySelectorAll('.screen').forEach(s => s.hidden = s.id !== id);
   if (id !== 'game') G = null;
+  if (typeof bgmSync === 'function') bgmSync();
   if (id === 'home') { renderBests(); $('#gameBest').textContent = gameBestText(); }
   if (id === 'levels') renderLevels();
   if (id === 'guide') renderGuide(currentTab);
@@ -1384,7 +1386,7 @@ document.addEventListener('keydown', e => {
 
 // ===== 対局モード（東風戦・CPU3人） =====
 const SEATS = ['あなた', '下家', '対面', '上家'];
-const GS = { callConfirm: store.get('g:call', true), pointsOnly: store.get('g:ptsonly', false), level: store.get('g:level', 'normal'), review: store.get('g:review', true), rvMode: store.get('g:rvmode', 'total') };
+const GS = { callConfirm: store.get('g:call', true), pointsOnly: store.get('g:ptsonly', false), level: store.get('g:level', 'normal'), review: store.get('g:review', true), bgm: store.get('g:bgm', true), rvMode: store.get('g:rvmode', 'total') };
 const LEVEL_NAME = { easy:'弱い', normal:'普通', hard:'強い', mleague:'Mリーガー' };
 // Mリーガー：席ごとに打ち筋を変える（本人ではなく、プレースタイルを参考にした傾向）
 const MSTYLE = {
@@ -1415,6 +1417,7 @@ const announce = (p, word) => toast(`<b>${word}</b>${nm(p)}`, 1100);
 function newGame() {
   G = { scores:[25000,25000,25000,25000], dealer:rnd(4), passes:0, honba:0, sticks:0, quiz:{ n:0, ok:0 }, eff:{ n:0, sum:0 }, log:[] };
   show('game');
+  bgmSync();
   startHand(G);
 }
 
@@ -1841,6 +1844,7 @@ function renderGame() {
   $('#gQuizStat').textContent = g.quiz.n ? `点数計算 ${g.quiz.ok}/${g.quiz.n}問正解` : '';
   $('#gOptCall').setAttribute('aria-pressed', String(GS.callConfirm));
   $('#gOptQuiz').setAttribute('aria-pressed', String(GS.pointsOnly));
+  $('#gOptBgm').setAttribute('aria-pressed', String(GS.bgm));
   for (let p = 0; p < 4; p++) {
     const melds = p === 0 ? '' : `<div class="omelds">${g.melds[p].map(m => `<div class="ts">${tilesHTML(meldTiles(m))}</div>`).join('')}</div>`;
     const pond = `<div class="pond ${p === 0 || p === 2 ? 'wide' : ''}">${pondHTML(g, p)}</div>`;
@@ -1950,6 +1954,17 @@ $('#actions').addEventListener('click', e => {
   g.waiter({ type:act });
 });
 $('#gOptCall').addEventListener('click', () => { GS.callConfirm = !GS.callConfirm; store.set('g:call', GS.callConfirm); renderGame(); });
+// ---- BGM（bgm.mp3 をHTMLと同じフォルダに置く。対局画面にいる間だけループ再生） ----
+let bgmEl = null;
+function bgmSync() {
+  const on = GS.bgm && !$('#game').hidden && !document.hidden;
+  if (on) {
+    if (!bgmEl) { bgmEl = new Audio('bgm.mp3'); bgmEl.loop = true; bgmEl.volume = 0.35; }
+    bgmEl.play().catch(() => {});
+  } else if (bgmEl) bgmEl.pause();
+}
+document.addEventListener('visibilitychange', bgmSync);
+$('#gOptBgm').addEventListener('click', () => { GS.bgm = !GS.bgm; store.set('g:bgm', GS.bgm); bgmSync(); renderGame(); });
 $('#gOptQuiz').addEventListener('click', () => { GS.pointsOnly = !GS.pointsOnly; store.set('g:ptsonly', GS.pointsOnly); renderGame(); });
 $('#gQuit').addEventListener('click', () => {
   const b = $('#gQuit');
