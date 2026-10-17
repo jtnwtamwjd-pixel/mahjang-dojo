@@ -369,6 +369,26 @@ table.effq .you{font-size:11px;display:block;margin:2px 0 0}
 .mpro .seat{position:absolute;top:6px;right:8px;font-size:11px;font-weight:700;color:var(--gold-ink);background:var(--gold);border-radius:8px;padding:1px 6px}
 @media (orientation:portrait){.mpros{grid-template-columns:1fr 1fr}}
 
+/* オンライン対局 */
+.ongo{align-self:flex-start}
+.onmsg{margin:0;padding:6px 10px;border-radius:8px;background:rgba(232,181,83,.15);color:var(--gold);font-size:13px}
+.onrow{display:flex;align-items:center;gap:8px;font-size:14px}
+#online input{font:inherit;font-size:16px;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--ink);width:9em}
+.oncards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.oncard{background:rgba(6,37,32,.55);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.oncard b{font-size:16px}
+.oncard p{margin:0;font-size:12px;color:var(--muted);line-height:1.5}
+.oncard .row{gap:8px}
+.onroom{font-size:15px;display:flex;align-items:center;gap:12px}
+.onroom b{font-family:var(--f-display);font-size:28px;color:var(--gold);letter-spacing:.08em}
+.onseats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.onseat{border:1px dashed var(--line);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:2px;font-weight:700}
+.onseat small{font-weight:400;color:var(--muted);font-size:11px}
+.onseat span{font-weight:400;color:var(--muted)}
+.onseat.in{border-style:solid;border-color:var(--gold)}
+.onnote{margin:0;font-size:13px;color:var(--muted)}
+@media (orientation:portrait){.oncards{grid-template-columns:1fr}.onseats{grid-template-columns:1fr 1fr}}
+
 @media (orientation:portrait){
   :root{--tw:min(calc((100vw - 56px) / 9), 42px)}
   body{overflow:auto}
@@ -513,6 +533,7 @@ table.effq .you{font-size:11px;display:block;margin:2px 0 0}
       <button class="mode lv" data-level="hard"><span class="k">強い</span><span class="d">受け入れが最も広い牌を切る。リーチには安全牌でしっかり降りる。</span></button>
       <button class="mode lv ml" data-level="mleague"><span class="k">Mリーガー</span><span class="d">7人の中から3人を選んで対局。それぞれ打ち筋が違う。</span></button>
     </div>
+    <button class="btn ongo" data-go="online">🌐 友だちとオンライン対局 ▶</button>
     <label class="toggle"><input type="checkbox" id="optReview"> 各局のあとに、自分の打牌を1手ずつ採点する</label>
     <div class="rvmodes"><span>採点方法</span>
       <button class="opt" data-rvmode="total" aria-pressed="true"><b>総合</b>　牌効率＋守り＋役・ドラ（その時の河で危険度を判定）</button>
@@ -520,6 +541,13 @@ table.effq .you{font-size:11px;display:block;margin:2px 0 0}
     </div>
   </div>
   <div class="setup" id="mpick" hidden></div>
+</section>
+<section class="screen" id="online" hidden>
+  <div class="bar"><button class="back" data-go="gsetup">◀ 対局の設定</button><span class="title">オンライン対局</span></div>
+  <div class="setup">
+    <p class="onmsg" id="onMsg" hidden></p>
+    <div id="onBody"></div>
+  </div>
 </section>
 
 </div>
@@ -1154,6 +1182,8 @@ const S = { mode:null, i:0, score:0, streak:0, maxStreak:0, correct:0, q:null, a
 function show(id) {
   document.querySelectorAll('.screen').forEach(s => s.hidden = s.id !== id);
   if (id !== 'game') G = null;
+  if (id !== 'game' && id !== 'online' && typeof NET !== 'undefined' && NET.role) NET.close();
+  if (id === 'online') renderOnline();
   if (typeof bgmSync === 'function') bgmSync();
   if (id === 'home') { renderBests(); $('#gameBest').textContent = gameBestText(); }
   if (id === 'levels') renderLevels();
@@ -1422,9 +1452,9 @@ const MPRO = {
 const MPRO_IDS = Object.keys(MPRO);
 GS.mPlayers = (store.get('g:mpl', ['oi', 'sasaki', 'setokuma']) || []).filter(id => MPRO[id]);
 if (GS.mPlayers.length !== 3) GS.mPlayers = ['oi', 'sasaki', 'setokuma'];
-const proOf = p => GS.level === 'mleague' && p ? MPRO[GS.mPlayers[p - 1]] : null;
+const proOf = p => GS.level === 'mleague' && p && !(G && G.client) && !(G && G.remote && G.remote[p]) ? MPRO[GS.mPlayers[p - 1]] : null;
 const styleOf = p => proOf(p) ? proOf(p).key : null;
-const nm = p => proOf(p) ? `${SEATS[p]}（${proOf(p).name}）` : SEATS[p];
+const nm = p => G && G.pnames && G.pnames[p] ? `${SEATS[p]}（${G.pnames[p]}）` : proOf(p) ? `${SEATS[p]}（${proOf(p).name}）` : SEATS[p];
 const ABORT = { abort: true };
 let G = null;
 
@@ -1444,10 +1474,11 @@ function toast(html, ms = 1500) {
   clearTimeout(toast.t);
   toast.t = setTimeout(() => { el.innerHTML = ''; }, ms);
 }
-const announce = (p, word) => toast(`<b>${word}</b>${nm(p)}`, 1100);
+const announce = (p, word) => { toast(`<b>${word}</b>${nm(p)}`, 1100); if (G && G.remote) NET.ann(G, p, word); };
 
-function newGame() {
-  G = { scores:[25000,25000,25000,25000], dealer:rnd(4), passes:0, honba:0, sticks:0, quiz:{ n:0, ok:0 }, eff:{ n:0, sum:0 }, log:[] };
+function newGame(online) {
+  if (!online) NET.reset();
+  G = { remote:online ? online.remote : null, pnames:online ? online.pnames : null, rp:{}, len:GS.len, scores:[25000,25000,25000,25000], dealer:rnd(4), passes:0, honba:0, sticks:0, quiz:{ n:0, ok:0 }, eff:{ n:0, sum:0 }, log:[] };
   show('game');
   bgmSync();
   startHand(G);
@@ -1462,6 +1493,7 @@ async function startHand(g) {
     riichi:[false,false,false,false], skipFuriten:[false,false,false,false], log:[],
     last:null, turn:g.dealer, phase:'wait', drawn:null, sel:-1, riichiSel:false, opts:null, callOpts:null, callTile:null,
   });
+  g.handKey = (g.handKey || 0) + 1;
   bgmSync();
   g.doraInd = [g.dead[4]];
   g.uraInd = [g.dead[9]];
@@ -1489,6 +1521,7 @@ async function playHand(g) {
     renderGame();
     let act;
     if (p === 0) act = await playerTurn(g, drawn);
+    else if (isRemote(g, p)) act = await NET.remoteTurn(g, p, drawn);
     else { await sleep(g, 420); act = cpuTurn(g, p, drawn); }
     if (act.type === 'tsumo') return winHand(g, p, null, drawn);
 
@@ -1537,15 +1570,22 @@ function riichiDiscards(hand) {
   return out;
 }
 
-function playerTurn(g, drawn) {
-  const hand = g.hands[0];
+const isRemote = (g, p) => !!(g.remote && g.remote[p]);
+// 手番の選択肢（ツモ・リーチ）。p は人間のプレイヤー（自分かオンライン参加者）
+function turnOpts(g, p, drawn) {
+  const hand = g.hands[p];
   const opts = { tsumo:false, riichi:[] };
   if (drawn !== null) {
-    const r = tryWin(g, 0, hand, drawn, true);
+    const r = tryWin(g, p, hand, drawn, true);
     opts.tsumo = r.ok;
-    if (!r.ok && r.reason) toast(r.reason, 2200);
-    if (!g.riichi[0] && g.melds[0].length === 0 && g.scores[0] >= 1000 && g.wall.length >= 4) opts.riichi = riichiDiscards(hand);
+    if (!r.ok && r.reason) opts.reason = r.reason;
+    if (!g.riichi[p] && g.melds[p].length === 0 && g.scores[p] >= 1000 && g.wall.length >= 4) opts.riichi = riichiDiscards(hand);
   }
+  return opts;
+}
+function playerTurn(g, drawn) {
+  const opts = turnOpts(g, 0, drawn);
+  if (opts.reason) toast(opts.reason, 2200);
   if (g.riichi[0] && drawn !== null && !opts.tsumo) {
     return sleep(g, 650).then(() => ({ type:'discard', tile:drawn, auto:true }));
   }
@@ -1620,26 +1660,34 @@ async function reactions(g, from, t) {
   for (let k = 1; k < 4; k++) {
     const q = (from + k) % 4;
     const r = tryWin(g, q, g.hands[q].concat([t]), t, false);
-    if (q === 0) {
+    if (q === 0 || isRemote(g, q)) {
       if (r.ok) {
-        const v = await promptCall(g, [{ type:'ron' }], t);
-        if (v.type === 'ron') return { ron:0 };
-        g.skipFuriten[0] = true;
-      } else if (r.reason) toast(r.reason, 2200);
+        const v = q === 0 ? await promptCall(g, [{ type:'ron' }], t) : await NET.askCall(g, q, [{ type:'ron' }], t);
+        if (v.type === 'ron') return { ron:q };
+        g.skipFuriten[q] = true;
+      } else if (r.reason && q === 0) toast(r.reason, 2200);
     } else if (r.ok) return { ron:q };
   }
   if (g.wall.length === 0) return {};
   let cpuPon = -1;
-  for (let k = 1; k < 4; k++) { const q = (from + k) % 4; if (q !== 0 && cpuWantsPon(g, q, t)) { cpuPon = q; break; } }
-  if (from !== 0 && !g.riichi[0] && GS.callConfirm) {
+  for (let k = 1; k < 4; k++) { const q = (from + k) % 4; if (q !== 0 && !isRemote(g, q) && cpuWantsPon(g, q, t)) { cpuPon = q; break; } }
+  // 人間（自分・オンライン参加者）にポン・チーを確認
+  for (let k = 1; k < 4; k++) {
+    const q = (from + k) % 4;
+    if (!(q === 0 || isRemote(g, q)) || g.riichi[q]) continue;
+    if (q === 0 && !GS.callConfirm) continue;
     const opts = [];
-    if (countIn(g.hands[0], t) >= 2) opts.push({ type:'pon' });
-    if (from === 3) chiOptions(g.hands[0], t).forEach(b => opts.push({ type:'chi', base:b }));
-    if (opts.length) {
-      const v = await promptCall(g, opts, t);
-      if (v.type === 'pon' || (v.type === 'chi' && cpuPon < 0)) { doCall(g, 0, from, t, v); return { call:0 }; }
-      if (v.type === 'chi') toast('ポンが優先されました');
+    if (countIn(g.hands[q], t) >= 2) opts.push({ type:'pon' });
+    if (k === 1) chiOptions(g.hands[q], t).forEach(b => opts.push({ type:'chi', base:b }));
+    if (!opts.length) continue;
+    const v = q === 0 ? await promptCall(g, opts, t) : await NET.askCall(g, q, opts, t);
+    if (v.type === 'pon' || (v.type === 'chi' && cpuPon < 0)) {
+      if (q !== 0 && !opts.some(o => o.type === v.type && (v.type !== 'chi' || o.base === v.base))) continue;
+      doCall(g, q, from, t, v);
+      if (q !== 0) { announce(q, v.type === 'pon' ? 'ポン' : 'チー'); renderGame(); await sleep(g, 450); }
+      return { call:q };
     }
+    if (v.type === 'chi' && q === 0) toast('ポンが優先されました');
   }
   if (cpuPon >= 0) {
     doCall(g, cpuPon, from, t, { type:'pon' });
@@ -1790,9 +1838,12 @@ async function winHand(g, winner, loser, t) {
   g.phase = 'wait'; renderGame();
   announce(winner, loser === null ? 'ツモ' : 'ロン');
   await sleep(g, 900);
+  NET.sendWin(g, winner, loser, res.h, res.r, settle(g, winner, loser, res.r.pts));
   await quizFlow(g, winner, loser, res.h, res.r);
   if (G !== g) return;
   await reviewFlow(g);
+  if (G !== g) return;
+  await NET.waitReady(g);
   if (G !== g) return;
   nextHand(g, winner === g.dealer, false);
 }
@@ -1839,8 +1890,8 @@ function quizFlow(g, winner, loser, h, r) {
       }));
     };
     const finalUI = () => {
-      const d = settle(g, winner, loser, r.pts);
-      for (let p = 0; p < 4; p++) g.scores[p] += d[p];
+      const d = g.client ? g.winD : settle(g, winner, loser, r.pts);
+      if (g.client) g.scores = g.winAfter.slice(); else for (let p = 0; p < 4; p++) g.scores[p] += d[p];
       const note = settleNote(g, winner, loser, r.pts);
       g.sticks = 0;
       const allOk = steps.every(s => marks[s]);
@@ -1860,31 +1911,41 @@ async function ryuukyoku(g) {
   const n = ten.filter(Boolean).length, d = [0,0,0,0];
   if (n > 0 && n < 4) for (let p = 0; p < 4; p++) d[p] = ten[p] ? 3000 / n : -3000 / (4 - n);
   for (let p = 0; p < 4; p++) g.scores[p] += d[p];
+  NET.sendRyu(g, ten, d);
   toast('<b>流局</b>', 900);
   await sleep(g, 900);
-  const ov = $('#gover');
-  ov.hidden = false;
-  const hands = [0,1,2,3].filter(p => ten[p]).map(p => `<div><p style="margin:0 0 4px;font-size:13px">${nm(p)}（聴牌）</p><div class="hand">${`<div class="grp"><div class="ts">${tilesHTML(g.hands[p].slice().sort((a, b) => a - b))}</div></div>`}${g.melds[p].map(m => `<div class="grp"><div class="ts">${tilesHTML(meldTiles(m))}</div></div>`).join('')}</div></div>`).join('');
-  ov.innerHTML = `<div class="ohead"><span class="who">流局</span><span class="sub">聴牌：${n ? [0,1,2,3].filter(p => ten[p]).map(p => nm(p)).join('・') : 'なし'}。ノーテン罰符は合計3000点</span></div>
-    <div class="obody">${hands}${payTableHTML(g, d)}</div>
-    <div class="ofoot row" style="justify-content:flex-end"><button class="btn primary" id="ovNext">次の局へ ▶</button></div>`;
   renderGame();
-  await new Promise(res => $('#ovNext').addEventListener('click', res));
+  await ryuOverlay(g, ten, d, g.hands);
   if (G !== g) return;
   await reviewFlow(g);
   if (G !== g) return;
-  ov.hidden = true;
+  await NET.waitReady(g);
+  if (G !== g) return;
+  $('#gover').hidden = true;
   nextHand(g, ten[g.dealer], true);
+}
+
+// 流局の結果表示（hands は聴牌者の手牌が入った配列）
+function ryuOverlay(g, ten, d, hands) {
+  const n = ten.filter(Boolean).length;
+  const ov = $('#gover');
+  ov.hidden = false;
+  const hs = [0,1,2,3].filter(p => ten[p]).map(p => `<div><p style="margin:0 0 4px;font-size:13px">${nm(p)}（聴牌）</p><div class="hand">${`<div class="grp"><div class="ts">${tilesHTML(hands[p].slice().sort((a, b) => a - b))}</div></div>`}${g.melds[p].map(m => `<div class="grp"><div class="ts">${tilesHTML(meldTiles(m))}</div></div>`).join('')}</div></div>`).join('');
+  ov.innerHTML = `<div class="ohead"><span class="who">流局</span><span class="sub">聴牌：${n ? [0,1,2,3].filter(p => ten[p]).map(p => nm(p)).join('・') : 'なし'}。ノーテン罰符は合計3000点</span></div>
+    <div class="obody">${hs}${payTableHTML(g, d)}</div>
+    <div class="ofoot row" style="justify-content:flex-end"><button class="btn primary" id="ovNext">次の局へ ▶</button></div>`;
+  return new Promise(res => $('#ovNext').addEventListener('click', res));
 }
 
 function nextHand(g, dealerKeeps, honbaUp) {
   if (dealerKeeps) g.honba++;
   else { g.dealer = (g.dealer + 1) % 4; g.passes++; g.honba = honbaUp ? g.honba + 1 : 0; }
-  if (g.scores.some(s => s < 0) || g.passes >= (GS.len === 'hanchan' ? 8 : 4)) return gameEnd(g);
+  if (g.scores.some(s => s < 0) || g.passes >= ((g.len || GS.len) === 'hanchan' ? 8 : 4)) return gameEnd(g);
   startHand(g);
 }
 
 function gameEnd(g) {
+  NET.sendEnd(g);
   const st = store.get('g:stats', { games:0, n:0, ok:0 });
   st.games++; st.n += g.quiz.n; st.ok += g.quiz.ok;
   store.set('g:stats', st);
@@ -1892,9 +1953,9 @@ function gameEnd(g) {
   const pct = g.quiz.n ? Math.round(g.quiz.ok / g.quiz.n * 100) : 0;
   const ov = $('#gover');
   ov.hidden = false;
-  ov.innerHTML = `<div class="ohead"><span class="who">対局終了</span><span class="sub">あなたは${order.indexOf(0) + 1}位（CPU：${LEVEL_NAME[GS.level]}）。点数計算は ${g.quiz.ok}/${g.quiz.n} 問正解（${pct}%）${g.eff.n ? `、牌効率は平均${Math.round(g.eff.sum / g.eff.n)}点` : ''}</span></div>
+  ov.innerHTML = `<div class="ohead"><span class="who">対局終了</span><span class="sub">あなたは${order.indexOf(0) + 1}位（${g.client || g.remote ? 'オンライン対局' : 'CPU：' + LEVEL_NAME[GS.level]}）。点数計算は ${g.quiz.ok}/${g.quiz.n} 問正解（${pct}%）${g.eff.n ? `、牌効率は平均${Math.round(g.eff.sum / g.eff.n)}点` : ''}</span></div>
     <div class="obody"><table class="pay"><tr><th>順位</th><th class="l">席</th><th>持ち点</th></tr>${order.map((p, i) => `<tr><td>${i + 1}位</td><td class="l">${nm(p)}</td><td>${fmt(g.scores[p])}</td></tr>`).join('')}</table></div>
-    <div class="ofoot row" style="justify-content:flex-end"><button class="btn" data-go="home">メニューへ</button><button class="btn primary" data-game="1">もう一度対局</button></div>`;
+    <div class="ofoot row" style="justify-content:flex-end"><button class="btn" data-go="home">メニューへ</button>${g.client || g.remote ? '' : '<button class="btn primary" data-game="1">もう一度対局</button>'}</div>`;
 }
 
 // ---- 描画 ----
@@ -1907,7 +1968,7 @@ function pondHTML(g, p) {
 function renderGame() {
   const g = G;
   if (!g || $('#game').hidden) return;
-  $('#gKyoku').textContent = `${LEN_NAME[GS.len]} ${kyokuName(g)} ${g.honba}本場・CPU${LEVEL_NAME[GS.level]}`;
+  $('#gKyoku').textContent = `${LEN_NAME[g.len || GS.len]} ${kyokuName(g)} ${g.honba}本場・${g.client || g.remote ? 'オンライン' : 'CPU' + LEVEL_NAME[GS.level]}`;
   $('#gDora').innerHTML = `ドラ表示牌 ${tileHTML(g.doraInd[0])}`;
   $('#gQuizStat').textContent = g.quiz.n ? `点数計算 ${g.quiz.ok}/${g.quiz.n}問正解` : '';
   $('#gOptCall').setAttribute('aria-pressed', String(GS.callConfirm));
@@ -1924,11 +1985,12 @@ function renderGame() {
       : `<div class="srow">${p === 3 ? hand : ''}<div class="scol">${melds}${pond}</div>${p === 1 ? hand : ''}</div>`;
   }
   const pos = ['b', 'r', 't', 'l'];
-  $('#center').innerHTML = [0,1,2,3].map(p => `<div class="ps ${pos[p]} ${p === g.dealer ? 'dealer' : ''} ${p === g.turn ? 'turn' : ''}"><span class="w">${HONOR[seatWind(g, p) - 27]}${p === g.dealer ? '・親' : ''}</span><b>${fmt(g.scores[p])}</b>${proOf(p) ? `<span class="sty">${proOf(p).name}</span>` : ''}${g.riichi[p] ? '<span class="tenbou" title="リーチ棒"></span>' : ''}</div>`).join('') +
+  $('#center').innerHTML = [0,1,2,3].map(p => `<div class="ps ${pos[p]} ${p === g.dealer ? 'dealer' : ''} ${p === g.turn ? 'turn' : ''}"><span class="w">${HONOR[seatWind(g, p) - 27]}${p === g.dealer ? '・親' : ''}</span><b>${fmt(g.scores[p])}</b>${g.pnames && g.pnames[p] ? `<span class="sty">${g.pnames[p]}</span>` : proOf(p) ? `<span class="sty">${proOf(p).name}</span>` : ''}${g.riichi[p] ? '<span class="tenbou" title="リーチ棒"></span>' : ''}</div>`).join('') +
     `<div class="mid">${kyokuName(g)}<small>残り ${g.wall.length}枚</small><small>${g.honba}本場・供託${g.sticks}</small></div>`;
   renderMyHand(g);
   renderActions(g);
   fitBoard();
+  if (g.remote) NET.sync(g);
 }
 // 河が全部見えるまで捨て牌のサイズを縮める
 function fitBoard() {
@@ -2307,6 +2369,290 @@ document.addEventListener('click', e => {
     newGame();
   }
 });
+
+// ===== オンライン対局（PeerJS による P2P。部屋を作った人の端末が卓を進め、参加者は操作だけを送る） =====
+// 部屋ID = 'mjdojo-' + 5桁の数字。空席はCPU。
+const PEERJS_URL = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';
+const NET = {
+  peer: null, role: null, conns: {}, seat: 0, code: '', lobby: [], hostConn: null, waits: {}, readyW: null,
+  reset() { this.close(); },
+  close() {
+    try { Object.values(this.conns).forEach(c => c && c.close()); } catch (e) {}
+    try { this.hostConn && this.hostConn.close(); } catch (e) {}
+    try { this.peer && this.peer.destroy(); } catch (e) {}
+    Object.assign(this, { peer:null, role:null, conns:{}, hostConn:null, lobby:[], waits:{}, readyW:null });
+  },
+  opts() {
+    const q = new URLSearchParams(location.search);
+    return q.get('peerhost') ? { host:q.get('peerhost'), port:+q.get('peerport') || 9000, path:'/', secure:false, debug:0 } : { debug:0 };
+  },
+  load() {
+    if (window.Peer) return Promise.resolve();
+    return new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = PEERJS_URL; s.onload = res; s.onerror = () => rej(new Error('通信ライブラリを読み込めませんでした。ネット接続を確認してください'));
+      document.head.appendChild(s);
+    });
+  },
+  // ---- ホスト（部屋を作る） ----
+  async host(name) {
+    await this.load();
+    this.close();
+    this.role = 'host';
+    this.lobby = [{ seat:0, name }];
+    for (let tries = 0; tries < 4; tries++) {
+      this.code = String(10000 + rnd(90000));
+      const ok = await new Promise(res => {
+        const peer = new Peer('mjdojo-' + this.code, this.opts());
+        peer.on('open', () => { this.peer = peer; res(true); });
+        peer.on('error', e => { if (!this.peer) { peer.destroy(); res(e.type === 'unavailable-id' ? false : e); } else onlineMsg('通信エラー：' + e.type); });
+      });
+      if (ok === true) break;
+      if (ok !== false) throw new Error('部屋を作れませんでした（' + ok.type + '）');
+    }
+    if (!this.peer) throw new Error('部屋を作れませんでした');
+    this.peer.on('connection', conn => {
+      conn.on('data', m => this.hostRecv(conn, m));
+      conn.on('close', () => this.dropped(conn));
+    });
+    renderOnline();
+  },
+  hostRecv(conn, m) {
+    if (m.type === 'hello') {
+      if (G && G.remote) { conn.send({ type:'full', msg:'対局がすでに始まっています' }); return; }
+      const free = [1, 2, 3].find(s => !this.lobby.some(x => x.seat === s));
+      if (!free) { conn.send({ type:'full', msg:'満席です' }); return; }
+      this.lobby.push({ seat:free, name:String(m.name || 'ゲスト').slice(0, 8) });
+      this.conns[free] = conn; conn.seat = free;
+      this.sendLobby(); renderOnline();
+      return;
+    }
+    const p = conn.seat;
+    if (m.type === 'act' && this.waits[p]) { const w = this.waits[p]; delete this.waits[p]; w(m.v); }
+    if (m.type === 'ready' && G && G.ready) { G.ready[p] = true; this.checkReady(); }
+  },
+  dropped(conn) {
+    const p = conn.seat;
+    if (!p || this.conns[p] !== conn) return;
+    delete this.conns[p];
+    if (G && G.remote && G.remote[p]) {
+      G.remote[p] = null; G.pnames[p] = (G.pnames[p] || '') + '→CPU';
+      toast(`<b>切断</b>${SEATS[p]}の代わりにCPUが打ちます`, 2000);
+      if (this.waits[p]) { const w = this.waits[p]; delete this.waits[p]; w(null); }
+      if (G.ready) { G.ready[p] = true; this.checkReady(); }
+    } else {
+      this.lobby = this.lobby.filter(x => x.seat !== p);
+      this.sendLobby(); renderOnline();
+    }
+  },
+  sendLobby() { Object.values(this.conns).forEach(c => c.send({ type:'lobby', lobby:this.lobby, code:this.code, len:GS.len })); },
+  start() {
+    const remote = {}, pnames = [null, null, null, null];
+    for (const x of this.lobby) if (x.seat) { remote[x.seat] = this.conns[x.seat]; pnames[x.seat] = x.name; }
+    for (let p = 1; p < 4; p++) if (!remote[p]) pnames[p] = GS.level === 'mleague' ? MPRO[GS.mPlayers[p - 1]].name : 'CPU';
+    pnames[0] = null;
+    Object.entries(remote).forEach(([p, c]) => c.send({ type:'start', seat:+p }));
+    newGame({ remote, pnames:pnames.map((n, p) => (p ? n : null)), hostName:this.lobby[0].name });
+  },
+  // 参加者ごとの視点（自分が0番）に回した卓の情報
+  view(g, s) {
+    const R = a => (a - s + 4) % 4, rot = arr => [0, 1, 2, 3].map(v => arr[(v + s) % 4]);
+    const rp = g.rp[s] || {};
+    const names = [0, 1, 2, 3].map(a => a === 0 ? this.lobby[0].name : g.pnames[a]);
+    return {
+      type:'state', scores:rot(g.scores), dealer:R(g.dealer), passes:g.passes, honba:g.honba, sticks:g.sticks, len:g.len,
+      doraInd:g.doraInd, wallN:g.wall.length, turn:R(g.turn), drawn:g.turn === s ? g.drawn : null, riichi:rot(g.riichi),
+      melds:rot(g.melds), ponds:rot(g.ponds), handN:rot(g.hands).map(h => h.length), hand:g.hands[s].slice(),
+      last:g.last ? { p:R(g.last.p), i:g.last.i } : null, pnames:rot(names).map((n, v) => (v ? n : null)),
+      phase:rp.phase || 'wait', opts:rp.opts || null, callOpts:rp.callOpts || null, callTile:rp.callTile ?? null, hk:g.handKey,
+    };
+  },
+  sync(g) {
+    if (this.role !== 'host' || this.syncQ) return;
+    this.syncQ = true;
+    queueMicrotask(() => {
+      this.syncQ = false;
+      if (G !== g) return;
+      Object.keys(g.remote).forEach(p => { if (g.remote[p]) g.remote[p].send(this.view(g, +p)); });
+    });
+  },
+  each(g, f) { if (g && g.remote) Object.keys(g.remote).forEach(p => { if (g.remote[p]) g.remote[p].send(f(+p, a => (a - p + 4) % 4)); }); },
+  ann(g, p, word) { this.each(g, (s, R) => ({ type:'ann', p:R(p), word })); },
+  waitAct(g, p) {
+    return new Promise(res => { this.waits[p] = res; this.sync(g); });
+  },
+  async remoteTurn(g, p, drawn) {
+    const opts = turnOpts(g, p, drawn);
+    if (g.riichi[p] && drawn !== null && !opts.tsumo) { await sleep(g, 650); return { type:'discard', tile:drawn }; }
+    g.rp[p] = { phase:'discard', opts };
+    const v = await this.waitAct(g, p);
+    g.rp[p] = {};
+    if (G !== g) throw ABORT;
+    if (!v) { await sleep(g, 300); return cpuTurn(g, p, drawn); }
+    if (v.type === 'tsumo' && opts.tsumo) return { type:'tsumo' };
+    let t = v.tile;
+    if (!g.hands[p].includes(t) || (g.riichi[p] && drawn !== null)) t = drawn !== null ? drawn : g.hands[p][g.hands[p].length - 1];
+    const riichi = !!v.riichi && opts.riichi.includes(t);
+    return { type:'discard', tile:t, riichi };
+  },
+  async askCall(g, q, opts, t) {
+    g.rp[q] = { phase:'call', callOpts:opts, callTile:t };
+    const v = await this.waitAct(g, q);
+    g.rp[q] = {};
+    if (G !== g) throw ABORT;
+    return v || { type:'skip' };
+  },
+  sendWin(g, winner, loser, h, r, d) {
+    if (!g.remote) return;
+    const after = g.scores.map((x, p) => x + d[p]);
+    g.ready = {};
+    this.each(g, (s, R) => ({ type:'win', winner:R(winner), loser:loser === null ? null : R(loser), h, r,
+      d:[0, 1, 2, 3].map(v => d[(v + s) % 4]), after:[0, 1, 2, 3].map(v => after[(v + s) % 4]) }));
+  },
+  sendRyu(g, ten, d) {
+    if (!g.remote) return;
+    g.ready = {};
+    this.each(g, (s, R) => {
+      const rot = arr => [0, 1, 2, 3].map(v => arr[(v + s) % 4]);
+      return { type:'ryu', ten:rot(ten), d:rot(d), hands:rot(g.hands.map((h, p) => ten[p] ? h.slice() : [])), scores:rot(g.scores) };
+    });
+  },
+  sendEnd(g) { this.each(g, (s, R) => ({ type:'end', scores:[0, 1, 2, 3].map(v => g.scores[(v + s) % 4]) })); },
+  waitReady(g) {
+    if (!g.remote || !Object.values(g.remote).some(Boolean)) return Promise.resolve();
+    return new Promise(res => { this.readyW = res; this.checkReady(); });
+  },
+  checkReady() {
+    const g = G;
+    if (!g || !this.readyW) return;
+    const left = Object.keys(g.remote).filter(p => g.remote[p] && !g.ready[p]);
+    if (!left.length) { const w = this.readyW; this.readyW = null; w(); return; }
+    const ov = $('#gover');
+    ov.hidden = false;
+    ov.innerHTML = `<div class="ohead"><span class="who">待機中</span><span class="sub">${left.map(p => nm(+p)).join('・')} が結果を確認しています</span></div><div class="obody"></div>`;
+  },
+
+  // ---- 参加者 ----
+  async join(code, name) {
+    await this.load();
+    this.close();
+    this.role = 'guest'; this.code = code;
+    await new Promise((res, rej) => {
+      const peer = new Peer(this.opts());
+      this.peer = peer;
+      peer.on('open', () => {
+        const conn = peer.connect('mjdojo-' + code, { reliable:true });
+        this.hostConn = conn;
+        const to = setTimeout(() => rej(new Error('部屋が見つかりません。番号を確認してください')), 12000);
+        conn.on('open', () => { clearTimeout(to); conn.send({ type:'hello', name }); res(); });
+        conn.on('data', m => this.guestRecv(m));
+        conn.on('close', () => { if (this.role === 'guest') onlineMsg('ホストとの接続が切れました'); });
+      });
+      peer.on('error', e => rej(new Error(e.type === 'peer-unavailable' ? '部屋が見つかりません。番号を確認してください' : '接続できませんでした（' + e.type + '）')));
+    });
+    renderOnline();
+  },
+  guestRecv(m) {
+    if (m.type === 'lobby') { this.lobby = m.lobby; this.guestLen = m.len; renderOnline(); return; }
+    if (m.type === 'full') { onlineMsg(m.msg); this.close(); return; }
+    if (m.type === 'start') {
+      G = { client:true, scores:[25000, 25000, 25000, 25000], quiz:{ n:0, ok:0 }, eff:{ n:0, sum:0 }, log:[], hands:[[], [], [], []], melds:[[], [], [], []], ponds:[[], [], [], []],
+        riichi:[false, false, false, false], wall:{ length:0 }, doraInd:[0], dealer:0, passes:0, honba:0, sticks:0, turn:0, drawn:null, sel:-1, riichiSel:false, phase:'wait' };
+      show('game'); bgmSync();
+      return;
+    }
+    const g = G;
+    if (!g || !g.client) return;
+    if (m.type === 'state') return this.applyState(g, m);
+    if (m.type === 'ann') return toast(`<b>${m.word}</b>${nm(m.p)}`, 1100);
+    if (m.type === 'win') {
+      g.winD = m.d; g.winAfter = m.after;
+      return quizFlow(g, m.winner, m.loser, m.h, m.r).then(() => this.guestDone(g));
+    }
+    if (m.type === 'ryu') {
+      g.scores = m.scores;
+      renderGame();
+      return ryuOverlay(g, m.ten, m.d, m.hands).then(() => this.guestDone(g));
+    }
+    if (m.type === 'end') { g.scores = m.scores; gameEnd(g); this.close(); }
+  },
+  guestDone(g) {
+    if (G !== g || !this.hostConn) return;
+    this.hostConn.send({ type:'ready' });
+    const ov = $('#gover');
+    ov.hidden = false;
+    ov.innerHTML = '<div class="ohead"><span class="who">待機中</span><span class="sub">ほかのプレイヤーが結果を確認しています</span></div><div class="obody"></div>';
+  },
+  applyState(g, m) {
+    const newHand = m.hk !== g.hk;
+    const prevRiichi = g.riichi.slice();
+    Object.assign(g, {
+      scores:m.scores, dealer:m.dealer, passes:m.passes, honba:m.honba, sticks:m.sticks, len:m.len, doraInd:m.doraInd,
+      wall:{ length:m.wallN }, turn:m.turn, drawn:m.drawn, riichi:m.riichi, melds:m.melds, ponds:m.ponds,
+      hands:[m.hand, ...m.handN.slice(1).map(n => Array(n).fill(-1))], last:m.last, pnames:m.pnames, hk:m.hk,
+    });
+    const samePhase = g.phase === m.phase;
+    g.phase = m.phase; g.opts = m.opts; g.callOpts = m.callOpts; g.callTile = m.callTile;
+    if (!samePhase || m.phase === 'wait') { g.sel = -1; g.riichiSel = false; }
+    g.waiter = m.phase === 'wait' ? null : v => {
+      g.waiter = null; g.phase = 'wait'; g.opts = null; g.callOpts = null; g.sel = -1; g.riichiSel = false;
+      this.hostConn.send({ type:'act', v }); renderGame();
+    };
+    if (newHand) {
+      $('#gover').hidden = true;
+      toast(`<b>${kyokuName(g)}</b>${g.honba}本場　親は${nm(g.dealer)}`, 1300);
+    }
+    renderGame();
+    bgmSync();
+    for (let p = 0; p < 4; p++) if (g.riichi[p] && !prevRiichi[p] && !newHand) riichiFx(p);
+    if (m.phase === 'discard' && m.opts && m.opts.reason) toast(m.opts.reason, 2200);
+  },
+};
+
+// ---- オンライン対局の画面 ----
+function onlineMsg(t) { const el = $('#onMsg'); if (el) { el.textContent = t; el.hidden = !t; } }
+function renderOnline() {
+  const box = $('#onBody');
+  if (!box) return;
+  const name = store.get('g:oname', '');
+  if (!NET.role) {
+    box.innerHTML = `<label class="onrow">名前 <input id="onName" maxlength="8" value="${name.replace(/"/g, '')}" placeholder="例：たろう"></label>
+      <div class="oncards">
+        <div class="oncard"><b>部屋を作る</b><p>部屋番号を友だちに伝えて、参加を待ちます。空いた席はCPUが入ります。東風戦・半荘戦やCPUの強さは「対局の設定」で選んだものを使います。</p><button class="btn primary" id="onHost">部屋を作る</button></div>
+        <div class="oncard"><b>部屋に入る</b><p>友だちから聞いた5桁の部屋番号を入れてください。</p><div class="row"><input id="onCode" inputmode="numeric" maxlength="5" placeholder="12345" value="${new URLSearchParams(location.search).get('room') || ''}"><button class="btn primary" id="onJoin">参加</button></div></div>
+      </div>`;
+    return;
+  }
+  const seats = [0, 1, 2, 3].map(s => NET.lobby.find(x => x.seat === s));
+  const me = NET.role === 'host' ? 0 : (NET.lobby.find(x => x.name && x.seat && NET.peer) || {}).seat;
+  const url = location.href.split('?')[0].split('#')[0] + '?room=' + NET.code;
+  box.innerHTML = `<div class="onroom">部屋番号 <b>${NET.code}</b>${NET.role === 'host' ? `<button class="btn ghost" id="onCopy">招待リンクをコピー</button>` : ''}</div>
+    <div class="onseats">${seats.map((x, s) => `<div class="onseat ${x ? 'in' : ''}"><small>${s === 0 ? '部屋主' : '席' + (s + 1)}</small>${x ? x.name : '<span>空席（CPU）</span>'}</div>`).join('')}</div>
+    <p class="onnote">${NET.role === 'host' ? `${LEN_NAME[GS.len]}・空席は CPU${LEVEL_NAME[GS.level]}。全員そろったら開始してください。` : '部屋主が開始するのを待っています…'}</p>
+    <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" id="onLeave">退出</button>${NET.role === 'host' ? '<button class="btn primary" id="onStart">対局開始 ▶</button>' : ''}</div>`;
+}
+document.addEventListener('click', async e => {
+  const id = e.target.closest('button') && e.target.closest('button').id;
+  if (!id || !id.startsWith('on')) return;
+  const nameOf = () => { const v = ($('#onName') && $('#onName').value.trim()) || 'ゲスト'; store.set('g:oname', v); return v; };
+  try {
+    onlineMsg('');
+    if (id === 'onHost') { const n = nameOf(); onlineMsg('部屋を作っています…'); await NET.host(n); onlineMsg(''); }
+    if (id === 'onJoin') {
+      const code = ($('#onCode').value || '').replace(/\D/g, '');
+      if (code.length !== 5) return onlineMsg('5桁の部屋番号を入れてください');
+      const n = nameOf(); onlineMsg('接続しています…'); await NET.join(code, n); onlineMsg('');
+    }
+    if (id === 'onLeave') { NET.close(); renderOnline(); }
+    if (id === 'onStart') NET.start();
+    if (id === 'onCopy') {
+      const url = location.href.split('?')[0].split('#')[0] + '?room=' + NET.code;
+      try { await navigator.clipboard.writeText(url); onlineMsg('招待リンクをコピーしました'); } catch (err) { onlineMsg(url); }
+    }
+  } catch (err) { NET.close(); renderOnline(); onlineMsg(err.message || String(err)); }
+});
+// 招待リンク（?room=12345）で開いたら参加画面へ
+if (new URLSearchParams(location.search).get('room')) setTimeout(() => show('online'), 0);
 
 $('#deco').innerHTML = [0, 13, 22, 33].map(t => tileHTML(t)).join('');
 $('#gameDeco').innerHTML = [27, 27, 27, 31].map(t => tileHTML(t)).join('');
