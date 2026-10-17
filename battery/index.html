@@ -1,119 +1,115 @@
 <!doctype html><html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0a1214"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
-<title>電池ラボ物語</title>
+<meta name="theme-color" content="#000000"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<title>全固体への道 〜O西 5ねん戦記〜</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap">
 <style>
-:root{
-  --bg:#0a1214;--panel:#13201f;--panel2:#1b2c2b;--line:rgba(255,255,255,.11);
-  --text:#eef8f5;--muted:#93aba6;--acc:#3ee6b0;--acc2:#29b6f6;--gold:#f7c948;--red:#ff6b6b;--warn:#ffb648;
-  --display:"Dela Gothic One","Hiragino Kaku Gothic StdN","Yu Gothic",system-ui,sans-serif;
-  --body:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Yu Gothic",system-ui,sans-serif;
-  color-scheme:dark;
-}
+:root{--bg:#000;--fg:#fcfcfc;--dim:#a0a0a0;--y:#f8b800;--r:#f85858;--g:#58d854;--b:#3cbcfc;--p:#f878f8;--o:#fca044;
+ --font:"DotGothic16","Hiragino Kaku Gothic StdN","Yu Gothic",monospace;color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);font-size:14px;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
-body{min-height:100vh;background:radial-gradient(ellipse at 50% -10%,#123a33 0%,#0a1214 60%) fixed}
-button{font-family:var(--body);font-size:14px;cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:10px;padding:9px 12px;font-weight:700;touch-action:manipulation}
-button:active{transform:scale(.97)}
-button:disabled{opacity:.38;cursor:default;transform:none}
-button.pri{background:linear-gradient(180deg,#5ff5c4,#1fb98a);color:#03241a;border:none}
-button.ghost{background:transparent}
-button.sm{padding:6px 9px;font-size:12px;border-radius:8px}
-input,select{font-family:var(--body);font-size:15px;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
-#app{max-width:620px;margin:0 auto;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
-h1,h2,h3{font-family:var(--display);font-weight:400;margin:0}
-.muted{color:var(--muted)}.small{font-size:12px}
-.ok{color:var(--acc)}.ng{color:var(--red)}.wn{color:var(--warn)}
-.top{position:sticky;top:0;z-index:20;background:rgba(10,18,20,.93);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:8px 12px;padding-top:max(8px,env(safe-area-inset-top,0px))}
-.toprow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.toprow .sp{flex:1}
-.cal{font-family:var(--display);font-size:15px}
-.chip{display:inline-flex;align-items:center;gap:4px;font-weight:800;white-space:nowrap;font-size:13px}
-.bat{display:inline-block;width:34px;height:15px;border:2px solid #cfe;border-radius:3px;position:relative;vertical-align:middle;margin-right:2px}
-.bat:after{content:"";position:absolute;right:-5px;top:3px;width:3px;height:5px;background:#cfe;border-radius:0 2px 2px 0}
-.bat i{position:absolute;left:1px;top:1px;bottom:1px;border-radius:1px;background:var(--acc)}
-.skills{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:7px}
-.sk{font-size:11px;color:var(--muted)}
-.sk .bar{height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;margin-top:2px}
-.sk .bar i{display:block;height:100%;border-radius:3px}
-main{flex:1;padding:12px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:12px}
-.card h3{font-size:15px;margin-bottom:6px}
-.ptitle{display:flex;gap:10px;align-items:center}
-.ptitle .ic{font-size:30px}
-.tag{display:inline-block;font-size:11px;padding:2px 7px;border-radius:99px;background:rgba(62,230,176,.14);color:var(--acc);font-weight:800}
-.tag.g{background:rgba(247,201,72,.15);color:var(--gold)}
-.tag.r{background:rgba(255,107,107,.15);color:var(--red)}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;-webkit-tap-highlight-color:transparent;overscroll-behavior:none;image-rendering:pixelated}
+body{min-height:100vh;background:#000}
+#app{max-width:620px;margin:0 auto;min-height:100vh;padding:8px;padding-top:max(8px,env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+.win{background:#000;border:3px solid #fcfcfc;border-radius:8px;box-shadow:0 0 0 3px #000,inset 0 0 0 2px #000;padding:10px 12px;margin:0 0 12px;position:relative}
+.wt{display:inline-block;background:#000;color:var(--fg);padding:0 6px;margin:-22px 0 6px -4px;position:relative;top:-2px;font-size:15px}
+button{font-family:var(--font);font-size:15px;cursor:pointer;background:#000;color:var(--fg);border:2px solid #fcfcfc;border-radius:6px;padding:8px 10px;touch-action:manipulation}
+button:active{transform:translateY(1px)}
+button:disabled{opacity:.35;cursor:default}
+button.pri{background:#fcfcfc;color:#000;border-color:#fcfcfc}
+button.ghost{border-color:transparent;background:transparent;color:var(--dim)}
+button.wide{width:100%;margin:6px 0}
+.small{font-size:12.5px}.dim{color:var(--dim)}.y{color:var(--y)}.r{color:var(--r)}.g{color:var(--g)}.b{color:var(--b)}.p{color:var(--p)}.o{color:var(--o)}
+main{display:block}
+.face{width:64px;height:64px;image-rendering:pixelated;border:2px solid #fcfcfc;border-radius:4px;flex:none;background:#203878}
+.face.big{width:120px;height:120px}
+.status .srow{display:flex;gap:10px;align-items:flex-start}
+.nmrow{display:flex;align-items:center;gap:6px}
+.nmrow button{padding:0 4px}
+.wkrow{display:flex;gap:3px;margin-top:4px}
+.wkrow span{flex:1;text-align:center;font-size:11px;border:1px solid #555;padding:1px 0;color:var(--dim)}
+.wkrow span.past{opacity:.35}
+.wkrow span.now{background:var(--fg);color:#000;border-color:var(--fg)}
+.bars{margin-top:8px;font-size:12.5px;line-height:1.9;white-space:nowrap}
+.pbar{display:inline-flex;gap:2px;vertical-align:middle;margin:0 4px}
+.pbar i{display:inline-block;width:9px;height:10px}
+.kv{display:flex;gap:16px;margin-top:4px}
+.team{margin-top:4px;line-height:1.6}
+.skills{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px;font-size:11px;color:var(--dim)}
+.skills b{color:var(--fg)}
+.mini{height:5px;background:#222;margin-top:2px}.mini i{display:block;height:100%}
+.badge{display:inline-block;font-size:11px;padding:0 5px;border:1px solid currentColor;border-radius:3px;vertical-align:middle}
+.badge.o{color:var(--o)}.badge.b{color:var(--b)}.badge.y{color:var(--y)}.badge.r{color:var(--r)}.badge.g{color:var(--g)}
+.thead{display:flex;gap:8px;align-items:center}
+.sq{display:inline-block;width:12px;height:12px;flex:none;vertical-align:middle}
+.thead .sq{width:20px;height:20px}
 .targets{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-.tbox{flex:1;min-width:130px;background:var(--panel2);border-radius:10px;padding:8px}
-.tbox .lb{font-size:11px;color:var(--muted)}
-.tbox .v{font-family:var(--display);font-size:18px}
-.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.act{display:flex;flex-direction:column;align-items:center;gap:3px;padding:11px 4px;border-radius:12px}
-.act .e{font-size:24px}.act .t{font-size:13px}.act .c{font-size:10.5px;color:var(--muted);font-weight:500}
-.boss{display:flex;gap:10px;align-items:flex-start}
-.boss .av{font-size:30px;line-height:1;flex:none}
-.boss .bub{background:var(--panel2);border-radius:4px 12px 12px 12px;padding:9px 11px;line-height:1.6;flex:1}
+.tbox{flex:1;min-width:120px;border:2px solid #555;border-radius:4px;padding:6px 8px}
+.tbox .v{font-size:19px}
+.prog{display:flex;gap:4px;margin:8px 0 3px}
+.prog span{flex:1;height:8px;background:#333}
+.prog span.c{background:var(--fg)}
+.cmds{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.cmd{display:flex;flex-direction:column;align-items:flex-start;text-align:left;padding:7px 10px 7px 22px;position:relative;border-width:2px}
+.cmd:before{content:"▶";position:absolute;left:6px;top:8px;font-size:11px;opacity:0}
+.cmd:not(:disabled):hover:before,.cmd:not(:disabled):active:before{opacity:1}
+.cmd .ct{font-size:16px}.cmd .cc{font-size:11px;color:var(--dim)}
 table{width:100%;border-collapse:collapse;font-size:12px}
-th,td{padding:5px 4px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-th{color:var(--muted);font-weight:700}
-td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.logwrap{max-height:280px;overflow:auto}
-.hint{font-size:12.5px;line-height:1.6;padding:6px 0;border-bottom:1px dashed var(--line)}
+th,td{padding:4px 3px;border-bottom:1px dashed #444;text-align:left;vertical-align:top}
+th{color:var(--dim);font-weight:400}
+.num{text-align:right;white-space:nowrap}
+.logwrap{max-height:260px;overflow:auto}
+.hint{font-size:13px;line-height:1.6;padding:5px 0;border-bottom:1px dashed #444}
 .hint:last-child{border-bottom:none}
 .hbar{display:flex;align-items:center;gap:6px;font-size:12px;margin:3px 0}
-.hbar .nm{width:92px;flex:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.hbar .tr{flex:1;height:8px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden}
-.hbar .tr i{display:block;height:100%;background:var(--acc2);border-radius:4px}
-.hbar .vv{width:58px;text-align:right;color:var(--muted);flex:none}
-/* modal */
-.ov{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center}
-.sheet{background:#101b1b;border:1px solid var(--line);border-bottom:none;border-radius:18px 18px 0 0;width:100%;max-width:620px;max-height:92vh;max-height:92dvh;overflow:auto;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));animation:up .22s ease}
-@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
-.sheet h2{font-size:18px;margin-bottom:10px}
-.btnrow{display:flex;gap:8px;margin-top:14px}
-.btnrow button{flex:1}
-.sample{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:10px}
-.sample .hd{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.prm{margin:6px 0}
-.prm .pl{font-size:11.5px;color:var(--muted);margin-bottom:3px}
-.seg{display:flex;flex-wrap:wrap;gap:5px}
-.seg button{padding:6px 9px;font-size:12.5px;border-radius:8px;font-weight:700}
-.seg button.on{background:var(--acc);color:#03241a;border-color:var(--acc)}
-.qopt{display:block;width:100%;text-align:left;margin:6px 0;padding:11px 12px;line-height:1.5}
-.qopt.right{background:rgba(62,230,176,.2);border-color:var(--acc)}
-.qopt.wrong{background:rgba(255,107,107,.2);border-color:var(--red)}
-.expl{background:var(--panel2);border-radius:10px;padding:10px;margin-top:8px;line-height:1.65;font-size:13px}
-.res{background:var(--panel);border-radius:12px;padding:10px;margin-bottom:8px;border:1px solid var(--line)}
-.res .big{font-family:var(--display);font-size:20px}
-.pill{display:inline-block;padding:1px 6px;margin:1px;border-radius:6px;background:rgba(255,255,255,.07);font-size:11px}
-.title{padding:28px 18px;text-align:center}
-.title h1{font-size:34px;line-height:1.2;background:linear-gradient(90deg,#5ff5c4,#29b6f6);-webkit-background-clip:text;background-clip:text;color:transparent}
-.title .lead{line-height:1.8;color:var(--muted);margin:14px 0 20px}
-.bgsel{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
-.bgsel button{text-align:left;padding:10px;line-height:1.45}
-.bgsel button.on{border-color:var(--acc);background:rgba(62,230,176,.12)}
-.toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:80;background:#1f3b35;border:1px solid var(--acc);color:var(--text);padding:9px 14px;border-radius:12px;font-weight:700;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.4);animation:up .2s;max-width:90vw;text-align:center}
-.prog{display:flex;gap:6px;margin:8px 0 2px}
-.prog span{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.08)}
-.prog span.d{background:var(--acc)}.prog span.c{background:var(--gold)}
-svg text{font-family:var(--body)}
-.endrank{font-family:var(--display);font-size:28px;text-align:center;margin:8px 0;color:var(--gold)}
-.wkb{font-size:11px;font-weight:800;padding:2px 7px;border-radius:99px}
-.wkb.prep{background:rgba(255,182,72,.18);color:var(--warn)}
-.wkb.meet{background:rgba(41,182,246,.18);color:var(--acc2)}
-.wkrow{display:flex;gap:4px;margin-top:6px}
-.wkrow span{flex:1;text-align:center;font-size:10px;padding:2px 0;border-radius:5px;background:rgba(255,255,255,.05);color:var(--muted)}
-.wkrow span.p{color:#ffcf8a}.wkrow span.m{color:#8fd8ff}
-.wkrow span.past{opacity:.4}
-.wkrow span.now{background:var(--acc);color:#03241a;font-weight:800;opacity:1}
-.tfrow{display:flex;gap:8px}.tfrow .qopt{text-align:center;font-size:16px}
-</style></head><body><div id="app"></div>
+.hbar .hn{width:96px;flex:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hbar .ht{flex:1;height:9px;background:#222}.hbar .ht i{display:block;height:100%;background:var(--b)}
+.hbar .hv{width:34px;text-align:right;color:var(--dim)}
+.ov{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.72);display:flex;align-items:flex-end;justify-content:center;padding:8px;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}
+.sheet{width:100%;max-width:620px;max-height:90vh;max-height:90dvh;overflow:auto;margin:0;padding-top:16px}
+.btnrow{display:flex;gap:8px;margin-top:12px}.btnrow button{flex:1}
+.sample{border:2px solid #555;border-radius:4px;padding:8px;margin-bottom:8px}
+.sample .hd{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.prm{margin:5px 0}
+.seg{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+.seg button{padding:5px 8px;font-size:13px;border-color:#777}
+.seg button.on{background:var(--fg);color:#000;border-color:var(--fg)}
+.qopt{display:block;width:100%;text-align:left;margin:6px 0;padding:10px 12px;line-height:1.6}
+.qopt.right{border-color:var(--g);color:var(--g)}
+.qopt.wrong{border-color:var(--r);color:var(--r)}
+.tfrow{display:flex;gap:8px}.tfrow .qopt{text-align:center;font-size:17px}
+.expl{border:2px dashed #555;border-radius:4px;padding:8px 10px;margin-top:8px;line-height:1.75;font-size:13px}
+.res{border:2px solid #555;border-radius:4px;padding:8px 10px;margin-bottom:8px;line-height:1.7}
+.big{font-size:22px}
+.pill{display:inline-block;padding:0 5px;margin:2px 2px 0 0;border:1px solid #666;font-size:11px}
+.talk{display:flex;gap:10px;align-items:flex-start}
+.talk .tb{flex:1;min-width:0}
+.talk .nm{display:inline-block;border:2px solid var(--fg);padding:0 6px;margin-bottom:4px;font-size:13px}
+.talk .tx{line-height:1.9;min-height:3.8em}
+.cur{animation:blink .6s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.oui{font-size:40px;text-align:center;color:var(--y);letter-spacing:4px;animation:shake .4s steps(4) 2;text-shadow:3px 3px 0 #a81000}
+@keyframes shake{0%{transform:translate(0,0)}25%{transform:translate(-4px,2px)}50%{transform:translate(4px,-2px)}75%{transform:translate(-2px,-2px)}}
+.toast{position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:80;font-size:13px;max-width:92vw;text-align:center}
+.title{text-align:center;padding:14px 4px}
+.logo{font-size:34px;color:var(--y);text-shadow:4px 4px 0 #a81000;letter-spacing:2px;margin-top:6px}
+.sublogo{color:var(--b);margin:4px 0 12px}
+.duo{display:flex;justify-content:center;align-items:center;gap:12px;margin:10px 0 14px}
+.vs{color:var(--dim)}
+.lead{line-height:1.9;text-align:center}
+.bgsel{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}
+.bgsel button{text-align:left;font-size:13px;line-height:1.5}
+.bgsel button.on{background:var(--fg);color:#000}
+.bgsel button.on .dim{color:#333}
+.endrank{font-size:22px;color:var(--y);margin:6px 0}
+svg text{font-family:var(--font)}
+@media (max-width:380px){.bars{font-size:11px}.pbar i{width:7px}}
+</style>
 </head><body><div id="app"></div>
 <script>
+"use strict";
+const IMG={"onishi": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAIAAADYYG7QAAAGKUlEQVR4nO2YcWgTVxzHf4a4wTpIIhqw1bCuSRPD0mst2c6sJJO4Srp1UNAtimWdDMWBHTiHOkSX/bMVcbIIysaQuI6u07HCHJZmFmyn3bnQuPPgvDbpCpHa0YG5DJwTQ9kfv/b1eZcmd7Fj+2M/Snn37r33++T7+73fvbtlT7EH4b9khn8bQGn/A5Uy46NMlqVYwX6zq6PsNcsHkqXYyTMXU78MAoCjPkj6WbfRyzaXjbWsjF2Gwpw8c/Hrs8fu3LxC31qxrgkbr73+7t6dLWVg6QaSpVhTYOOdm1dWrGu6c/NKMn0LANbb1yqGIdmJrkNetlkXkz4gWYp1dr5zqTeKl8n0LTWKwsSZB7qAdOdQkk+SNqFBnWgjt7Y1rPzqekw7k45tL0sxt3W5ImmI+8Wk4qdyB7b4FtuPjwSERouxWJuGY6pMF4YT2tfXCoTyYNIQ32pV1tvXvhF4RtHJVJm2NazUKJK+HFITkLzG/61+r89sCDfCiDwLAJmJcX4qx1SZtLvQBITyFMTCNroMN7pMDg/2hwAAIGc22GpmEWspgUoaQWGqrXQ/D56D1dbhuIGfuua2Lhel0ttNR1KT1Emmb9Ep/OErz5kcHqbaqqAhfJVvHtHuRQcQRofGAoBWvxe14Sdnisxt9XuXHkhR/dbb1zJVJp95bgW1PAAwHB/86NwPd4f67lVuUBfPgqY1hwout1jqAAA/OdOf4AEg5GUqAm3tAJd6o+LMgyUDUhu9mdF9ZmLcVlMb8jIAkEsJ2ACA259/4G8Obgp3itHjJZfVV6npkkjkyaUEAAh5md3hrT6zAS9NDk8uJfQn+P4EjzWpfftmLS7KVIipMpGSQxoYI8wqpto6nAKf2UDu2jNXtaysVSHF49NWU0vnDSpBLlEkf3NwsQwrYloVwmfCiOy9MJxQJ3jIy+RSAhGDGFNtLV4Oyge6V7kB/rwW8jI+s+HQd5CZGAd48aGfXj13rEYCfnIG7+ZSwnAKsHJqcaQpZGZXRzR6HFcfkWexyhHH9Eh+cgbjRbTxNwdxouXViJZjmo5dRh7gIS8TbnQpOLCBNDQuPzmjDmUR07HL1rQc9j95Db1iCGiRiDYwv90AFnaZyeEBKHDULB/I7OrYu7NlR3a60vb83aG+4oPJ8wRp+hN81zcjGo/V+gpjekzgxLywqrU/wQ/HB0naEve9o1LvqIRtksjaafQBmV0dXraZdRtZt3FNy+FjqeUYLDpFwo0uW03tiDyLlHr3PJTxXpbNTqfHBNJjz1xVeyVPDwB44cDpf+pFUZZiCS6u6CyZT8gEmt+pNYVMlmJqGrvTw4n5wxelktOz545mzx1dsrcODBO26WB92Xf9xGcDlY8vjCz49ID5ipDNTlssq6GUVMWA8DcluDjNgXZ3qO9E32MAwN3IVnS1YeDwyKEYSdUhaApsvH2/7lfukyJYiwLJUuxy1x4A4MQ861YO+3bqCYC8ehZ9QiJq5VJCxvceMz/mafbtl581RqPHCzIVyCHMmMtde4RVrRWBth1tDXanBx4+0CT5ZGZsCNucmGd2HelP8LmUgIUHixChGZFnd7Q10DJ//3M+wcXRUQkgWYod2OJLcHEaBY3e3tyNLGnjR7Qt+9/vHZXUJaB3VMKzLCfm6VkAkODi2ey0gmkBCHn/+uO3e5UbkEOdOmhkq6NIp7oH02OC3enZd7rn097zdBr1J3hbTS2z6wjhps3u9KTHBIVURphPXvwutqnzWCSyn8xBT0hWEWgryAcA3T0DkYgHmT7es90mz84RT4zvO92D69AfljJjQwAvkUvcxRbLarOrw4if6PDGpnAnTUOYFD3CqlaAn+ieJJ9EdLvT49v7BYrx+49nd4e3otgkXiTz1IZ1wUg/CuiM0WucmAcQOHFu6znqg476YIXbiKDqeHFi3u58qAfDZ0AO/ANKjyJwBVa/kSWd9F1OzHf3DCjiZXMGCIF6cSP2FnRPskeLneoebN++mXUbWffC+xcn5h31we6eAbK/CA3thb40dPcMcGJe7bgkCltneas9yNZZaPfKMW4j6zbS8hBTyEzcGXAaLUZ6TMA2hr8IUySy//b9OrUPMsvu9NDyEFPrROxv/ZdBOU7FmY8AAAAASUVORK5CYII=", "kawaguchi": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAIAAADYYG7QAAAEmElEQVR4nO2YP2gbVxzHvy4Somio7gKWNDnWJAmBOGIsRVACRgk4bp0MWRpSCO7QoQQCpdAhpQ206VAKpYF2KUGDSfHU1EE1xMKQghXLuFwFwtLiSz2drmBJSwZxAnf4Sa/P73TS3UnQDvkhzLunp9/7+Pv7c+9u5nz2U/yf7I3/GkC010Dj7DXQOJsOUKdR6DQKU3Hlm5CDBocvtgEkL15mX4Xit735nPHWhwjl8MV2tFXR5QyAaKtCX6maAWDpzkNvTF6AOo0CScIgmBENAH+9+vYPv8O9VK5zqNMotItfRlsVK41gn7+XycXfcptb7nKor81IFH+96sqnYC4UIm0A6HKGPkOXmYm0mUgDyEuBHHqhN7uuRJqo7Idi8QoFlVRybtYVk9OQMXl4s0ujSaLmTiFBD0EhKjGKF7Mcesm5WefZ7UghqzykjV0aASi1u/zl4fHfQMDJXh5ziG+Ggk7+erXU7ual/vZBJQUgOTfr0PNEtw5iIprv1p/y87xCOfR+Om49eryzdnN5bJ90B8S2J9PlDHVIVTPyUsBMpJVYWNUMEon/4TQV6jQKOw/vMALYFNe59z8DgFbFShNUUjm1dvz0i+kADTUqKAUVXc40DzaJUtWMjfL+K7WGQep4MEdASixMA9p7o7wPIC8FELuCQddRkVZiYWARucXn5X1an5cCpXaXEKcJxJPpcubugA9AtFU5ObuA8okuKXZBJfVKrTnE8tIY2V8a8J2Q9UahPTqPoJc+JCQ1BZTCxIJLcWRSOWdyASSUmNCs81Lgq4+/5plg6dfTAQrFb0sr9wSCWvEZgObBJhXXrzt/lNrdoJKieSUWFkI2TSCr1YrPzESa75DXli4AoN7ojYOZ604N4ASILKwCiCys6kBERjQWNjUD9aq/Xh3Uvxiv+z9XnJyvXTdGVTPAyUCIdLsgiIDhV2JQYmF/PeAhhxwBURrxJxBKHQBNAIOaoh6YlwLAFbcc7oB4Y0XEBqpmmIk0MV1bujA0jRzGC86TmtWa0BXZg5iZSLOkVjVD1QwP8YIHhfgTiC5nInJ/EoCKvjbsXkbmXB64KnuhIQnGpBJo3JqXPqRqBs/EEtxfr1ppXN3q4eoxCEC7reuNGrRNVTMU9AueCm0oShk+wPfo8dbazWU4e84fA8SeXdptnU0+L+9fyi2OjhET5p0bH2Tnffz7mtFYtm8/mCTWr3789pvu0e6l3CJd7hl+AN2jXSuTfOPD6yvL/GQ0npKk6AisIQqNQCG7vrK88f2/22fDpr9eLVmWXf1oTbn1CY31Ro1oMIi7nVpnFBqNojdqey972XkfgCfFre7R7t1b7/IvhPjHMTORjiysPiluAYgkL2fnfUQj8FnV6gONVYVoABAQMWXDJp1Z+ZV0zKUFbFJg4gUDwGPNhEKR0Shkv2z9SQPySx7pzD+UpnmwSblFKExa4hCAeKyZ09PT0Sj8/8R74ZnYfU2XM3sve+dPfvvr3NXm4TbRDHUo0DCfToHsEKPxlLr+AIMTEgCKLM5qaResaQLR78m1uv6AgPg8s9t1qAfGOtHLBuZLoHGCYmf/AEECi5GWkxmVAAAAAElFTkSuQmCC", "boss": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAArUlEQVR4nGNUsKhgIAWwoPEjHNBVrDiAwmXCrxpTkAmXBC49KE5qyTDAqqFmxgUsNuBSjSaFYoOIQQGE8ebCBEwuFg0MDAwvXjyQkFCAK4VwkRUwwuPhzgqcTmJgYFCJuABhMGEK4VGNxUkMDAxrDCLg7JALK9BkGdGSBqbD0GxGaHig0ABh/FjA8IYjgYGBQeTHAo4EqDqFB1BZJjTVuABcARMxqpH1MBFShg4AbmUzSwaAiJwAAAAASUVORK5CYII="};
 "use strict";
 // ===================== 基本データ =====================
 const SK = {
@@ -123,21 +119,21 @@ const SK = {
   hyoka:{n:"評価解析",c:"#c792ea"}
 };
 const SKK = Object.keys(SK);
-const RANKS = [[0,"新人研究員"],[30,"研究員"],[75,"主任研究員"],[135,"チームリーダー"],[210,"グループ長"],[300,"フェロー"]];
+const RANKS = [[0,"主任"],[40,"係長"],[100,"課長"],[180,"部長"],[280,"開発本部長"]];
 const BG = [
   {n:"化学系（無機合成）",d:"材料合成 +18",sk:{gosei:28}},
   {n:"物理系（計算物性）",d:"計算科学 +18",sk:{keisan:28}},
   {n:"電気系（電気化学）",d:"電気化学 +18",sk:{denki:28}},
   {n:"分析系（構造解析）",d:"評価解析 +18",sk:{hyoka:28}}
 ];
-const TERMS = [{y:1,d:"短期（48 週）"},{y:2,d:"標準（96 週）"},{y:3,d:"じっくり（144 週）"}];
+const YEARS = 5;
 const NEED_SE = 2; // 正極テーマ解放に必要な電解質テーマ数
 const PATENT_WAIT = 16; // 出願から審査結果までの週数
 
 // ===================== テーマ =====================
 // calc(c) はスキル・ノイズなしの「真の」性能。cell の電解質選択肢は達成済み電解質で動的に決まる。
 const PROJ = [
- {id:"argy",kind:"se",icon:"🟡",name:"アルジロダイト型硫化物",short:"アルジロダイト",sub:"Li₇₋ₓPS₆₋ₓClₓ の高伝導化",
+ {id:"argy",col:"#f8b800",kind:"se",icon:"🟡",name:"アルジロダイト型硫化物",short:"アルジロダイト",sub:"Li₇₋ₓPS₆₋ₓClₓ の高伝導化",
   skills:["gosei","hyoka"],cost:20,cellE:1,cellR:.95,liR:1,
   intro:"Li₆PS₅Cl を出発点に Cl 量を増やすと伝導度が上がるという話がある。ミリング時間とアニール温度も効くぞ。大気に出すと H₂S が出るから、グローブボックスの露点には気をつけて。",
   params:[
@@ -156,7 +152,7 @@ const PROJ = [
    if(c[0]===2&&c[2]===3)n.push("Raman: PS₄³⁻ 420 cm⁻¹ が鋭い");
    return {v:[10.5*[.55,.8,1,.9,.6][c[0]]*[.35,.7,.95,1,.85][c[1]]*[.25,.5,.8,1,.72][c[2]]],n};
   }},
- {id:"lgps",kind:"se",icon:"🟠",name:"LGPS 型硫化物",short:"LGPS 系",sub:"Li₁₀GeP₂S₁₂ の脱 Ge 化と超イオン伝導",
+ {id:"lgps",col:"#e45c10",kind:"se",icon:"🟠",name:"LGPS 型硫化物",short:"LGPS 系",sub:"Li₁₀GeP₂S₁₂ の脱 Ge 化と超イオン伝導",
   skills:["gosei","keisan"],cost:25,cellE:1,cellR:.9,liR:.82,
   intro:"Li₁₀GeP₂S₁₂ は電解液並みの伝導度を持つが、Ge が高価だ。Si や Sn で置き換え、さらに Cl を入れた系が最高記録を出している。焼成温度を外すと別の相が出るぞ。",
   params:[
@@ -175,7 +171,7 @@ const PROJ = [
    if(c[2]===0)n.push("原料の混合不足");
    return {v:[13*[.92,.5,.62,1.2][c[0]]*[.45,.8,1,.82,.5][c[1]]*[.5,.85,1,.9][c[2]]],n};
   }},
- {id:"halide",kind:"se",icon:"⚪",name:"ハライド電解質",short:"ハライド",sub:"Li₃MCl₆ 系の高電位安定な電解質",
+ {id:"halide",col:"#bcbcbc",kind:"se",icon:"⚪",name:"ハライド電解質",short:"ハライド",sub:"Li₃MCl₆ 系の高電位安定な電解質",
   skills:["gosei","hyoka"],cost:20,cellE:.97,cellR:.98,liR:.85,
   intro:"Li₃YCl₆ や Li₂ZrCl₆ は酸化に強く、正極と直接接しても分解しにくい。ただし吸湿性が高いから露点管理が肝だ。Y と Zr を混ぜると Li 空孔が入って伝導度が上がるという報告もある。",
   params:[
@@ -194,7 +190,7 @@ const PROJ = [
    if(c[2]===1)n.push("表面がわずかに水和");
    return {v:[1.55*[.6,.55,.72,.42,1][c[0]]*[.62,.85,1,.72][c[1]]*[.3,.65,.92,1][c[2]]],n};
   }},
- {id:"oxcl",kind:"se",icon:"🟣",name:"酸塩化物電解質",short:"酸塩化物",sub:"UCl₃ 型 LaCl₃ への Li・ドーパント・O の固溶",
+ {id:"oxcl",col:"#9878f8",kind:"se",icon:"🟣",name:"酸塩化物電解質",short:"酸塩化物",sub:"UCl₃ 型 LaCl₃ への Li・ドーパント・O の固溶",
   skills:["gosei","keisan"],cost:20,cellE:.97,cellR:1,liR:1,
   intro:"LaCl₃ の 1 次元チャネルを Li が走る酸塩化物系だ。La サイトに何を入れるか、O をどれだけ入れるか。O を入れすぎると LaOCl が出る。DFT で固溶エネルギーを見てから合成すると近道だぞ。",
   params:[
@@ -212,7 +208,7 @@ const PROJ = [
    if(c[0]===1)n.push("Sr 固溶で Li 空孔が減少");
    return {v:[2.9*[.35,.4,.62,.66,.68][c[0]]*fo*[.45,.8,1,.65][c[2]]],n};
   }},
- {id:"llzo",kind:"se",icon:"🟤",name:"ガーネット型酸化物",short:"LLZO",sub:"Li₇La₃Zr₂O₁₂ の立方晶安定化と緻密焼結",
+ {id:"llzo",col:"#ac7c00",kind:"se",icon:"🟤",name:"ガーネット型酸化物",short:"LLZO",sub:"Li₇La₃Zr₂O₁₂ の立方晶安定化と緻密焼結",
   skills:["gosei","hyoka"],cost:25,cellE:.82,cellR:.9,liR:1,
   intro:"LLZO は Li 金属に対して安定な数少ない電解質だ。何も入れないと正方晶になって伝導度が 2 桁下がる。ドーパントで立方晶を安定化し、Li 揮発を見込んで高温で緻密に焼き切ってくれ。",
   params:[
@@ -232,7 +228,7 @@ const PROJ = [
    if(c[2]===4)n.push("粒界に Li₂CO₃ が残存");
    return {v:[1.45*[.012,.62,1,.75,.85][c[0]]*[.25,.62,.9,1,.7][c[1]]*[.55,.85,1,.94,.78][c[2]]],n};
   }},
- {id:"latp",kind:"se",icon:"🟢",name:"NASICON 型酸化物",short:"LATP",sub:"Li₁₊ₓAlₓTi₂₋ₓ(PO₄)₃ の焼結と粒界制御",
+ {id:"latp",col:"#58d854",kind:"se",icon:"🟢",name:"NASICON 型酸化物",short:"LATP",sub:"Li₁₊ₓAlₓTi₂₋ₓ(PO₄)₃ の焼結と粒界制御",
   skills:["gosei","denki"],cost:20,cellE:.8,cellR:.78,liR:.55,
   intro:"LATP は大気中で安定で扱いやすい。ただし粒界抵抗が大きく、焼結助剤と温度が勝負だ。Ti⁴⁺ は Li 金属で還元されるから、負極との組み合わせには注意だぞ。",
   params:[
@@ -250,7 +246,7 @@ const PROJ = [
    if(c[2]===1)n.push("助剤が粒界を埋めて粒界抵抗が低下");
    return {v:[1.05*[.15,.45,.8,1,.88,.6][c[0]]*[.42,.72,1,.86,.55][c[1]]*[.72,1,.82,.9][c[2]]],n};
   }},
- {id:"ncm",kind:"cat",icon:"🔵",name:"全固体用 高 Ni 正極",short:"NCM811",sub:"LiNi₀.₈Co₀.₁Mn₀.₁O₂ の合成と被覆",
+ {id:"ncm",col:"#3cbcfc",kind:"cat",icon:"🔵",name:"全固体用 高 Ni 正極",short:"NCM811",sub:"LiNi₀.₈Co₀.₁Mn₀.₁O₂ の合成と被覆",
   skills:["gosei","denki"],cost:30,
   intro:"電解質がそろったら次は正極だ。NCM811 は容量が大きいが、焼成条件を外すと Li/Ni ミキシングが起きる。硫化物と接すると界面で副反応も起きるから、表面コートが鍵になる。容量と寿命の両方を満たしてくれ。",
   params:[
@@ -271,7 +267,7 @@ const PROJ = [
    if(co===4)n.push("被膜が厚く Li 輸送を阻害");
    return {v:[cap,ret],n};
   }},
- {id:"cell",kind:"cell",icon:"🔋",name:"全固体電池セル試作",short:"セル",sub:"エネルギー密度と寿命の両立",
+ {id:"cell",col:"#00e8d8",kind:"cell",icon:"🔋",name:"全固体電池セル試作",short:"セル",sub:"エネルギー密度と寿命の両立",
   skills:["denki","hyoka"],cost:40,
   intro:"いよいよセル試作だ。君が開発した電解質と正極を組み合わせて、事業部が求める 350 Wh/kg・300 サイクル 80 % を達成してほしい。Li 金属負極はエネルギーでは最強だが、電解質によっては還元されるし、拘束圧をかけすぎるとクリープで短絡するぞ。",
   params:[
@@ -295,8 +291,32 @@ const PROJ = [
    if(se.cellE<.9)n.push(`${se.short} は重く、正極との界面抵抗も大きい`);
    if(ng===0)n.push("In–Li は安定だが電圧が下がる");
    return {v:[E,R],n};
+  }},
+ {id:"proto",col:"#f878f8",kind:"proto",icon:"🏭",name:"プロト量産ライン立ち上げ",short:"プロト量産",sub:"量産試作ラインで歩留まりと生産能力を両立",
+  skills:["denki","hyoka"],cost:60,
+  intro:"ついに最後の関門、プロト量産だ。ラボで作れても、ラインで毎日同じものが作れなければ製品にならない。生技部との連携度が歩留まりに直結するぞ。歩留まり 85 %、生産能力 450 セル/日が合格ラインだ。",
+  params:[
+   {l:"電極作製プロセス",o:["湿式スラリー塗工","乾式（ドライ）電極","転写プレス"]},
+   {l:"ライン速度",o:["1 m/min","3 m/min","5 m/min","10 m/min","20 m/min"]},
+   {l:"加圧方式",o:["一軸プレス","ロールプレス","WIP（温間静水圧）"]},
+   {l:"検査方式",o:["抜き取り検査","全数インライン検査"]}
+  ],
+  metrics:[{l:"歩留まり",u:"%",t:85,d:1,max:100},{l:"生産能力",u:"セル/日",t:450,d:0}],
+  calc(c){
+   const [pr,sp,ps,ins]=c,n=[];
+   const f=.85+.15*(S.ready||0)/100;
+   const Y=110*[.9,.8,.95][pr]*[1,.98,.95,.88,.65][sp]*[.85,.97,1][ps]*[.9,1][ins]*f;
+   const C=900*[1,1.2,.8][pr]*[.15,.4,.65,1,1.6][sp]*[.6,1,.7][ps]*[1,.85][ins];
+   if(pr===1)n.push("溶媒レスで速いが膜厚ムラが出やすい");
+   if(pr===2)n.push("転写時の剥離で不良が出る");
+   if(sp===4)n.push("速度に乾燥・プレスが追いつかない");
+   if(ps===0)n.push("一軸プレスはバッチ式で律速");
+   if(ins===0)n.push("不良の流出でロット全体が NG に");
+   if((S.ready||0)<40)n.push("生技部との条件すり合わせ不足");
+   return {v:[Math.min(100,Y),C],n};
   }}
 ];
+
 const PB = {}; PROJ.forEach((p,i)=>{PB[p.id]=p;p.idx=i;});
 const SE_IDS = PROJ.filter(p=>p.kind==="se").map(p=>p.id);
 
@@ -426,46 +446,61 @@ const EVENTS = [
  {w:2,t:"共同研究先から原料を提供してもらえた",e:"🤝",f:()=>{S.budget+=80;return"予算 +80 万円";}},
  {w:2,t:"競合グループが近い成果を発表した",e:"📰",f:()=>{S.rep=Math.max(0,S.rep-4);return"評価 −4（急ごう）";}},
  {w:2,t:"過去の発表が被引用され話題に",e:"✨",f:()=>{S.rep+=4;return"評価 +4";}},
- {w:2,t:"風邪で寝込んだ",e:"🤧",f:()=>{S.soc=Math.max(5,S.soc-30);return"SOC −30 %";}},
+ {w:2,t:"風邪で寝込んだ",e:"🤧",f:()=>{S.soc=Math.max(5,S.soc-30);return"たいりょく −30 %";}},
  {w:3,t:"学生さんが実験を手伝ってくれる",e:"🙋",f:()=>{S.flags.extra=1;return"次の実験の試料枠 +1";}},
- {w:2,t:"H₂S センサーが鳴った！換気で半日ロス",e:"🚨",f:()=>{S.soc=Math.max(5,S.soc-12);return"SOC −12 %";},cond:()=>S.cur!==null&&(PROJ[S.cur].id==="argy"||PROJ[S.cur].id==="lgps")},
- {w:2,t:"室長からの差し入れ（プリン）",e:"🍮",f:()=>{S.soc=Math.min(100,S.soc+15);return"SOC +15 %";}},
+ {w:2,t:"H₂S センサーが鳴った！換気で半日ロス",e:"🚨",f:()=>{S.soc=Math.max(5,S.soc-12);return"たいりょく −12 %";},cond:()=>S.cur!==null&&(PROJ[S.cur].id==="argy"||PROJ[S.cur].id==="lgps")},
+ {w:2,t:"後輩が差し入れのプリンをくれた",e:"🍮",f:()=>{S.soc=Math.min(100,S.soc+15);S.stress=Math.max(0,S.stress-5);return"たいりょく +15・ストレス −5";}},
  {w:2,t:"展示会でメーカーの人に声をかけられた",e:"🏢",f:()=>{S.rep+=3;gain("denki",2);return"評価 +3・電気化学 +2";}},
  {w:2,t:"放射光施設のビームタイムが当たった",e:"🌈",f:()=>{gain("hyoka",5);return"評価解析 +5";}},
  {w:2,t:"知財部から「出願できそうな成果はない？」と聞かれた",e:"⚖️",f:()=>{gain("denki",1);return"特許申請コマンドを活用しよう";}},
  {w:2,t:"国家プロジェクトの公募が出た",e:"📑",choice:[
-   {l:"応募する（SOC −20 %）",f:()=>{S.soc=Math.max(5,S.soc-20);if(Math.random()<.35+S.rep/300){S.budget+=300;return"採択！予算 +300 万円";}return"不採択…";}},
+   {l:"応募する（たいりょく −20 %）",f:()=>{S.soc=Math.max(5,S.soc-20);if(Math.random()<.35+S.rep/300){S.budget+=300;return"採択！予算 +300 万円";}return"不採択…";}},
    {l:"今回は見送る",f:()=>"見送った"}]},
  {w:2,t:"他部署から測定を頼まれた",e:"📦",choice:[
-   {l:"引き受ける（SOC −15 %）",f:()=>{S.soc=Math.max(5,S.soc-15);S.rep+=3;gain("hyoka",2);return"評価 +3・評価解析 +2";}},
+   {l:"引き受ける（たいりょく −15 %）",f:()=>{S.soc=Math.max(5,S.soc-15);S.rep+=3;gain("hyoka",2);return"評価 +3・評価解析 +2";}},
    {l:"丁重に断る",f:()=>"自分のテーマに集中"}]}
 ];
 
 // ===================== 状態 =====================
 let S=null;
-const SAVEKEY="battery_lab_save_v2";
+const SAVEKEY="battery_lab_save_v3";
+const TEAM_POOL=["N村","Y田","H野","M本"];
+const FAVOR_REWARDS=[
+ {f:45,k:"m1",t:"人員補充！ 部下が 1 人増えた"},
+ {f:60,k:"b1",t:"特別予算 +200 万円"},
+ {f:75,k:"m2",t:"人員補充！ 部下が 1 人増えた"},
+ {f:90,k:"b2",t:"役員枠の特別予算 +300 万円"}
+];
 function save(){try{localStorage.setItem(SAVEKEY,JSON.stringify(S));}catch(e){}}
 function load(){try{const t=localStorage.getItem(SAVEKEY);return t?JSON.parse(t):null;}catch(e){return null;}}
 function clearSave(){try{localStorage.removeItem(SAVEKEY);}catch(e){}}
 function freshMon(){return {samples:0,up:0,done:0,pat:0,pub:0,comp:0,study:0};}
 
-function newGame(name,bgi,years){
+function newGame(bgi){
   const sk={denki:10,gosei:10,keisan:10,hyoka:10};
   Object.assign(sk,BG[bgi].sk);
-  S={name:name||"あなた",bg:bgi,w:1,TW:years*48,soc:100,budget:400,rep:0,sk,cur:null,
+  S={bg:bgi,w:1,TW:YEARS*48,soc:100,stress:10,favor:30,ready:15,budget:400,rep:0,sk,cur:null,
+     team:[{n:"T中",mot:70},{n:"S木",mot:70}],
      P:PROJ.map(()=>({log:[],hits:0,done:false,doneW:0,pubs:0,comp:{},lit:{},acts:0,pat:0,patW:0,patP:0})),
-     cellSE:[],flags:{},seen:{},grantCd:0,hist:[],over:false,lastRank:0,mon:freshMon()};
+     cellSE:[],flags:{},seen:{},grantCd:0,hist:[],over:false,clear:false,lastRank:0,mon:freshMon(),
+     deptNext:5,deptI:0,costUntil:0,rewards:{},oui:{talk:0,ignore:0},tantrum:0};
   save();
 }
 function gain(k,v){S.sk[k]=Math.min(100,Math.round((S.sk[k]+v)*10)/10);}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function addStress(v){S.stress=clamp(Math.round(S.stress+v),0,100);}
+function addFavor(v){S.favor=clamp(Math.round(S.favor+v),0,100);}
+function addMot(v){S.team.forEach(m=>m.mot=clamp(Math.round(m.mot+v),0,100));}
+function avgMot(){return S.team.length?S.team.reduce((a,m)=>a+m.mot,0)/S.team.length:50;}
 function rankIdx(){let r=0;RANKS.forEach((x,i)=>{if(S.rep>=x[0])r=i;});return r;}
 function rankName(){return RANKS[rankIdx()][1];}
-function monthlyBudget(){return 50+15*rankIdx();}
+function monthlyBudget(){return 50+15*rankIdx()+Math.floor(S.favor/10)*5;}
 function wkOf(w){return ((w-1)%4)+1;}
-function cal(w){const mi=Math.floor((w-1)/4),y=Math.floor(mi/12)+1,mo=(mi+3)%12+1;return `${y}年目 ${mo}月 第${wkOf(w)}週`;}
+function cal(w){const mi=Math.floor((w-1)/4),y=Math.floor(mi/12)+1,mo=(mi+3)%12+1;return `${y}ねんめ ${mo}がつ ${wkOf(w)}しゅう`;}
 function isPrepWeek(){return wkOf(S.w)===3;}
 function isMeetWeek(){return wkOf(S.w)===4;}
-function slots(){if(isPrepWeek())return 1;return Math.min(5,2+Math.floor(S.sk.gosei/35)+(S.flags.extra?1:0));}
+function slots(){if(isPrepWeek())return 1;return Math.min(5,1+S.team.length+(S.flags.extra?1:0));}
+function costOf(p){return Math.round(p.cost*(S.w<S.costUntil?.85:1));}
 function skillAvg(p){return p.skills.reduce((a,k)=>a+S.sk[k],0)/p.skills.length;}
 function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
 function rnd(a){return a[Math.floor(Math.random()*a.length)];}
@@ -473,20 +508,28 @@ function fmt(v,d){return v.toFixed(d);}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
 function params(p){if(p.kind!=="cell")return p.params;return p.params.map((x,i)=>i===3?{...x,o:S.cellSE.map(id=>PB[id].short)}:x);}
 function seDone(){return SE_IDS.filter(id=>S.P[PB[id].idx].done).length;}
-function unlocked(p){if(p.kind==="se")return true;if(p.kind==="cat")return seDone()>=NEED_SE;return S.P[PB.ncm.idx].done;}
+function unlocked(p){
+  if(p.kind==="se")return true;
+  if(p.kind==="cat")return seDone()>=NEED_SE;
+  if(p.kind==="cell")return S.P[PB.ncm.idx].done;
+  return S.P[PB.cell.idx].done;
+}
 function score(p,v){return v.reduce((a,x,j)=>a*Math.min(1.4,x/p.metrics[j].t),1);}
-function bestOf(p){ // 全組合せ探索で理想条件を求める（計算・文献ヒント用）
+function bestOf(p){
   const ps=params(p);let best=null,bs=-1;
   const rec=(k,c)=>{if(k===ps.length){const s=score(p,p.calc(c).v);if(s>bs){bs=s;best=c.slice();}return;}for(let i=0;i<ps[k].o.length;i++){c[k]=i;rec(k+1,c);}};
   rec(0,[]);return best;
 }
-
+function failProb(){
+  let pf=.24*(1-S.sk.gosei/110)+Math.max(0,60-avgMot())/120;
+  if(S.flags.wet)pf+=.25;
+  return clamp(pf,.02,.9);
+}
 function measure(pi,c){
   const p=PROJ[pi], r=p.calc(c), s=skillAvg(p);
   const mA=.9+.12*s/100, mB=.95+.06*s/100;
   const sd=.12*(1-S.sk.hyoka/130);
-  let pf=.26*(1-S.sk.gosei/110); if(S.flags.wet)pf+=.25;
-  const fail=Math.random()<pf;
+  const fail=Math.random()<failProb();
   const notes=r.n.slice();
   const v=r.v.map((x,i)=>{
     let y=x*(i===0?mA:mB)*(1+gauss()*(i===0?sd:sd/3));
@@ -494,7 +537,7 @@ function measure(pi,c){
     const mx=p.metrics[i].max; if(mx)y=Math.min(mx,y);
     return Math.max(0,y);
   });
-  if(fail)notes.unshift(rnd(["合成失敗: 未知の不純物相","秤量ミスの疑い","ペレットに割れ","雰囲気リークで劣化"]));
+  if(fail)notes.unshift(avgMot()<50?rnd(["部下の秤量ミス","手順の抜け漏れ","サンプルの取り違え"]):rnd(["合成失敗: 未知の不純物相","ペレットに割れ","雰囲気リークで劣化"]));
   const ok=v.every((x,i)=>x>=p.metrics[i].t);
   return {c:c.slice(),v,notes,ok,fail,w:S.w};
 }
@@ -503,50 +546,86 @@ function ratio(pi){
   return Math.max(...L.map(e=>Math.min(...e.v.map((x,i)=>x/p.metrics[i].t))));
 }
 
+// ===================== 効果音（矩形波） =====================
+let AC=null,MUTE=false;
+try{MUTE=localStorage.getItem("battery_lab_mute")==="1";}catch(e){}
+function tone(f,d,t0,type,vol){
+  if(MUTE)return;
+  try{
+    if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();
+    const o=AC.createOscillator(),g=AC.createGain();o.type=type||"square";o.frequency.value=f;
+    g.gain.value=vol||.04;o.connect(g);g.connect(AC.destination);
+    const s=AC.currentTime+(t0||0);o.start(s);g.gain.setValueAtTime(vol||.04,s);g.gain.exponentialRampToValueAtTime(.0001,s+d);o.stop(s+d+.02);
+  }catch(e){}
+}
+const SFX={
+  sel:()=>tone(990,.05),
+  ok:()=>{tone(784,.07);tone(1047,.1,.07);},
+  bad:()=>{tone(330,.12);tone(220,.2,.12);},
+  fan:()=>{[523,659,784,1047].forEach((f,i)=>tone(f,.14,i*.12));tone(1047,.4,.5);},
+  oui:()=>{tone(196,.18,0,"square",.06);tone(392,.28,.2,"square",.06);},
+  hit:()=>{tone(150,.2,0,"sawtooth",.05);}
+};
+document.addEventListener("click",e=>{if(e.target.closest("button"))SFX.sel();},true);
+
 // ===================== UI 共通 =====================
 const app=document.getElementById("app");
 let ov=null;
-function toast(t){const d=document.createElement("div");d.className="toast";d.innerHTML=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2200);}
-function modal(html,onmount){closeModal();ov=document.createElement("div");ov.className="ov";ov.innerHTML=`<div class="sheet">${html}</div>`;document.body.appendChild(ov);if(onmount)onmount(ov.querySelector(".sheet"));}
+function toast(t){const d=document.createElement("div");d.className="toast win";d.innerHTML=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2200);}
+function modal(html,onmount){closeModal();ov=document.createElement("div");ov.className="ov";ov.innerHTML=`<div class="sheet win">${html}</div>`;document.body.appendChild(ov);if(onmount)onmount(ov.querySelector(".sheet"));}
 function closeModal(){if(ov){ov.remove();ov=null;}}
-// モーダルを順番に表示するキュー
 let Q=[];
 function pushQ(fn){Q.push(fn);}
 function runQ(){closeModal();const fn=Q.shift();if(fn)fn(runQ);else render();}
-function okModal(html,label){return next=>modal(`${html}<div class="btnrow"><button class="pri" id="ok">${label||"OK"}</button></div>`,sh=>sh.querySelector("#ok").onclick=next);}
-function bossHTML(html){return`<div class="boss"><div class="av">👨‍🔬</div><div class="bub">${html}</div></div>`;}
-function log(t){S.hist.push({m:cal(S.w),t});if(S.hist.length>50)S.hist.shift();}
+function okModal(html,label){return next=>modal(`${html}<div class="btnrow"><button class="pri" id="ok">▶ ${label||"OK"}</button></div>`,sh=>sh.querySelector("#ok").onclick=next);}
+const WHO={onishi:{n:"O西",img:"onishi"},kawaguchi:{n:"K口 役員",img:"kawaguchi"},boss:{n:"M田 室長",img:"boss"}};
+function face(k,cls){return`<img class="face ${cls||""}" src="${IMG[WHO[k].img]}" alt="${WHO[k].n}">`;}
+function talkHTML(k,html){return`<div class="talk">${face(k)}<div class="tb"><div class="nm">${WHO[k].n}</div><div class="tx tw">${html}</div></div></div>`;}
+// 文字送り（タグは一気に出す）
+function typeIn(root){
+  root.querySelectorAll(".tw").forEach(el=>{
+    const html=el.innerHTML;const parts=html.split(/(<[^>]+>)/);let out="",pi=0,ci=0,done=false;
+    const step=()=>{if(done)return;let n=2;while(n-->0&&pi<parts.length){const p=parts[pi];if(p.startsWith("<")){out+=p;pi++;continue;}if(ci<p.length){out+=p[ci++];}else{pi++;ci=0;}}el.innerHTML=out+(pi<parts.length?'<span class="cur">▼</span>':"");if(pi<parts.length)setTimeout(step,22);else done=true;};
+    el.innerHTML="";step();
+    el.closest(".sheet").addEventListener("pointerdown",()=>{if(!done){done=true;el.innerHTML=html;}},{once:true});
+  });
+}
+function say(k,html,label){return next=>{modal(talkHTML(k,html)+`<div class="btnrow"><button class="pri" id="ok">▶ ${label||"つぎへ"}</button></div>`,sh=>{typeIn(sh);sh.querySelector("#ok").onclick=next;});};}
+function log(t){S.hist.push({m:cal(S.w),t});if(S.hist.length>60)S.hist.shift();}
+function bar(v,col,max){const n=10,f=Math.round(clamp(v,0,max||100)/(max||100)*n);return`<span class="pbar">${Array.from({length:n},(_,i)=>`<i style="background:${i<f?col:"#222"}"></i>`).join("")}</span>`;}
 
 // ===================== タイトル =====================
 function titleScreen(){
   const sv=load();
-  let bgi=0,ti=2;
+  let bgi=0;
   app.innerHTML=`<div class="title">
-   <div style="font-size:54px">🔋⚗️</div>
-   <h1>電池ラボ物語</h1>
-   <div class="lead">電池メーカーの研究所に配属された新人研究員。<br>毎週の行動を積み重ね、毎月の報告会を乗り越えて<br>次世代の全固体電池を完成させよう。</div>
-   ${sv&&!sv.over?`<button class="pri" id="cont" style="width:100%;margin-bottom:10px">つづきから（${cal(sv.w)}）</button>`:""}
-   <div class="card" style="text-align:left">
-    <div class="small muted">名前</div>
-    <input id="nm" maxlength="10" placeholder="あなた" style="width:100%;margin:4px 0 10px">
-    <div class="small muted">出身研究室</div>
-    <div class="bgsel" id="bgs">${BG.map((b,i)=>`<button data-i="${i}" class="${i===0?"on":""}"><b>${b.n}</b><br><span class="small muted">${b.d}</span></button>`).join("")}</div>
-    <div class="small muted">プレイ期間</div>
-    <div class="bgsel" id="tms" style="grid-template-columns:repeat(3,1fr)">${TERMS.map((t,i)=>`<button data-i="${i}" class="${i===ti?"on":""}"><b>${t.y} 年</b><br><span class="small muted">${t.d}</span></button>`).join("")}</div>
-    <button class="pri" id="start" style="width:100%">はじめから</button>
+   <div class="logo">全固体への道</div>
+   <div class="sublogo">〜 O西 5ねん戦記 〜</div>
+   <div class="duo">${face("onishi","big")}<div class="vs">と</div>${face("kawaguchi","big")}</div>
+   <div class="win lead">電池メーカーの開発主任 O西。<br>与えられた期間は 5 年。<br>固体電解質から正極、セル、そして<br><b class="y">プロト量産</b>までたどり着け！</div>
+   ${sv&&!sv.over?`<button class="pri wide" id="cont">▶ つづきから（${cal(sv.w)}）</button>`:""}
+   <div class="win" style="text-align:left">
+    <div class="small dim">O西の 専門は？</div>
+    <div class="bgsel" id="bgs">${BG.map((b,i)=>`<button data-i="${i}" class="${i===0?"on":""}">${b.n}<br><span class="small dim">${b.d}</span></button>`).join("")}</div>
+    <button class="pri wide" id="start">▶ はじめから</button>
    </div>
-   <div class="small muted" style="line-height:1.75;text-align:left">
-   遊び方：<b>毎週</b> 1 つ行動を選びます。<b>勉強</b>でクイズ（4 択・○×・計算問題）に答えて知識を上げ、<b>計算</b>で有望な条件を予測し、<b>実験</b>で条件を振って目標性能を 2 回出す（再現性確認）とテーマ達成。<br>
-   電解質は 6 種類から選べ、${NEED_SE} 種類達成すると正極、正極を達成するとセル試作に進めます。<br>
-   毎月第 4 週の終わりに<b>社内報告会</b>があり、その月の成果で評価が決まります。前の週（第 3 週）は資料作成で実験が 1 水準に制限されます。<br>
-   成果が出たら<b>特許申請</b>。学会で先に発表すると新規性を失うので順番に注意。
-   </div></div>`;
-  const sel=(id,cb)=>app.querySelectorAll(`#${id} button`).forEach(b=>b.onclick=()=>{cb(+b.dataset.i);app.querySelectorAll(`#${id} button`).forEach(x=>x.classList.toggle("on",x===b));});
-  sel("bgs",i=>bgi=i);sel("tms",i=>ti=i);
+   <div class="win small" style="text-align:left;line-height:1.85">
+   ◆ まいしゅう 1 つ コマンドを えらぶ。<br>
+   ◆ 電解質を ${NEED_SE} つ → 正極 → セル → <span class="y">プロト量産</span> で クリア。<br>
+   ◆ 月末は 社内報告会。前の週は 資料作成で 実験は 1 水準まで。<br>
+   ◆ <span class="p">K口役員</span>に「オウイ」と よばれたら… 話せば こうかんどUP（予算・人員）、でも <span class="r">ストレス</span>も たまる。<br>
+   ◆ ストレスが 高いと 部下に あたって モチベが さがり、ミスが ふえる。他部署や 社外との やりとりも うまくいかない。
+   </div>
+   <button class="ghost small" id="mute">${MUTE?"♪ おと：OFF":"♪ おと：ON"}</button>
+  </div>`;
+  app.querySelectorAll("#bgs button").forEach(b=>b.onclick=()=>{bgi=+b.dataset.i;app.querySelectorAll("#bgs button").forEach(x=>x.classList.toggle("on",x===b));});
+  app.querySelector("#mute").onclick=e=>{MUTE=!MUTE;try{localStorage.setItem("battery_lab_mute",MUTE?"1":"0");}catch(_){}e.target.textContent=MUTE?"♪ おと：OFF":"♪ おと：ON";};
   app.querySelector("#start").onclick=()=>{
-    if(sv&&!sv.over&&!confirm("現在のセーブを消して新しく始めますか？"))return;
-    newGame(app.querySelector("#nm").value.trim(),bgi,TERMS[ti].y);
-    pushQ(okModal(bossHTML(`ようこそ、${esc(S.name)}さん。室長の電井だ。<br>うちのチームの目標は全固体電池の実用化だ。まずは固体電解質から。6 つの候補から好きなテーマを選んでくれ。${NEED_SE} つ仕上げたら正極に進もう。<br><br>それと、毎月末には社内報告会がある。前の週は資料づくりで忙しくなるから計画的にな。`),"はい"));
+    if(sv&&!sv.over&&!confirm("いまの セーブを けして はじめますか？"))return;
+    newGame(bgi);
+    pushQ(say("boss","O西、今日から君が全固体電池プロジェクトの主任だ。<br>期限は 5 年。プロト量産までこぎつけてくれ。<br>まずは固体電解質。6 つの候補から選んで、2 つ仕上げたら正極に進もう。"));
+    pushQ(say("kawaguchi","オウイ！ O西！<br>期待しとるぞ。わしが呼んだら、すぐ来いよ。"));
+    pushQ(say("onishi","（K口役員に呼ばれると話が長いんだよな…）<br>はい！ がんばります！"));
     pushQ(next=>openThemes(next,true));
     render();runQ();
   };
@@ -554,140 +633,132 @@ function titleScreen(){
 }
 
 // ===================== メイン画面 =====================
-function topBar(){
-  const socC=S.soc>50?"var(--acc)":S.soc>25?"var(--warn)":"var(--red)";
+function statusWin(){
   const wi=wkOf(S.w);
-  const badge=wi===3?`<span class="wkb prep">📝 資料作成週</span>`:wi===4?`<span class="wkb meet">🗣 報告会週</span>`:"";
-  return `<div class="top"><div class="toprow">
-   <span class="cal">${cal(S.w)}</span>${badge}<span class="small muted">残り ${Math.max(0,S.TW-S.w+1)} 週</span><span class="sp"></span>
-   <span class="chip" title="SOC（体力）"><span class="bat"><i style="width:${Math.max(0,S.soc)*0.28}px;background:${socC}"></i></span>${Math.round(S.soc)}%</span>
-   <span class="chip" style="color:var(--gold)">💴${S.budget}万</span>
-   <span class="chip">⭐${S.rep}</span>
-  </div>
-  <div class="wkrow">${[1,2,3,4].map(i=>`<span class="${i<wi?"past":i===wi?"now":""} ${i===3?"p":""} ${i===4?"m":""}">${i===3?"資料":i===4?"報告会":"第"+i+"週"}</span>`).join("")}</div>
-  <div class="skills">${SKK.map(k=>`<div class="sk">${SK[k].n} <b style="color:#fff">${Math.round(S.sk[k])}</b><div class="bar"><i style="width:${S.sk[k]}%;background:${SK[k].c}"></i></div></div>`).join("")}</div>
+  const badge=wi===3?`<span class="badge o">資料作成週</span>`:wi===4?`<span class="badge b">報告会週</span>`:"";
+  return`<div class="win status">
+   <div class="srow">${face("onishi")}
+    <div style="flex:1;min-width:0">
+     <div class="nmrow"><b>O西</b> <span class="dim small">${rankName()}</span><span style="flex:1"></span><button class="ghost small" id="mute">${MUTE?"♪OFF":"♪ON"}</button></div>
+     <div class="small">${cal(S.w)} ${badge}</div>
+     <div class="small dim">のこり ${Math.max(0,S.TW-S.w+1)} しゅう</div>
+     <div class="wkrow">${[1,2,3,4].map(i=>`<span class="${i<wi?"past":i===wi?"now":""}">${i===3?"資料":i===4?"報告":i+"週"}</span>`).join("")}</div>
+    </div></div>
+   <div class="bars">
+    <div>たいりょく ${bar(S.soc,"#58d854")} <b>${Math.round(S.soc)}</b></div>
+    <div>ストレス　 ${bar(S.stress,S.stress>=75?"#f83800":"#f8b800")} <b class="${S.stress>=75?"r":""}">${S.stress}</b></div>
+    <div>K口こうかん ${bar(S.favor,"#f878f8")} <b>${S.favor}</b></div>
+    <div>生技れんけい ${bar(S.ready,"#3cbcfc")} <b>${S.ready}</b></div>
+   </div>
+   <div class="small kv"><span>よさん <b class="y">${S.budget}</b>万</span><span>ひょうか <b>${S.rep}</b></span></div>
+   <div class="small team">ぶか：${S.team.map(m=>`${m.n}<span class="${m.mot<50?"r":m.mot>=75?"g":""}">${m.mot<35?"(×_×)":m.mot<50?"(-_-)":m.mot>=75?"(^o^)":"(・_・)"}</span>`).join(" ")}</div>
+   <div class="skills">${SKK.map(k=>`<div>${SK[k].n}<b> ${Math.round(S.sk[k])}</b><div class="mini"><i style="width:${S.sk[k]}%;background:${SK[k].c}"></i></div></div>`).join("")}</div>
   </div>`;
 }
-function actBtn(k,e,t,c,en){return`<button class="act" data-act="${k}" ${en?"":"disabled"}><span class="e">${e}</span><span class="t">${t}</span><span class="c">${c}</span></button>`;}
-
+function cmd(k,t,c,en){return`<button class="cmd" data-act="${k}" ${en?"":"disabled"}><span class="ct">${t}</span><span class="cc">${c}</span></button>`;}
 function render(){
   closeModal();
   if(S.over){endScreen();return;}
   const pi=S.cur, p=pi===null?null:PROJ[pi], P=pi===null?null:S.P[pi];
-  const cellDone=S.P[PB.cell.idx].done;
   const patOK=S.P.some((x,i)=>x.pat===0&&ratio(i)>=.8);
+  const active=p&&!P.done;
   const can={
-    exp:p&&!P.done&&S.soc>=20&&S.budget>=p.cost,
-    comp:p&&!P.done&&S.soc>=12&&p.params.some(x=>x.comp),
+    exp:active&&S.soc>=20&&S.budget>=costOf(p)&&!S.flags.delay,
+    comp:active&&S.soc>=12&&p.params.some(x=>x.comp),
     study:S.soc>=10,
     pub:S.soc>=20&&S.P.some(x=>x.log.length),
     pat:S.soc>=20&&S.budget>=30&&patOK,
     grant:S.soc>=15&&S.grantCd<=0,
+    care:S.budget>=10,
     rest:true
   };
   const avail=PROJ.filter(q=>unlocked(q)&&!S.P[q.idx].done);
-  let main;
-  if(!p||P.done){
-    main=`<div class="card"><h3>${cellDone?"🏆 全固体電池セル完成！":"テーマを選んでください"}</h3>
-     <div class="small muted" style="line-height:1.6;margin:4px 0 8px">${cellDone?"残りの期間は未着手の電解質に挑むか、最終報告して残り週数ボーナスを受け取れます。":"実験と計算はテーマを選ぶと使えます。"}</div>
-     ${avail.length?`<button class="pri" id="pick" style="width:100%">テーマを選ぶ</button>`:""}
-     ${cellDone?`<button id="finish" style="width:100%;margin-top:8px">最終報告へ</button>`:""}
-    </div>`;
+  let theme;
+  if(!active){
+    theme=`<div class="win"><div class="wt">テーマ</div><div class="small" style="margin:4px 0 8px">テーマを えらんでください。</div>${avail.length?`<button class="pri wide" id="pick">▶ テーマを えらぶ</button>`:""}${progRow()}</div>`;
   }else{
-    main=`<div class="card">
-    <div class="ptitle"><span class="ic">${p.icon}</span><div style="flex:1">
-     <div class="small muted">${rankName()}・${p.kind==="se"?"電解質テーマ":p.kind==="cat"?"正極テーマ":"セル試作"}</div>
-     <h3 style="margin:2px 0">${p.name}</h3><div class="small muted">${p.sub}</div>
-    </div><button class="sm" id="pick">切替</button></div>
-    ${progRow()}
-    <div class="targets">${p.metrics.map((m,i)=>{const b=P.log.length?Math.max(...P.log.map(e=>e.v[i])):null;return`<div class="tbox"><div class="lb">${m.l}</div><div class="v">${b===null?"—":fmt(b,m.d)} <span class="small muted">/ ${m.t} ${m.u}</span></div><div class="small ${b!==null&&b>=m.t?"ok":"muted"}">最高値 ${b!==null&&b>=m.t?"✓ 目標クリア":""}</div></div>`}).join("")}</div>
-    <div class="small" style="margin-top:8px">再現性確認: ${"●".repeat(Math.min(2,P.hits))}${"○".repeat(Math.max(0,2-P.hits))} <span class="muted">（全目標を満たした試料 2 つで達成）</span>${P.pat?` <span class="tag ${P.pat===2?"g":P.pat<0?"r":""}">${P.pat===1?"特許出願中":P.pat===2?"特許登録":"特許拒絶"}</span>`:""}</div>
-   </div>`;
+    theme=`<div class="win"><div class="wt">テーマ</div>
+     <div class="thead"><span class="sq" style="background:${p.col}"></span><div style="flex:1;min-width:0"><b>${p.name}</b><div class="small dim">${p.sub}</div></div><button class="small" id="pick">きりかえ</button></div>
+     <div class="targets">${p.metrics.map((m,i)=>{const b=P.log.length?Math.max(...P.log.map(e=>e.v[i])):null;return`<div class="tbox"><div class="small dim">${m.l}</div><div class="v ${b!==null&&b>=m.t?"g":""}">${b===null?"--":fmt(b,m.d)}<span class="small dim"> / ${m.t} ${m.u}</span></div></div>`}).join("")}</div>
+     <div class="small" style="margin-top:6px">さいげんせい ${"●".repeat(Math.min(2,P.hits))}${"○".repeat(Math.max(0,2-P.hits))}${P.pat?` <span class="badge ${P.pat===2?"y":P.pat<0?"r":"b"}">${P.pat===1?"特許 審査中":P.pat===2?"特許 登録":"特許 拒絶"}</span>`:""}${p.kind==="proto"?` <span class="small dim">（生技れんけい が 歩留まりに 効く）</span>`:""}</div>
+     ${progRow()}</div>`;
   }
-  app.innerHTML=topBar()+`<main>
-   ${main}
-   <div class="actions">
-    ${actBtn("exp","🧪","実験",p&&!P.done?`${slots()}水準・${p.cost}万/個`:"テーマ未選択",can.exp)}
-    ${actBtn("comp","💻","計算","SOC −12",can.comp)}
-    ${actBtn("study","📚","勉強","SOC −10",can.study)}
-    ${actBtn("pub","🎤","学会発表","SOC −20",can.pub)}
-    ${actBtn("pat","⚖️","特許申請","SOC −20・30万",can.pat)}
-    ${actBtn("grant","📝","予算申請",S.grantCd>0?`あと${S.grantCd}週`:"SOC −15",can.grant)}
-    ${actBtn("rest","☕","休養","SOC +40",can.rest)}
-    ${monthCard()}
-   </div>
-   <div style="height:12px"></div>
-   ${p&&!P.done?chartCard(pi)+hintCard(pi)+logCard(pi):""}
-   ${patCard()}
-   ${histCard()}
-   <div style="text-align:center;margin-top:10px"><button class="ghost sm" id="totitle">タイトルへ</button></div>
+  app.innerHTML=statusWin()+`<main>${theme}
+   <div class="win"><div class="wt">コマンド</div><div class="cmds">
+    ${cmd("exp","じっけん",active?(S.flags.delay?"原料待ち":`${slots()}水準 ${costOf(p)}万/個`):"テーマなし",can.exp)}
+    ${cmd("comp","けいさん","たいりょく−12",can.comp)}
+    ${cmd("study","べんきょう","クイズ 3もん",can.study)}
+    ${cmd("pub","がっかい","ひょうか UP",can.pub)}
+    ${cmd("pat","とっきょ","30万",can.pat)}
+    ${cmd("grant","よさん",S.grantCd>0?`あと${S.grantCd}週`:"しんせい",can.grant)}
+    ${cmd("care","チームケア","モチベUP 10万",can.care)}
+    ${cmd("rest","やすむ","ストレス−20",can.rest)}
+   </div><div class="small dim" style="margin-top:6px">こんげつの成果：試料${S.mon.samples}・更新${S.mon.up}・特許${S.mon.pat}・発表${S.mon.pub} → みこみ <b class="y">${grade(monScore()).g}</b></div></div>
+   ${active?chartCard(pi)+hintCard(pi)+logCard(pi):""}
+   ${patCard()}${histCard()}
+   <div style="text-align:center;margin:10px 0"><button class="ghost small" id="totitle">タイトルへ</button></div>
   </main>`;
-  app.querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>({exp:openExp,comp:openComp,study:openStudy,pub:openPub,pat:openPat,grant:doGrant,rest:doRest})[b.dataset.act]());
+  app.querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>({exp:openExp,comp:openComp,study:openStudy,pub:openPub,pat:openPat,grant:doGrant,care:doCare,rest:doRest})[b.dataset.act]());
   const pk=app.querySelector("#pick"); if(pk)pk.onclick=()=>openThemes(render,false);
-  const f=app.querySelector("#finish"); if(f)f.onclick=()=>{if(confirm("最終報告して研究生活を締めくくりますか？"))finishGame(true);};
+  app.querySelector("#mute").onclick=()=>{MUTE=!MUTE;try{localStorage.setItem("battery_lab_mute",MUTE?"1":"0");}catch(_){}render();};
   app.querySelector("#totitle").onclick=()=>{save();titleScreen();};
   save();
 }
 function progRow(){
-  return`<div class="prog">${PROJ.map((q,i)=>`<span title="${q.short}" class="${S.P[i].done?"d":i===S.cur?"c":""}"></span>`).join("")}</div><div class="small muted">電解質 ${seDone()}/6・正極 ${S.P[PB.ncm.idx].done?"✓":unlocked(PB.ncm)?"挑戦可":`電解質 ${NEED_SE} つで解放`}・セル ${S.P[PB.cell.idx].done?"✓":unlocked(PB.cell)?"挑戦可":"正極で解放"}</div>`;
-}
-function monthCard(){
-  const m=S.mon,sc=monScore();
-  return`<div class="act" style="cursor:default;align-items:flex-start;padding:8px 10px"><span class="t" style="font-size:11.5px">今月の成果</span><span class="c" style="text-align:left;line-height:1.5">試料${m.samples}・更新${m.up}<br>特許${m.pat}・発表${m.pub}<br>見込み <b style="color:#fff">${grade(sc).g}</b></span></div>`;
+  return`<div class="prog">${PROJ.map((q,i)=>`<span class="${S.P[i].done?"d":i===S.cur?"c":""}" style="${S.P[i].done?`background:${q.col}`:""}"></span>`).join("")}</div>
+  <div class="small dim">電解質 ${seDone()}/6 ・ 正極 ${S.P[PB.ncm.idx].done?"○":unlocked(PB.ncm)?"かのう":"×"} ・ セル ${S.P[PB.cell.idx].done?"○":unlocked(PB.cell)?"かのう":"×"} ・ <span class="p">プロト量産 ${S.P[PB.proto.idx].done?"○":unlocked(PB.proto)?"かのう":"×"}</span></div>`;
 }
 function shortCond(p,c){const ps=params(p);return c.map((o,i)=>ps[i].o[o]).join(" / ");}
 function logCard(pi){
   const p=PROJ[pi],L=S.P[pi].log;
-  if(!L.length)return`<div class="card"><h3>実験ノート</h3><div class="small muted">まだ実験していません。勉強や計算で当たりをつけてから始めても OK。</div></div>`;
-  return`<div class="card"><h3>実験ノート（${L.length} 試料）</h3><div class="logwrap"><table>
-   <tr><th>#</th><th>条件</th>${p.metrics.map(m=>`<th style="text-align:right">${m.u}</th>`).join("")}</tr>
-   ${L.map((e,i)=>({e,i})).reverse().map(({e,i})=>`<tr><td class="muted">${i+1}</td><td>${esc(shortCond(p,e.c))}${e.notes.length?`<div class="small ${e.fail?"ng":"muted"}">${esc(e.notes[0])}</div>`:""}</td>${e.v.map((v,j)=>`<td class="num ${v>=p.metrics[j].t?"ok":""}">${fmt(v,p.metrics[j].d)}</td>`).join("")}</tr>`).join("")}
+  if(!L.length)return`<div class="win"><div class="wt">じっけんノート</div><div class="small dim">まだ じっけんしていない。</div></div>`;
+  return`<div class="win"><div class="wt">じっけんノート（${L.length}）</div><div class="logwrap"><table>
+   <tr><th>#</th><th>じょうけん</th>${p.metrics.map(m=>`<th class="num">${m.u}</th>`).join("")}</tr>
+   ${L.map((e,i)=>({e,i})).reverse().map(({e,i})=>`<tr><td class="dim">${i+1}</td><td>${esc(shortCond(p,e.c))}${e.notes.length?`<div class="small ${e.fail?"r":"dim"}">${esc(e.notes[0])}</div>`:""}</td>${e.v.map((v,j)=>`<td class="num ${v>=p.metrics[j].t?"g":""}">${fmt(v,p.metrics[j].d)}</td>`).join("")}</tr>`).join("")}
   </table></div></div>`;
 }
 function chartCard(pi){
   const p=PROJ[pi],L=S.P[pi].log; if(L.length<2)return"";
-  const W=560,H=150,pad=28;
-  const sets=p.metrics.map((m,j)=>{const vals=L.map(e=>e.v[j]);return {m,vals,mx:Math.max(m.t*1.3,...vals)};});
+  const W=560,H=140,pad=24;
   const xs=i=>pad+(W-pad-8)*(i/(L.length-1));
-  let svg=`<svg viewBox="0 0 ${W} ${H*sets.length}" width="100%" role="img" aria-label="実験結果の推移">`;
-  sets.forEach((s,j)=>{
-    const oy=j*H, ys=v=>oy+H-18-(H-34)*v/s.mx, col=j?"#29b6f6":"#3ee6b0";
-    svg+=`<text x="${pad}" y="${oy+12}" font-size="12" fill="#93aba6">${s.m.l}（${s.m.u}）</text>`;
-    svg+=`<line x1="${pad}" x2="${W-8}" y1="${ys(s.m.t)}" y2="${ys(s.m.t)}" stroke="#f7c948" stroke-dasharray="5 4" stroke-width="1.5"/><text x="${W-10}" y="${ys(s.m.t)-4}" font-size="11" text-anchor="end" fill="#f7c948">目標 ${s.m.t}</text>`;
-    svg+=`<line x1="${pad}" x2="${W-8}" y1="${oy+H-18}" y2="${oy+H-18}" stroke="rgba(255,255,255,.15)"/>`;
-    let best=-1;svg+=`<polyline fill="none" stroke="${col}" stroke-opacity=".35" stroke-width="1.5" points="${s.vals.map((v,i)=>{best=Math.max(best,v);return xs(i)+","+ys(best);}).join(" ")}"/>`;
-    s.vals.forEach((v,i)=>{svg+=`<circle cx="${xs(i)}" cy="${ys(v)}" r="4.5" fill="${v>=s.m.t?col:"none"}" stroke="${col}" stroke-width="2"/>`;});
+  let svg=`<svg viewBox="0 0 ${W} ${H*p.metrics.length}" width="100%" role="img" aria-label="けっかの すいい" shape-rendering="crispEdges">`;
+  p.metrics.forEach((m,j)=>{
+    const vals=L.map(e=>e.v[j]),mx=Math.max(m.t*1.3,...vals),oy=j*H,ys=v=>oy+H-16-(H-32)*v/mx,col=j?"#3cbcfc":"#58d854";
+    svg+=`<text x="${pad}" y="${oy+12}" font-size="13" fill="#bcbcbc">${m.l}（${m.u}）</text>`;
+    svg+=`<line x1="${pad}" x2="${W-8}" y1="${ys(m.t)}" y2="${ys(m.t)}" stroke="#f8b800" stroke-dasharray="6 4" stroke-width="2"/><text x="${W-10}" y="${ys(m.t)-4}" font-size="12" text-anchor="end" fill="#f8b800">もくひょう ${m.t}</text>`;
+    svg+=`<line x1="${pad}" x2="${W-8}" y1="${oy+H-16}" y2="${oy+H-16}" stroke="#555" stroke-width="2"/>`;
+    vals.forEach((v,i)=>{const x=xs(i),y=ys(v);svg+=v>=m.t?`<rect x="${x-5}" y="${y-5}" width="10" height="10" fill="${col}"/>`:`<rect x="${x-4}" y="${y-4}" width="8" height="8" fill="none" stroke="${col}" stroke-width="2"/>`;});
   });
-  return`<div class="card"><h3>結果の推移</h3>${svg}</svg><div class="small muted">● 目標達成 ○ 未達・薄線は最高値の更新</div></div>`;
+  return`<div class="win"><div class="wt">けっかの すいい</div>${svg}</svg></div>`;
 }
 function hintCard(pi){
   const p=PROJ[pi],P=S.P[pi],ps=params(p); const items=[];
   Object.keys(P.comp).forEach(k=>{const pr=ps[k],arr=P.comp[k];const mx=Math.max(...arr);
-    items.push(`<div class="hint"><b>💻 ${pr.comp}</b>（${pr.l}）<span class="small muted">相対スコア・高いほど有望</span>${arr.map((v,i)=>`<div class="hbar"><span class="nm">${esc(pr.o[i])}</span><span class="tr"><i style="width:${Math.max(3,v/mx*100)}%"></i></span><span class="vv">${(v*100).toFixed(0)}</span></div>`).join("")}</div>`);});
-  Object.keys(P.lit).forEach(k=>{if(ps[k]&&ps[k].o[P.lit[k]]!==undefined)items.push(`<div class="hint">📚 メモ：${esc(ps[k].l)}は「${esc(ps[k].o[P.lit[k]])}」付近が良いらしい</div>`);});
+    items.push(`<div class="hint"><b>けいさん：${pr.comp}</b><span class="small dim">（${pr.l}）</span>${arr.map((v,i)=>`<div class="hbar"><span class="hn">${esc(pr.o[i])}</span><span class="ht"><i style="width:${Math.max(3,v/mx*100)}%"></i></span><span class="hv">${(v*100).toFixed(0)}</span></div>`).join("")}</div>`);});
+  Object.keys(P.lit).forEach(k=>{if(ps[k]&&ps[k].o[P.lit[k]]!==undefined)items.push(`<div class="hint">メモ：${esc(ps[k].l)}は「${esc(ps[k].o[P.lit[k]])}」ふきんが よいらしい</div>`);});
   if(!items.length)return"";
-  return`<div class="card"><h3>ヒント</h3>${items.join("")}</div>`;
+  return`<div class="win"><div class="wt">ヒント</div>${items.join("")}</div>`;
 }
 function patCard(){
   const L=S.P.map((x,i)=>({x,i})).filter(o=>o.x.pat);
   if(!L.length)return"";
-  return`<div class="card"><h3>⚖️ 特許</h3>${L.map(o=>`<div class="hint">${PROJ[o.i].icon} ${PROJ[o.i].short} <span class="tag ${o.x.pat===2?"g":o.x.pat<0?"r":""}">${o.x.pat===1?`審査中（結果まで ${Math.max(0,PATENT_WAIT-(S.w-o.x.patW))} 週）`:o.x.pat===2?"登録":"拒絶"}</span></div>`).join("")}</div>`;
+  return`<div class="win"><div class="wt">とっきょ</div>${L.map(o=>`<div class="hint"><span class="sq" style="background:${PROJ[o.i].col}"></span> ${PROJ[o.i].short} <span class="badge ${o.x.pat===2?"y":o.x.pat<0?"r":"b"}">${o.x.pat===1?`審査中 あと${Math.max(0,PATENT_WAIT-(S.w-o.x.patW))}週`:o.x.pat===2?"登録":"拒絶"}</span></div>`).join("")}</div>`;
 }
 function histCard(){
   if(!S.hist.length)return"";
-  return`<div class="card"><h3>できごと</h3>${S.hist.slice(-6).reverse().map(h=>`<div class="hint"><span class="muted small">${h.m}</span> ${h.t}</div>`).join("")}</div>`;
+  return`<div class="win"><div class="wt">できごと</div>${S.hist.slice(-6).reverse().map(h=>`<div class="hint"><span class="dim small">${h.m}</span><br>${h.t}</div>`).join("")}</div>`;
 }
 
 // ---------- テーマ選択 ----------
 function openThemes(next,first){
   const rows=PROJ.map(p=>{const P=S.P[p.idx],u=unlocked(p);
-    const st=P.done?'<span class="tag">達成</span>':!u?'<span class="tag r">未解放</span>':P.log.length?`<span class="tag g">進行中 ${(ratio(p.idx)*100).toFixed(0)}%</span>`:"";
-    return`<button class="qopt" data-i="${p.idx}" ${P.done||!u||p.idx===S.cur?"disabled":""}><b>${p.icon} ${p.name}</b> ${st}<br><span class="small muted">${p.sub}・目標 ${p.metrics.map(m=>`${m.t} ${m.u}`).join("・")}</span></button>`;}).join("");
-  modal(`<h2>🗂 テーマ選択</h2><div class="small muted" style="margin-bottom:6px">途中のテーマも進捗は保存されます。テーマの切り替えに週は消費しません。</div>${rows}${first?"":`<div class="btnrow"><button id="cx">やめる</button></div>`}`,sh=>{
+    const st=P.done?'<span class="badge g">達成</span>':!u?'<span class="badge r">未解放</span>':P.log.length?`<span class="badge y">${(ratio(p.idx)*100).toFixed(0)}%</span>`:"";
+    return`<button class="qopt" data-i="${p.idx}" ${P.done||!u||p.idx===S.cur?"disabled":""}><span class="sq" style="background:${p.col}"></span> <b>${p.name}</b> ${st}<br><span class="small dim">${p.sub}</span></button>`;}).join("");
+  modal(`<div class="wt">テーマ せんたく</div><div class="small dim" style="margin-bottom:6px">とちゅうの テーマも しんちょくは のこる。きりかえに しゅうは つかわない。</div>${rows}${first?"":`<div class="btnrow"><button id="cx">▶ やめる</button></div>`}`,sh=>{
     const cx=sh.querySelector("#cx");if(cx)cx.onclick=next;
     sh.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{
       const i=+b.dataset.i,p=PROJ[i],P=S.P[i];S.cur=i;
-      if(!P.started){P.started=1;modal(bossHTML(`<b>${p.name}</b>だな。<br>${p.intro}`)+`<div class="btnrow"><button class="pri" id="ok">はい</button></div>`,s2=>s2.querySelector("#ok").onclick=next);}
+      if(!P.started){P.started=1;say(p.kind==="proto"?"kawaguchi":"boss",`<b>${p.name}</b>だな。<br>${p.intro}`)(next);}
       else next();
     });
   });
@@ -695,22 +766,18 @@ function openThemes(next,first){
 
 // ---------- 実験 ----------
 function openExp(){
-  const pi=S.cur,p=PROJ[pi],P=S.P[pi],ps=params(p);
-  const n=Math.min(slots(),Math.floor(S.budget/p.cost));
+  const pi=S.cur,p=PROJ[pi],P=S.P[pi],ps=params(p),cost=costOf(p);
+  const n=Math.min(slots(),Math.floor(S.budget/cost));
   const last=P.log.length?P.log[P.log.length-1].c:ps.map(pr=>Math.floor(pr.o.length/2));
-  const sel=Array.from({length:n},(_,i)=>{
-    const c=last.slice();
-    if(i>0){const k=(i-1)%ps.length;c[k]=(c[k]+(i%2?1:ps[k].o.length-1))%ps[k].o.length;}
-    return c;
-  });
+  const sel=Array.from({length:n},(_,i)=>{const c=last.slice();if(i>0){const k=(i-1)%ps.length;c[k]=(c[k]+(i%2?1:ps[k].o.length-1))%ps[k].o.length;}return c;});
   let use=n;
   const draw=sh=>{
-    sh.innerHTML=`<h2>🧪 実験計画</h2>
-    <div class="small muted" style="margin-bottom:8px">1 試料 ${p.cost} 万円。材料合成スキルで 1 週に振れる水準数が増え、評価解析スキルで測定ばらつきが減ります。${isPrepWeek()?'<br><span class="wn">📝 資料作成週のため今週は 1 水準のみ</span>':""}${S.flags.wet?'<br><span class="wn">💧 露点悪化中：失敗しやすい</span>':""}</div>
-    ${sel.map((c,si)=>`<div class="sample" style="${si>=use?"opacity:.35":""}"><div class="hd"><b>水準 ${si+1}</b><span style="flex:1"></span>${si>0?`<button class="sm" data-tog="${si}">${si<use?"作らない":"作る"}</button>`:""}</div>
-     ${ps.map((pr,k)=>`<div class="prm"><div class="pl">${pr.l}</div><div class="seg">${pr.o.map((o,oi)=>`<button data-s="${si}" data-k="${k}" data-o="${oi}" class="${c[k]===oi?"on":""}">${esc(o)}</button>`).join("")}</div></div>`).join("")}
+    sh.innerHTML=`<div class="wt">じっけん けいかく</div>
+    <div class="small dim" style="margin-bottom:8px">1 試料 ${cost} 万円。部下の人数で 1 週の水準数が きまる。モチベが ひくいと ミスが ふえる（いまの しっぱい率 ${Math.round(failProb()*100)}%）。${isPrepWeek()?'<br><span class="o">資料作成週：こんしゅうは 1 水準のみ</span>':""}${S.flags.wet?'<br><span class="o">露点 悪化中：しっぱいしやすい</span>':""}</div>
+    ${sel.map((c,si)=>`<div class="sample" style="${si>=use?"opacity:.35":""}"><div class="hd"><b>水準 ${si+1}</b>${si>0&&S.team[si-1]?`<span class="small dim"> 担当 ${S.team[si-1].n}</span>`:""}<span style="flex:1"></span>${si>0?`<button class="small" data-tog="${si}">${si<use?"つくらない":"つくる"}</button>`:""}</div>
+     ${ps.map((pr,k)=>`<div class="prm"><div class="small dim">${pr.l}</div><div class="seg">${pr.o.map((o,oi)=>`<button data-s="${si}" data-k="${k}" data-o="${oi}" class="${c[k]===oi?"on":""}">${esc(o)}</button>`).join("")}</div></div>`).join("")}
     </div>`).join("")}
-    <div class="btnrow"><button id="cx">やめる</button><button class="pri" id="go">${use} 水準を作製（${use*p.cost} 万円）</button></div>`;
+    <div class="btnrow"><button id="cx">▶ やめる</button><button class="pri" id="go">▶ ${use}水準 つくる（${use*cost}万）</button></div>`;
     sh.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{sel[+b.dataset.s][+b.dataset.k]=+b.dataset.o;draw(sh);});
     sh.querySelectorAll("[data-tog]").forEach(b=>b.onclick=()=>{const si=+b.dataset.tog;use=si<use?si:si+1;draw(sh);});
     sh.querySelector("#cx").onclick=closeModal;
@@ -720,36 +787,46 @@ function openExp(){
 }
 function runExp(list){
   const pi=S.cur,p=PROJ[pi],P=S.P[pi];
-  S.budget-=list.length*p.cost; S.soc-=20; P.acts++;
+  S.budget-=list.length*costOf(p); S.soc-=20; P.acts++;
   let bestS=P.log.length?Math.max(...P.log.map(e=>score(p,e.v))):0;
   const res=list.map(c=>measure(pi,c));
   S.flags.wet=0;S.flags.extra=0;
   res.forEach(r=>{P.log.push(r);if(r.ok)P.hits++;const s=score(p,r.v);if(s>bestS*1.02){bestS=s;S.mon.up++;}});
   S.mon.samples+=res.length;
-  p.skills.forEach(k=>gain(k,.6));gain("hyoka",.3);
-  const hit=res.filter(r=>r.ok).length;
-  log(`${p.icon} 実験 ${res.length} 水準${hit?`（目標達成 ${hit}）`:""}`);
+  const fails=res.filter(r=>r.fail).length,hit=res.filter(r=>r.ok).length;
+  addStress(3+fails*2-(hit?3:0));
+  p.skills.forEach(k=>gain(k,.5));gain("hyoka",.3);
+  log(`じっけん ${res.length}水準（${p.short}）${hit?`もくひょう達成 ${hit}`:""}${fails?` ミス ${fails}`:""}`);
   const done=P.hits>=2&&!P.done;
-  pushQ(okModal(`<h2>📊 測定結果</h2>${res.map((r,i)=>`<div class="res"><div class="small muted">水準 ${i+1}：${esc(shortCond(p,r.c))}</div>
-   ${r.v.map((v,j)=>`<div><span class="small muted">${p.metrics[j].l}</span> <span class="big ${v>=p.metrics[j].t?"ok":""}">${fmt(v,p.metrics[j].d)}</span> <span class="small muted">${p.metrics[j].u}</span></div>`).join("")}
-   ${r.notes.map(n=>`<span class="pill ${r.fail?"ng":""}">${esc(n)}</span>`).join("")}
-   ${r.ok?`<div class="ok small" style="margin-top:4px">✓ 目標性能をクリア！</div>`:""}</div>`).join("")}`,done?"テーマ達成へ":"次の週へ"));
+  (hit?SFX.ok:fails?SFX.bad:()=>{})();
+  pushQ(okModal(`<div class="wt">そくてい けっか</div>${res.map((r,i)=>`<div class="res"><div class="small dim">水準 ${i+1}：${esc(shortCond(p,r.c))}</div>
+   ${r.v.map((v,j)=>`<div><span class="small dim">${p.metrics[j].l}</span> <span class="big ${v>=p.metrics[j].t?"g":""}">${fmt(v,p.metrics[j].d)}</span> <span class="small dim">${p.metrics[j].u}</span></div>`).join("")}
+   ${r.notes.map(n=>`<span class="pill ${r.fail?"r":""}">${esc(n)}</span>`).join("")}
+   ${r.ok?`<div class="g small">★ もくひょう クリア！</div>`:""}</div>`).join("")}`,done?"テーマ達成へ":"つぎの しゅうへ"));
   if(done)completeProj(pi);
   endWeek();
 }
 function completeProj(pi){
   const p=PROJ[pi],P=S.P[pi];P.done=true;P.doneW=S.w;
   const bonus=Math.max(0,Math.round((22-P.acts)*1.2));
-  const r=22+bonus; S.rep+=r; p.skills.forEach(k=>gain(k,3)); S.budget+=100; S.mon.done++;
+  const r=22+bonus; S.rep+=r; p.skills.forEach(k=>gain(k,3)); S.budget+=100; S.mon.done++; addStress(-15); addMot(10);
   if(p.kind==="se")S.cellSE.push(p.id);
-  log(`🏆 「${p.name}」達成！ 評価 +${r}`);
-  let msg=`<b>「${p.name}」達成！</b><br>${P.acts} 週ぶんの検討で再現性まで確認できたな。評価 +${r}、報奨予算 +100 万円。`;
-  if(P.pat===0)msg+=`<br>発表の前に<b>特許出願</b>も忘れずにな。`;
-  if(p.kind==="se"&&seDone()===NEED_SE)msg+=`<br><br>電解質が ${NEED_SE} つそろった。<b>正極テーマ</b>が解放されたぞ。`;
-  if(p.kind==="cat")msg+=`<br><br>いよいよ<b>セル試作</b>だ。君が作った電解質から選んで組んでくれ。`;
-  if(p.kind==="cell")msg+=`<br><br>……全固体電池セルの完成だ。量産化検討が正式に始まるぞ。本当によくやった。`;
+  log(`★「${p.name}」達成！ ひょうか +${r}`);
+  pushQ(next=>{SFX.fan();next();});
+  let msg=`<b>「${p.name}」達成！</b><br>${P.acts}週ぶんの検討で 再現性まで確認できたな。ひょうか +${r}、報奨予算 +100 万円。`;
+  if(P.pat===0&&p.kind!=="proto")msg+=`<br>発表の前に 特許出願も 忘れずにな。`;
+  if(p.kind==="se"&&seDone()===NEED_SE)msg+=`<br><br>電解質が ${NEED_SE} つ そろった。<b>正極テーマ</b>が 解放されたぞ。`;
+  if(p.kind==="cat")msg+=`<br><br>次は <b>セル試作</b>だ。君が作った電解質から 選んで組んでくれ。`;
+  if(p.kind==="cell")msg+=`<br><br>セルができた！ 最後は <b>プロト量産</b>だ。生技部と しっかり連携しておけよ。`;
   S.cur=null;
-  pushQ(okModal(bossHTML(msg),"はい"));
+  if(p.kind==="proto"){
+    S.clear=true;
+    pushQ(say("kawaguchi","オウイ！ O西！！<br>プロト量産ライン、見てきたぞ。<br>……ようやった。ほんまに ようやった。"));
+    pushQ(say("onishi","ありがとうございます！<br>チームのみんなの おかげです！"));
+    pushQ(()=>finishGame(true));
+    return;
+  }
+  pushQ(say(p.kind==="cell"?"kawaguchi":"boss",msg));
   if(PROJ.some(q=>unlocked(q)&&!S.P[q.idx].done))pushQ(next=>openThemes(next,true));
 }
 
@@ -757,9 +834,9 @@ function completeProj(pi){
 function openComp(){
   const p=PROJ[S.cur],ps=params(p);
   const opts=ps.map((pr,k)=>({pr,k})).filter(x=>x.pr.comp);
-  modal(`<h2>💻 計算スクリーニング</h2><div class="small muted" style="margin-bottom:10px">DFT・機械学習ポテンシャルで候補を比べます。計算科学スキルが高いほど正確です（今の精度 ±${Math.round(18*(1-S.sk.keisan/120))} %）。同じ計算を重ねると平均されて精度が上がります。</div>
-   ${opts.map(x=>`<button class="qopt" data-k="${x.k}"><b>${x.pr.comp}</b><br><span class="small muted">${x.pr.l}：${x.pr.o.join(" / ")}</span></button>`).join("")}
-   <div class="btnrow"><button id="cx">やめる</button></div>`,sh=>{
+  modal(`<div class="wt">けいさん スクリーニング</div><div class="small dim" style="margin-bottom:10px">DFT・機械学習ポテンシャルで 候補を くらべる。計算科学スキルが 高いほど 正確（いまの精度 ±${Math.round(18*(1-S.sk.keisan/120))}%）。かさねると 平均されて 精度UP。</div>
+   ${opts.map(x=>`<button class="qopt" data-k="${x.k}"><b>${x.pr.comp}</b><br><span class="small dim">${x.pr.l}：${x.pr.o.join(" / ")}</span></button>`).join("")}
+   <div class="btnrow"><button id="cx">▶ やめる</button></div>`,sh=>{
     sh.querySelector("#cx").onclick=closeModal;
     sh.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>runComp(+b.dataset.k));
   });
@@ -772,12 +849,12 @@ function runComp(k){
   const pred=truth.map(t=>Math.max(.02,t/mx*(1+gauss()*sd)));
   const prev=P.comp[k];
   P.comp[k]=prev?prev.map((v,i)=>(v+pred[i])/2):pred;
-  S.soc-=12; P.acts++; S.mon.comp++; gain("keisan",2);
-  log(`💻 ${pr.comp}を実行`);
+  S.soc-=12; P.acts++; S.mon.comp++; gain("keisan",2); addStress(1);
+  log(`けいさん：${pr.comp}`);
   const arr=P.comp[k],m2=Math.max(...arr);
-  pushQ(okModal(`<h2>💻 ${pr.comp}</h2><div class="small muted">${prev?"前回の計算と平均しました。":""}相対スコア（高いほど有望）</div>
-   ${arr.map((v,i)=>`<div class="hbar"><span class="nm">${esc(pr.o[i])}</span><span class="tr"><i style="width:${Math.max(3,v/m2*100)}%"></i></span><span class="vv">${(v*100).toFixed(0)}</span></div>`).join("")}
-   <div class="expl">${compComment(p.id,k)}</div>`,"次の週へ"));
+  pushQ(okModal(`<div class="wt">${pr.comp}</div><div class="small dim">${prev?"前回と 平均した。":""}相対スコア（高いほど 有望）</div>
+   ${arr.map((v,i)=>`<div class="hbar"><span class="hn">${esc(pr.o[i])}</span><span class="ht"><i style="width:${Math.max(3,v/m2*100)}%"></i></span><span class="hv">${(v*100).toFixed(0)}</span></div>`).join("")}
+   <div class="expl">${compComment(p.id,k)}</div>`,"つぎの しゅうへ"));
   endWeek();
 }
 function compComment(id,k){
@@ -787,19 +864,19 @@ function compComment(id,k){
    "halide:0":"Zr⁴⁺ で Y³⁺ を置換すると Li 空孔が入り、拡散障壁が下がる。Zr 単独では Li が少なすぎる。",
    "oxcl:0":"Ta⁵⁺ は単独だと固溶しにくい（+2.9 eV）が、O と組ませると +1.4 eV まで下がる。O を入れる前提で評価すると Ta が最有望。",
    "oxcl:1":"Ta に O を結合させた配置が LaOCl を作るより安定。1 個目 −1.08 eV、2 個目 −0.43 eV で、O/Ta ≈ 2 を超えると LaOCl 析出が優勢になる見込み。",
-   "llzo:0":"Ga³⁺ は Li サイトの中でも拡散経路を塞ぎにくい 24d 以外の位置に入り、立方晶を最も安定化しつつ伝導を妨げにくい。",
+   "llzo:0":"Ga³⁺ は立方晶を強く安定化しつつ、Al³⁺ ほど Li の伝導経路を塞がない。",
    "latp:0":"Al³⁺ 置換で格子が縮み、Li 過剰分が隙間サイトを占めて伝導度が上がる。x ≈ 0.3 を超えると AlPO₄ が出やすい。",
    "ncm:2":"LiNbO₃ は硫化物と反応しにくく Li 伝導もあるが、厚すぎると抵抗になる。"
-  })[id+":"+k]||"計算結果を実験計画に活かそう。";
+  })[id+":"+k]||"計算結果を 実験計画に 活かそう。";
 }
 
 // ---------- 勉強 ----------
 function openStudy(){
-  modal(`<h2>📚 勉強する分野</h2><div class="small muted" style="margin-bottom:8px">3 問出題（4 択・○×・計算問題）。正解で +3、不正解でも解説を読んで +1。良い成績だと文献ヒントが見つかることも。</div>
-   ${SKK.map(k=>`<button class="qopt" data-k="${k}"><b style="color:${SK[k].c}">${SK[k].n}</b> <span class="small muted">現在 ${Math.round(S.sk[k])}</span></button>`).join("")}
-   <button class="qopt" data-k="mix"><b>🎲 総合（ランダム）</b> <span class="small muted">分野をまたいで出題・全問正解でボーナス</span></button>
-   <button class="qopt" data-k="calc"><b>🧮 計算ドリル</b> <span class="small muted">計算問題だけを 3 問</span></button>
-   <div class="btnrow"><button id="cx">やめる</button></div>`,sh=>{
+  modal(`<div class="wt">べんきょう</div><div class="small dim" style="margin-bottom:8px">3 もん（4択・○×・計算）。せいかいで +3、まちがいでも 解説を読んで +1。</div>
+   ${SKK.map(k=>`<button class="qopt" data-k="${k}"><b style="color:${SK[k].c}">${SK[k].n}</b> <span class="small dim">いま ${Math.round(S.sk[k])}</span></button>`).join("")}
+   <button class="qopt" data-k="mix"><b>そうごう（ランダム）</b></button>
+   <button class="qopt" data-k="calc"><b>けいさんドリル</b></button>
+   <div class="btnrow"><button id="cx">▶ やめる</button></div>`,sh=>{
     sh.querySelector("#cx").onclick=closeModal;
     sh.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>startQuiz(b.dataset.k));
   });
@@ -818,21 +895,20 @@ function pickQ(f){
   return out;
 }
 function startQuiz(f){
-  S.soc-=10;S.mon.study++;
+  S.soc-=10;S.mon.study++;addStress(-2);
   const qs=pickQ(f);let qi=0,correct=0;
-  const title=f==="mix"?"総合":f==="calc"?"計算ドリル":SK[f].n;
+  const title=f==="mix"?"そうごう":f==="calc"?"けいさんドリル":SK[f].n;
   const show=sh=>{
-    const q=qs[qi];
-    const tf=q.t==="tf";
-    const opts=tf?[{k:"t",l:"○ 正しい"},{k:"f",l:"× 誤り"}]:[0,1,2,3].slice(0,q.c.length).sort(()=>Math.random()-.5).map(o=>({k:String(o),l:q.c[o]}));
+    const q=qs[qi],tf=q.t==="tf";
+    const opts=tf?[{k:"t",l:"○ ただしい"},{k:"f",l:"× まちがい"}]:[0,1,2,3].slice(0,q.c.length).sort(()=>Math.random()-.5).map(o=>({k:String(o),l:q.c[o]}));
     const right=tf?(q.a?"t":"f"):String(q.a);
-    sh.innerHTML=`<h2>📚 ${title} ${qi+1}/3 <span class="tag" style="vertical-align:middle">${tf?"○×":q.q.startsWith("計算問題")?"計算":"4 択"}</span> <span class="small" style="color:${SK[q.f].c}">${SK[q.f].n}</span></h2><div style="line-height:1.7;margin-bottom:6px">${q.q.replace(/^計算問題：/,"")}</div>
+    sh.innerHTML=`<div class="wt">${title} ${qi+1}/3 <span class="badge b">${tf?"○×":q.q.startsWith("計算問題")?"けいさん":"4たく"}</span> <span class="small" style="color:${SK[q.f].c}">${SK[q.f].n}</span></div><div style="line-height:1.8;margin-bottom:6px">${q.q.replace(/^計算問題：/,"")}</div>
      <div class="${tf?"tfrow":""}">${opts.map(o=>`<button class="qopt" data-o="${o.k}">${o.l}</button>`).join("")}</div><div id="ex"></div>`;
     sh.querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>{
-      const ok=b.dataset.o===right;if(ok)correct++;
+      const ok=b.dataset.o===right;if(ok)correct++;(ok?SFX.ok:SFX.bad)();
       gain(q.f,ok?3:1);
       sh.querySelectorAll("[data-o]").forEach(x=>{x.disabled=true;x.style.opacity=1;if(x.dataset.o===right)x.classList.add("right");else if(x===b)x.classList.add("wrong");});
-      sh.querySelector("#ex").innerHTML=`<div class="expl"><b class="${ok?"ok":"ng"}">${ok?"正解！":"残念…"}</b> ${q.e}</div><div class="btnrow"><button class="pri" id="nx">${qi<2?"次の問題":"結果へ"}</button></div>`;
+      sh.querySelector("#ex").innerHTML=`<div class="expl"><b class="${ok?"g":"r"}">${ok?"せいかい！":"ざんねん…"}</b> ${q.e}</div><div class="btnrow"><button class="pri" id="nx">▶ ${qi<2?"つぎの もんだい":"けっかへ"}</button></div>`;
       sh.querySelector("#nx").onclick=()=>{qi++;if(qi<3)show(sh);else quizEnd(title,qs,correct);};
     });
   };
@@ -840,162 +916,245 @@ function startQuiz(f){
 }
 function quizEnd(title,qs,correct){
   let lit="";
-  if(correct===3){qs.forEach(q=>gain(q.f,1));}
+  if(correct===3)qs.forEach(q=>gain(q.f,1));
   if(S.cur!==null&&!S.P[S.cur].done&&Math.random()<.2+correct*.15){
     const p=PROJ[S.cur],P=S.P[S.cur],ps=params(p);
     const cand=ps.map((_,k)=>k).filter(k=>P.lit[k]===undefined);
     if(cand.length){const k=rnd(cand),best=bestOf(p);const acc=.55+S.sk[qs[0].f]/250;let o=best[k];
       if(Math.random()>acc)o=Math.min(ps[k].o.length-1,Math.max(0,o+(Math.random()<.5?-1:1)));
-      P.lit[k]=o;lit=`<div class="expl">📄 関連論文を見つけた：<b>${esc(ps[k].l)}</b>は「${esc(ps[k].o[o])}」付近が良いという報告がある（ヒントに記録）。</div>`;}
+      P.lit[k]=o;lit=`<div class="expl">関連論文を みつけた：<b>${esc(ps[k].l)}</b>は「${esc(ps[k].o[o])}」ふきんが よいらしい（ヒントに きろく）。</div>`;}
   }
-  log(`📚 ${title}を勉強（${correct}/3 正解）`);
-  pushQ(okModal(`<h2>📚 勉強おわり</h2><div class="res"><span class="big">${correct} / 3</span> 正解 ${correct===3?'<span class="tag g">全問正解ボーナス</span>':""}</div>${lit}`,"次の週へ"));
+  log(`べんきょう：${title}（${correct}/3）`);
+  pushQ(okModal(`<div class="wt">べんきょう おわり</div><div class="res"><span class="big">${correct} / 3</span> せいかい ${correct===3?'<span class="badge y">ぜんもん せいかい ボーナス</span>':""}</div>${lit}`,"つぎの しゅうへ"));
   endWeek();
 }
 
 // ---------- 学会 ----------
 function openPub(){
   const list=S.P.map((x,i)=>({x,i})).filter(o=>o.x.log.length);
-  modal(`<h2>🎤 学会発表</h2><div class="small muted" style="margin-bottom:8px">成果が目標に近いほど評価が上がります。同じテーマで何度も発表すると反響は小さくなります。<span class="wn">特許を出願する前に発表すると新規性を失います。</span></div>
-   ${list.map(o=>{const r=ratio(o.i),g=pubGain(o.i);return`<button class="qopt" data-i="${o.i}"><b>${PROJ[o.i].icon} ${PROJ[o.i].name}</b>${o.x.done?' <span class="tag">達成済</span>':""}${o.x.pat===0&&r>=.8?' <span class="tag r">未出願</span>':""}<br><span class="small muted">到達度 ${(r*100).toFixed(0)} %・発表 ${o.x.pubs} 回・見込み 評価 +${g}</span></button>`;}).join("")}
-   <div class="btnrow"><button id="cx">やめる</button></div>`,sh=>{
+  modal(`<div class="wt">がっかい はっぴょう</div><div class="small dim" style="margin-bottom:8px">目標に ちかいほど ひょうかUP。同じテーマを くりかえすと 反響は へる。<span class="o">特許出願の 前に 発表すると 新規性を うしなう。</span></div>
+   ${list.map(o=>{const r=ratio(o.i),g=pubGain(o.i);return`<button class="qopt" data-i="${o.i}"><span class="sq" style="background:${PROJ[o.i].col}"></span> <b>${PROJ[o.i].name}</b>${o.x.pat===0&&r>=.8?' <span class="badge r">未出願</span>':""}<br><span class="small dim">到達度 ${(r*100).toFixed(0)}% ・ 発表 ${o.x.pubs}回 ・ みこみ +${g}</span></button>`;}).join("")}
+   <div class="btnrow"><button id="cx">▶ やめる</button></div>`,sh=>{
     sh.querySelector("#cx").onclick=closeModal;
     sh.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>doPub(+b.dataset.i));
   });
 }
 function pubGain(i){const r=Math.min(1.3,ratio(i));return Math.max(1,Math.round((3+12*r*r)*Math.pow(.55,S.P[i].pubs)*(S.P[i].done?1.2:1)));}
 function doPub(i){
-  const P=S.P[i],g=pubGain(i);S.rep+=g;P.pubs++;S.soc-=20;S.mon.pub++;gain("denki",1);gain("hyoka",.5);
+  const P=S.P[i],g=pubGain(i);S.rep+=g;P.pubs++;S.soc-=20;S.mon.pub++;gain("denki",1);gain("hyoka",.5);addStress(4);
   let warn="";
-  if(P.pat===0&&!P.disclosed){P.disclosed=1;warn=`<div class="expl"><span class="wn">⚠️ 未出願のまま発表したため、このテーマの特許は新規性喪失の例外を使っても通りにくくなりました。</span></div>`;}
+  if(P.pat===0&&!P.disclosed){P.disclosed=1;warn=`<div class="expl"><span class="o">未出願のまま 発表したので、このテーマの 特許は 通りにくく なった。</span></div>`;}
   const q=rnd(["「その伝導度、粒界の寄与は分離していますか？」","「電子伝導度は測りましたか？」","「再現性は何回確認しましたか？」","「計算と実験のずれはどう解釈していますか？」","「大気安定性はどうですか？」","「スケールアップの見通しは？」","「電位窓はどの方法で評価しましたか？」"]);
-  log(`🎤 ${PROJ[i].short}を発表 評価 +${g}`);
-  pushQ(okModal(`<h2>🎤 発表しました</h2><div class="res">質疑応答：${q}<div class="big" style="margin-top:6px">評価 +${g}</div></div>${warn}`,"次の週へ"));
+  log(`がっかい：${PROJ[i].short} ひょうか +${g}`);
+  pushQ(okModal(`<div class="wt">がっかい はっぴょう</div><div class="res">しつぎ：${q}<div class="big" style="margin-top:6px">ひょうか +${g}</div></div>${warn}`,"つぎの しゅうへ"));
   endWeek();
 }
 // ---------- 特許 ----------
 function patProb(i){const P=S.P[i];let p=.3+.45*Math.min(1,ratio(i))+(S.sk.denki+S.sk.gosei)/800;if(P.disclosed)p*=.35;return Math.min(.95,p);}
 function openPat(){
   const list=S.P.map((x,i)=>({x,i})).filter(o=>o.x.pat===0&&ratio(o.i)>=.8);
-  modal(`<h2>⚖️ 特許申請</h2><div class="small muted" style="margin-bottom:8px">目標の 80 % 以上に達したテーマを出願できます（1 テーマ 1 件）。弁理士費用 30 万円・SOC −20 %。${PATENT_WAIT} 週後に審査結果が届き、登録されると評価と報奨金が入ります。</div>
-   ${list.map(o=>`<button class="qopt" data-i="${o.i}"><b>${PROJ[o.i].icon} ${PROJ[o.i].name}</b>${o.x.disclosed?' <span class="tag r">発表済（新規性に難）</span>':""}<br><span class="small muted">到達度 ${(ratio(o.i)*100).toFixed(0)} %・登録見込み ${Math.round(patProb(o.i)*100)} %</span></button>`).join("")}
-   <div class="btnrow"><button id="cx">やめる</button></div>`,sh=>{
+  modal(`<div class="wt">とっきょ しゅつがん</div><div class="small dim" style="margin-bottom:8px">目標の 80% 以上の テーマを 出願できる（1 テーマ 1 件）。弁理士費用 30 万円。${PATENT_WAIT} 週後に 審査けっか。</div>
+   ${list.map(o=>`<button class="qopt" data-i="${o.i}"><span class="sq" style="background:${PROJ[o.i].col}"></span> <b>${PROJ[o.i].name}</b>${o.x.disclosed?' <span class="badge r">発表済</span>':""}<br><span class="small dim">到達度 ${(ratio(o.i)*100).toFixed(0)}% ・ 登録みこみ ${Math.round(patProb(o.i)*100)}%</span></button>`).join("")}
+   <div class="btnrow"><button id="cx">▶ やめる</button></div>`,sh=>{
     sh.querySelector("#cx").onclick=closeModal;
     sh.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>doPat(+b.dataset.i));
   });
 }
 function doPat(i){
   const P=S.P[i],p=PROJ[i];
-  P.pat=1;P.patW=S.w;P.patP=patProb(i);S.soc-=20;S.budget-=30;S.mon.pat++;S.rep+=2;gain("denki",1);gain("gosei",1);
-  const claim=p.kind==="se"?`${p.sub.split(" ")[0]}を含む固体電解質およびその製造方法`:p.kind==="cat"?"被覆層を有する全固体電池用正極活物質":"全固体電池およびその製造方法";
-  log(`⚖️ 「${p.short}」で特許出願`);
-  pushQ(okModal(`<h2>⚖️ 出願しました</h2><div class="res">発明の名称：<b>${esc(claim)}</b><div class="small muted" style="margin-top:4px">${PATENT_WAIT} 週後に審査結果が届きます。評価 +2</div></div>`,"次の週へ"));
+  P.pat=1;P.patW=S.w;P.patP=patProb(i);S.soc-=20;S.budget-=30;S.mon.pat++;S.rep+=2;gain("denki",1);gain("gosei",1);addStress(3);
+  const claim=p.kind==="se"?`${p.sub.split(" ")[0]}を含む固体電解質およびその製造方法`:p.kind==="cat"?"被覆層を有する全固体電池用正極活物質":p.kind==="cell"?"全固体電池およびその製造方法":"全固体電池用電極の連続製造方法";
+  log(`とっきょ出願：${p.short}`);
+  pushQ(okModal(`<div class="wt">しゅつがん した</div><div class="res">発明の名称：<b>${esc(claim)}</b><div class="small dim" style="margin-top:4px">${PATENT_WAIT} 週後に 審査けっか。ひょうか +2</div></div>`,"つぎの しゅうへ"));
   endWeek();
 }
-// ---------- 予算・休養 ----------
+// ---------- 予算・ケア・休養 ----------
 function doGrant(){
-  S.soc-=15;S.grantCd=12;
-  const p=Math.min(.9,.35+S.rep/350),ok=Math.random()<p;
+  S.soc-=15;S.grantCd=12;addStress(4);
+  const p=Math.min(.9,.3+S.rep/350+S.favor/400),ok=Math.random()<p;
   const amt=100+S.rep;
   if(ok)S.budget+=amt;
-  log(ok?`📝 予算申請が通った +${amt}万`:"📝 予算申請は不採択");
-  pushQ(okModal(`<h2>📝 予算申請</h2><div class="res">${ok?`<span class="big ok">採択！</span><br>予算 +${amt} 万円`:`<span class="big ng">不採択…</span><br><span class="small muted">評価を上げると通りやすくなります（採択率 ${Math.round(p*100)} %）</span>`}</div>`,"次の週へ"));
+  log(ok?`よさん申請 採択 +${amt}万`:"よさん申請 不採択");
+  (ok?SFX.ok:SFX.bad)();
+  pushQ(okModal(`<div class="wt">よさん しんせい</div><div class="res">${ok?`<span class="big g">さいたく！</span><br>よさん +${amt} 万円`:`<span class="big r">ふさいたく…</span><br><span class="small dim">ひょうかと K口こうかんどで 通りやすくなる（採択率 ${Math.round(p*100)}%）</span>`}</div>`,"つぎの しゅうへ"));
   endWeek();
 }
-function doRest(){S.soc=Math.min(100,S.soc+40);log("☕ 休養した");toast("☕ リフレッシュ！ SOC +40 %");endWeek();}
+function doCare(){
+  S.budget-=10;S.soc=Math.max(0,S.soc-5);addMot(15);addStress(-8);
+  const line=rnd(["焼き肉で 部下と 語り合った。","1on1 で 部下の 悩みを 聞いた。","みんなで 昼休みに キャッチボールをした。","部下の 実験の 工夫を みんなの前で ほめた。"]);
+  log(`チームケア：${line}`);
+  pushQ(say("onishi",`${line}<br><span class="g">チームの モチベ +15</span>・ストレス −8`));
+  endWeek();
+}
+function doRest(){S.soc=Math.min(100,S.soc+40);addStress(-20);log("やすんだ");toast("リフレッシュ！ たいりょく+40 ストレス−20");endWeek();}
+
+// ---------- K口役員「オウイ」 ----------
+const OUI_TALK=[
+ "昔はな、鉛蓄電池の 電槽を 夜通し 組んだもんや。","最近 ゴルフの スコアが 伸びんのや。どうしたらええと思う？","全固体は いつ 出るんや？ 社長にも 聞かれとるで。",
+ "気合いや、気合い。データは 気合いで 出る。","この前の 役員会で 君の 話を しといたで。","硫化物？ 酸化物？ わしには 違いが わからん。説明してみい。",
+ "若い頃の わしに そっくりや。","今度 一緒に 工場見に 行こか。"];
+function ouiEvent(){
+  return next=>{
+    SFX.oui();
+    modal(`<div class="oui">オウイ！！</div>${talkHTML("kawaguchi","オウイ！ O西！ ちょっと 来い！")}
+     <button class="qopt" data-c="go">▶ 「はい！」と かけつけて 話す<br><span class="small dim">こうかんど UP ／ ストレス UP</span></button>
+     <button class="qopt" data-c="no">▶ きこえない ふりをする<br><span class="small dim">こうかんど DOWN</span></button>`,sh=>{
+      typeIn(sh);
+      sh.querySelector('[data-c="go"]').onclick=()=>{
+        const g=8+Math.floor(Math.random()*5),st=10+Math.floor(Math.random()*5);
+        addFavor(g);addStress(st);S.soc=Math.max(0,S.soc-5);S.oui.talk++;
+        log(`K口役員と話した（こうかんど +${g}・ストレス +${st}）`);
+        say("kawaguchi",`${rnd(OUI_TALK)}<br><span class="small dim">（${30+Math.floor(Math.random()*60)} 分 話を 聞いた…）</span><br><span class="p">こうかんど +${g}</span>・<span class="r">ストレス +${st}</span>`)(()=>{favorRewards(next);});
+      };
+      sh.querySelector('[data-c="no"]').onclick=()=>{
+        addFavor(-7);S.oui.ignore++;
+        log("K口役員の オウイを スルーした（こうかんど −7）");
+        say("kawaguchi","……なんや、聞こえとらんのか。<br><span class=\"p\">こうかんど −7</span>")(next);
+      };
+    });
+  };
+}
+function favorRewards(next){
+  const r=FAVOR_REWARDS.find(x=>S.favor>=x.f&&!S.rewards[x.k]);
+  if(!r){next();return;}
+  S.rewards[r.k]=1;
+  if(r.k[0]==="m"){const nm=TEAM_POOL.find(n=>!S.team.some(m=>m.n===n))||"新人";S.team.push({n:nm,mot:80});}
+  else S.budget+=r.k==="b1"?200:300;
+  log(`K口役員から：${r.t}`);SFX.fan();
+  say("kawaguchi",`O西、君は よう 話を 聞いてくれる。<br>わしから 手を まわしといたで。<br><b class="y">${r.t}</b>`)(()=>favorRewards(next));
+}
+
+// ---------- 他部署・社外とのやりとり ----------
+const DEPTS=[
+ {n:"企画部",topic:"製品仕様の すりあわせ",
+  ok:()=>{S.rep+=4;S.budget+=40;return"仕様の 落としどころが 決まった。ひょうか +4・予算 +40 万円";},
+  ng:()=>{S.rep=Math.max(0,S.rep-3);addStress(6);return"仕様の 追加要求を 押しつけられた…ひょうか −3";}},
+ {n:"生技部",topic:"量産プロセスの 事前検討",
+  ok:()=>{S.ready=clamp(S.ready+15,0,100);return"量産条件の すりあわせが 進んだ。生技れんけい +15";},
+  ng:()=>{S.ready=clamp(S.ready-5,0,100);addStress(6);return"「ラボの 条件では 流せない」と 突き返された。生技れんけい −5";}},
+ {n:"調達部",topic:"原料の 価格と 納期",
+  ok:()=>{S.costUntil=S.w+8;return"原料を 安く 確保できた。8 週間 試料コスト −15%";},
+  ng:()=>{S.flags.delay=1;addStress(5);return"原料の 納期が 遅れる…来週は じっけん できない";}},
+ {n:"社外",topic:"",
+  ok:()=>{S.rep+=6;gain("denki",1);return"先方から 高く 評価された。ひょうか +6";},
+  ng:()=>{S.rep=Math.max(0,S.rep-4);addStress(8);return"打ち合わせが こじれた…ひょうか −4";}}
+];
+const OUTSIDE=["顧客（自動車メーカー）との 技術打ち合わせ","大学との 共同研究 打ち合わせ","装置メーカーとの 仕様打ち合わせ","材料メーカーとの サンプル評価会"];
+function deptEvent(){
+  const d=DEPTS[S.deptI%DEPTS.length];S.deptI++;
+  const topic=d.n==="社外"?rnd(OUTSIDE):`${d.n}と ${d.topic}`;
+  const p=clamp(.95-S.stress/100+(S.sk.denki+S.sk.hyoka)/600,.08,.95),ok=Math.random()<p;
+  const t=(ok?d.ok:d.ng)();
+  const mood=S.stress>=75?"ストレスで つい 口調が きつく なってしまった…":S.stress>=50?"少し イライラが 顔に 出てしまった。":"おちついて 話が できた。";
+  log(`${d.n}：${ok?"○":"×"} ${t}`);
+  return next=>{(ok?SFX.ok:SFX.bad)();okModal(`<div class="wt">${d.n==="社外"?"社外との やりとり":d.n+"との やりとり"}</div><div class="res">${esc(topic)}<div class="small dim" style="margin-top:4px">ストレス ${S.stress} → ${mood}（成功率 ${Math.round(p*100)}%）</div><div class="${ok?"g":"r"}" style="margin-top:6px">${ok?"○ ":"× "}${t}</div></div>`)(next);};
+}
+function tantrum(){
+  const who=rnd(S.team);
+  addMot(-15);addStress(-10);S.tantrum++;
+  log(`ストレスで ${who?who.n:"部下"}に あたってしまった（チームのモチベ −15）`);
+  return next=>{SFX.hit();modal(talkHTML("onishi",`なんで こんな ミスするんだ！！<br><span class="small dim">……${who?who.n:"部下"}に きつく あたってしまった。</span><br><span class="r">チームの モチベ −15</span>`)+`<div class="btnrow"><button class="pri" id="ok">▶ つぎへ</button></div>`,sh=>{typeIn(sh);sh.querySelector("#ok").onclick=next;});};
+}
 
 // ---------- 社内報告会 ----------
 function monScore(){const m=S.mon;return m.samples*.8+m.up*3+m.done*8+m.pat*4+m.pub*2+m.comp*1+m.study*.5;}
-function grade(sc){return sc>=14?{g:"S",r:6,b:60}:sc>=8?{g:"A",r:4,b:30}:sc>=3.5?{g:"B",r:1,b:0}:{g:"C",r:-3,b:0};}
+function grade(sc){return sc>=14?{g:"S",r:6,b:60,s:-8}:sc>=8?{g:"A",r:4,b:30,s:-3}:sc>=3.5?{g:"B",r:1,b:0,s:2}:{g:"C",r:-3,b:0,s:10};}
 function meeting(){
-  const m=S.mon,sc=monScore(),G=grade(sc);
-  S.rep=Math.max(0,S.rep+G.r);S.budget+=G.b;S.soc=Math.max(5,S.soc-5);
-  const lines={
-   S:["素晴らしい月だった。事業部長もメモを取っていたぞ。","この調子だ。来月の予算は少し上乗せしておく。"],
-   A:["着実に進んでいるな。データの見せ方も良かった。","いい報告だった。次は再現性をもう一押し。"],
-   B:["まあまあだな。もう少し実験の水準を振ってもいいんじゃないか。","方向性は悪くない。来月は数字で語ってくれ。"],
-   C:["今月は何をしていたんだ？ 報告会は成果を見せる場だぞ。","正直、厳しい。来月は実験を回して巻き返そう。"]
-  }[G.g];
-  const q=rnd(["部長「それ、量産でも同じ性能が出るの？」","品証「原料コストはどれくらい？」","事業部「いつ頃サンプル出荷できそう？」","先輩「比較対象の選び方が気になったかな」","部長「競合と比べて何が勝ってる？」"]);
+  const m=S.mon,G=grade(monScore());
+  S.rep=Math.max(0,S.rep+G.r);S.budget+=G.b;S.soc=Math.max(5,S.soc-5);addStress(G.s);
+  const lines={S:["素晴らしい月だった。事業部長も メモを 取っていたぞ。","この調子だ。"],A:["着実に 進んでいるな。","いい報告だった。次は 再現性を もう一押し。"],B:["まあまあだな。もう少し 水準を 振っても いいんじゃないか。","方向性は 悪くない。来月は 数字で 語ってくれ。"],C:["今月は 何を していたんだ？","正直、厳しい。来月は 巻き返そう。"]}[G.g];
+  const q=rnd(["K口役員「それ、量産でも 同じ性能 出るんか？」","品証「原料コストは どれくらい？」","事業部「いつ頃 サンプル出荷 できそう？」","企画部「競合と 比べて 何が 勝ってる？」"]);
   let hint="";
   if((G.g==="S"||G.g==="A")&&S.cur!==null&&!S.P[S.cur].done&&Math.random()<.4){
     const p=PROJ[S.cur],P=S.P[S.cur],ps=params(p),cand=ps.map((_,k)=>k).filter(k=>P.lit[k]===undefined);
-    if(cand.length){const k=rnd(cand),b=bestOf(p);P.lit[k]=b[k];hint=`<div class="expl">💡 室長「そういえば ${esc(ps[k].l)}は ${esc(ps[k].o[b[k]])} あたりを試してみたらどうだ」（ヒントに記録）</div>`;}
+    if(cand.length){const k=rnd(cand),b=bestOf(p);P.lit[k]=b[k];hint=`<div class="expl">M田室長「${esc(ps[k].l)}は ${esc(ps[k].o[b[k]])} あたりを 試してみたら どうだ」（ヒントに きろく）</div>`;}
   }
-  log(`🗣 社内報告会 評価 ${G.g}（${G.r>=0?"+":""}${G.r}）`);
+  log(`社内報告会 ${G.g}（ひょうか ${G.r>=0?"+":""}${G.r}）`);
   S.mon=freshMon();
-  return okModal(`<h2>🗣 月例 社内報告会</h2>
-   <div class="res"><div class="small muted">今月の成果</div>
-    <div class="small" style="line-height:1.8">作製試料 ${m.samples}・最高値更新 ${m.up}・テーマ達成 ${m.done}・特許出願 ${m.pat}・学会発表 ${m.pub}・計算 ${m.comp}・勉強 ${m.study}</div>
-    <div style="margin-top:6px">評価 <span class="big" style="color:${G.g==="C"?"var(--red)":"var(--gold)"}">${G.g}</span> <span class="small">評価 ${G.r>=0?"+":""}${G.r}${G.b?`・予算 +${G.b} 万円`:""}</span></div>
-   </div>
-   <div class="small muted" style="margin:6px 0">質疑：${q}</div>
-   ${bossHTML(rnd(lines))}${hint}`,"次の月へ");
+  return next=>{(G.g==="C"?SFX.bad:SFX.ok)();modal(`<div class="wt">げつれい 社内報告会</div>
+   <div class="res"><div class="small" style="line-height:1.8">試料 ${m.samples}・最高値更新 ${m.up}・テーマ達成 ${m.done}・特許 ${m.pat}・発表 ${m.pub}・計算 ${m.comp}・勉強 ${m.study}</div>
+    <div style="margin-top:6px">ひょうか <span class="big ${G.g==="C"?"r":"y"}">${G.g}</span> <span class="small">ひょうか ${G.r>=0?"+":""}${G.r}${G.b?` ・ よさん +${G.b}万`:""} ・ ストレス ${G.s>=0?"+":""}${G.s}</span></div></div>
+   <div class="small dim" style="margin:6px 0">しつぎ：${q}</div>
+   ${talkHTML("boss",rnd(lines))}${hint}<div class="btnrow"><button class="pri" id="ok">▶ つぎの つきへ</button></div>`,sh=>{typeIn(sh);sh.querySelector("#ok").onclick=next;});};
 }
 
 // ---------- 週送り ----------
 function endWeek(){
   if(isMeetWeek())pushQ(meeting());
-  S.w++;S.soc=Math.min(100,S.soc+6);if(S.grantCd>0)S.grantCd--;
-  if(wkOf(S.w)===1){S.budget+=monthlyBudget();}
-  // 特許の審査結果
+  S.flags.delay=0;
+  S.w++;S.soc=Math.min(100,S.soc+6);addStress(-2);if(S.grantCd>0)S.grantCd--;
+  if(S.stress<50)addMot(2);else if(S.stress>=80)addMot(-2);
+  if(S.stress>=90){S.soc=Math.max(0,S.soc-8);}
+  if(wkOf(S.w)===1){S.budget+=monthlyBudget();addFavor(-1);if(S.favor<15){S.budget=Math.max(0,S.budget-20);log("K口役員の 機嫌が わるい（予算 −20 万）");}}
   S.P.forEach((P,i)=>{if(P.pat===1&&S.w-P.patW>=PATENT_WAIT){
     const ok=Math.random()<P.patP;P.pat=ok?2:-1;
-    if(ok){S.rep+=10;S.budget+=50;log(`⚖️ 「${PROJ[i].short}」の特許が登録`);}
-    else log(`⚖️ 「${PROJ[i].short}」の特許は拒絶`);
-    pushQ(okModal(`<h2>⚖️ 特許審査の結果</h2><div class="res">${PROJ[i].icon} ${PROJ[i].name}<div class="big ${ok?"ok":"ng"}" style="margin-top:6px">${ok?"登録査定！":"拒絶査定…"}</div><div class="small muted">${ok?"評価 +10・発明報奨金 +50 万円":P.disclosed?"先に学会発表していたことが響いた。":"先行文献との差が認められなかった。"}</div></div>`));
+    if(ok){S.rep+=10;S.budget+=50;log(`とっきょ登録：${PROJ[i].short}`);}else log(`とっきょ拒絶：${PROJ[i].short}`);
+    pushQ(next=>{(ok?SFX.fan:SFX.bad)();okModal(`<div class="wt">とっきょ 審査けっか</div><div class="res"><span class="sq" style="background:${PROJ[i].col}"></span> ${PROJ[i].name}<div class="big ${ok?"g":"r"}" style="margin-top:6px">${ok?"とうろく さてい！":"きょぜつ さてい…"}</div><div class="small dim">${ok?"ひょうか +10・発明報奨金 +50 万円":P.disclosed?"先に学会発表していたことが響いた。":"先行文献との差が認められなかった。"}</div></div>`)(next);});
   }});
   if(S.w>S.TW){pushQ(()=>finishGame(false));render();runQ();return;}
+  // ストレス爆発
+  if(S.stress>=75&&Math.random()<.3)pushQ(tantrum());
+  // 部署・社外とのやりとり
+  let busy=false;
+  if(S.w>=S.deptNext){S.deptNext=S.w+5+Math.floor(Math.random()*4);pushQ(deptEvent());busy=true;}
+  // K口役員
+  if(!busy&&S.w>2&&Math.random()<.17){pushQ(ouiEvent());busy=true;}
   // ランダムイベント
-  if(Math.random()<.12){
+  if(!busy&&Math.random()<.1){
     const pool=EVENTS.filter(e=>!e.cond||e.cond());let x=Math.random()*pool.reduce((a,e)=>a+e.w,0),ev=pool[0];
     for(const e of pool){x-=e.w;if(x<=0){ev=e;break;}}
     if(ev.choice){
-      pushQ(next=>modal(`<h2>${ev.e} できごと</h2><div class="res">${ev.t}</div>${ev.choice.map((c,i)=>`<button class="qopt" data-i="${i}">${c.l}</button>`).join("")}`,sh=>sh.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{const t=ev.choice[+b.dataset.i].f();log(`${ev.e} ${ev.t} → ${t}`);toast(t);next();})));
+      pushQ(next=>modal(`<div class="wt">できごと</div><div class="res">${ev.t}</div>${ev.choice.map((c,i)=>`<button class="qopt" data-i="${i}">▶ ${c.l}</button>`).join("")}`,sh=>sh.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{const t=ev.choice[+b.dataset.i].f();log(`${ev.t} → ${t}`);toast(t);next();})));
     }else{
-      pushQ(next=>{const t=ev.f();log(`${ev.e} ${ev.t}（${t}）`);okModal(`<h2>${ev.e} できごと</h2><div class="res">${ev.t}<div class="small muted" style="margin-top:4px">${t}</div></div>`)(next);});
+      pushQ(next=>{const t=ev.f();log(`${ev.t}（${t}）`);okModal(`<div class="wt">できごと</div><div class="res">${ev.t}<div class="small dim" style="margin-top:4px">${t}</div></div>`)(next);});
     }
   }
   pushQ(next=>{const r1=rankIdx(),r0=S.lastRank||0;S.lastRank=r1;
-    if(r1>r0)okModal(bossHTML(`昇格おめでとう！今日から<b>${RANKS[r1][1]}</b>だ。毎月の研究予算も増える（${monthlyBudget()} 万円/月）。`))(next);else next();});
-  if(wkOf(S.w)===3)pushQ(next=>{toast("📝 今週は報告会の資料作成週（実験は 1 水準まで）");next();});
-  if(S.w===S.TW)pushQ(next=>{toast("⏳ 最後の 1 週！");next();});
+    if(r1>r0){SFX.fan();say("boss",`しょうかく おめでとう！ 今日から <b>${RANKS[r1][1]}</b>だ。毎月の研究予算も 増える。`)(next);}else next();});
+  if(wkOf(S.w)===3)pushQ(next=>{toast("こんしゅうは 報告会の 資料作成週（実験は 1 水準まで）");next();});
+  if(S.w===S.TW)pushQ(next=>{toast("さいごの 1 しゅう！");next();});
   save();
   render();
   runQ();
 }
 
 // ---------- エンディング ----------
-function finishGame(early){
-  if(early){const rem=S.TW-S.w+1;const b=Math.round(rem*.5);S.rep+=b;log(`📘 最終報告（残り ${rem} 週ボーナス 評価 +${b}）`);}
-  S.over=true;save();endScreen();
+function finishGame(clear){
+  if(clear){const rem=S.TW-S.w+1;const b=Math.round(rem*.5);S.rep+=b;log(`★ プロト量産 達成！（のこり ${rem} 週ボーナス ひょうか +${b}）`);}
+  S.over=true;S.clear=!!clear;save();endScreen();
 }
 function endScreen(){
   closeModal();
-  const done=S.P.filter(x=>x.done).length, r=rankIdx(), cell=S.P[PB.cell.idx].done;
+  const done=S.P.filter(x=>x.done).length, r=rankIdx();
   const pats=S.P.filter(x=>x.pat===2).length;
   const skillSum=SKK.reduce((a,k)=>a+S.sk[k],0);
-  const score=Math.round(S.rep*10+skillSum*2+done*120+pats*80);
-  const ending = cell?(r>=5?"全固体電池の生みの親と呼ばれ、量産ラインの立ち上げを任された。":r>=3?"全固体電池プロジェクトの中核として、次世代電池部門を率いることになった。":"セル試作を完遂。地道な成果が認められ、次の大型プロジェクトに抜擢された。")
-    : S.P[PB.ncm.idx].done?"電解質と正極の成果が高く評価された。セル化は次の世代へ託される。":done>=2?"複数の電解質を仕上げた材料のスペシャリストとして名が知られるようになった。":done===1?"最初のテーマで確かな手応えをつかんだ。研究者人生はまだ始まったばかり。":"思うような成果は出なかったが、多くを学んだ期間だった。";
-  const top=SKK.slice().sort((a,b)=>S.sk[b]-S.sk[a])[0];
-  app.innerHTML=topBar()+`<main><div class="card" style="text-align:center">
-   <div style="font-size:48px">${cell?"🏆":done>=2?"🎖️":"📘"}</div>
-   <div class="small muted">${esc(S.name)} の ${S.TW/48} 年間</div>
-   <div class="endrank">${RANKS[r][1]}</div>
-   <div style="line-height:1.8">${ending}</div>
+  const score=Math.round(S.rep*10+skillSum*2+done*120+pats*80+(S.clear?2000:0)+S.favor*5-S.tantrum*30);
+  let ending;
+  if(S.clear)ending=S.tantrum===0?"O西は 部下に 一度も 声を 荒げることなく、プロト量産を なしとげた。チームは 伝説と なった。":S.favor>=80?"K口役員の 後ろ盾を 得て、O西は 量産工場の 立ち上げ責任者に 抜擢された。":"プロト量産 達成！ O西の 名は 全固体電池の 歴史に 刻まれた。";
+  else if(S.P[PB.cell.idx].done)ending="セルは 完成したが、量産の 壁は 厚かった。O西の 挑戦は 次の 5 年へ 続く。";
+  else if(S.P[PB.ncm.idx].done)ending="電解質と 正極の 成果は 高く 評価された。セル化は 次の 世代へ 託される。";
+  else if(done>=1)ending="電解質の 開発で 手応えを つかんだ。研究者人生は まだ 始まったばかりだ。";
+  else ending="思うような 成果は 出なかったが、多くを 学んだ 5 年間だった。";
+  if(S.clear)SFX.fan();
+  app.innerHTML=statusWin()+`<main><div class="win" style="text-align:center">
+   <div class="logo" style="font-size:24px">${S.clear?"PROTO MASS PRODUCTION!":"GAME OVER"}</div>
+   <div class="duo">${face("onishi","big")}${face("kawaguchi","big")}</div>
+   <div class="endrank">${RANKS[r][1]} O西</div>
+   <div style="line-height:1.9">${ending}</div>
    <div class="targets" style="margin-top:12px">
-    <div class="tbox"><div class="lb">達成テーマ</div><div class="v">${done} / ${PROJ.length}</div></div>
-    <div class="tbox"><div class="lb">登録特許</div><div class="v">${pats} 件</div></div>
-    <div class="tbox"><div class="lb">評価</div><div class="v">⭐ ${S.rep}</div></div>
-    <div class="tbox"><div class="lb">得意分野</div><div class="v" style="font-size:15px;color:${SK[top].c}">${SK[top].n}</div></div>
-    <div class="tbox"><div class="lb">総合スコア</div><div class="v" style="color:var(--gold)">${score}</div></div>
+    <div class="tbox"><div class="small dim">達成テーマ</div><div class="v">${done} / ${PROJ.length}</div></div>
+    <div class="tbox"><div class="small dim">登録特許</div><div class="v">${pats} 件</div></div>
+    <div class="tbox"><div class="small dim">K口こうかんど</div><div class="v p">${S.favor}</div></div>
+    <div class="tbox"><div class="small dim">オウイに応じた</div><div class="v">${S.oui.talk} 回</div></div>
+    <div class="tbox"><div class="small dim">部下に あたった</div><div class="v ${S.tantrum?"r":""}">${S.tantrum} 回</div></div>
+    <div class="tbox"><div class="small dim">そうごう スコア</div><div class="v y">${score}</div></div>
    </div></div>
-   <div class="card"><h3>テーマ別</h3>${PROJ.map((p,i)=>{const P=S.P[i];return`<div class="hint">${p.icon} <b>${p.name}</b> ${P.done?`<span class="tag">達成（${cal(P.doneW)}）</span>`:P.log.length?`<span class="tag r">未達</span>`:`<span class="tag r">未着手</span>`}${P.pat===2?' <span class="tag g">特許</span>':""}<div class="small muted">試料 ${P.log.length} 個・発表 ${P.pubs} 回${P.log.length?`・最高 ${p.metrics.map((m,j)=>fmt(Math.max(...P.log.map(e=>e.v[j])),m.d)+" "+m.u).join(" / ")}`:""}</div></div>`;}).join("")}</div>
+   <div class="win"><div class="wt">テーマべつ</div>${PROJ.map((p,i)=>{const P=S.P[i];return`<div class="hint"><span class="sq" style="background:${p.col}"></span> <b>${p.name}</b> ${P.done?`<span class="badge g">達成 ${cal(P.doneW)}</span>`:P.log.length?`<span class="badge r">未達</span>`:`<span class="badge r">未着手</span>`}${P.pat===2?' <span class="badge y">特許</span>':""}<div class="small dim">試料 ${P.log.length}・発表 ${P.pubs}${P.log.length?`・最高 ${p.metrics.map((m,j)=>fmt(Math.max(...P.log.map(e=>e.v[j])),m.d)+" "+m.u).join(" / ")}`:""}</div></div>`;}).join("")}</div>
    ${histCard()}
-   <button class="pri" id="again" style="width:100%">もう一度あそぶ</button>
+   <button class="pri wide" id="again">▶ もういちど あそぶ</button>
   </main>`;
   app.querySelector("#again").onclick=()=>{clearSave();titleScreen();};
+  const mu=app.querySelector("#mute");if(mu)mu.onclick=()=>{MUTE=!MUTE;mu.textContent=MUTE?"♪OFF":"♪ON";};
 }
 
 titleScreen();
