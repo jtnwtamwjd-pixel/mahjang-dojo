@@ -51,6 +51,7 @@ main{display:block}
 .prog span{flex:1;height:8px;background:#333}
 .prog span.c{background:var(--fg)}
 .cmds{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.cmds .cmd:last-child:nth-child(odd){grid-column:span 2}
 .cmd{display:flex;flex-direction:column;align-items:flex-start;text-align:left;padding:7px 10px 7px 22px;position:relative;border-width:2px}
 .cmd:before{content:"▶";position:absolute;left:6px;top:8px;font-size:11px;opacity:0}
 .cmd:not(:disabled):hover:before,.cmd:not(:disabled):active:before{opacity:1}
@@ -267,11 +268,35 @@ const PROJ = [
    if(co===4)n.push("被膜が厚く Li 輸送を阻害");
    return {v:[cap,ret],n};
   }},
+ {id:"si",col:"#d82800",kind:"an",icon:"🟤",name:"全固体用 シリコン負極",short:"Si負極",sub:"体積膨張を抑えて 高容量と寿命を両立",
+  skills:["gosei","hyoka"],cost:30,
+  intro:"負極はシリコンでいく。黒鉛の 10 倍近い容量があるが、充電で 体積が 約 3 倍に ふくらむ。全固体では 液が すき間を 埋めてくれないから、膨張で 粒子が 孤立すると 一気に 劣化する。可逆容量 1500 mAh/g と 100 サイクル 85 % を 両立してくれ。",
+  params:[
+   {l:"Si 活物質",o:["マイクロ Si（5 µm）","ナノ Si（100 nm）","Si/C 複合","SiOx"],comp:"MD 体積膨張・応力シミュレーション"},
+   {l:"導電助剤",o:["なし","AB","VGCF","CNT"]},
+   {l:"プレリチウム化",o:["なし","5 %","10 %","20 %"]},
+   {l:"合材比（Si:SE）",o:["80:20","70:30","60:40","50:50"]}
+  ],
+  metrics:[{l:"可逆容量",u:"mAh/g",t:1500,d:0},{l:"100 サイクル維持率",u:"%",t:85,d:1,max:100}],
+  calc(c){
+   const [f,ca,pl,ra]=c,n=[];
+   const cap=3000*[1,.95,.7,.55][f]*[.75,.95,1,.98][ca]*[1,1,.98,.9][pl]*[.85,1,.97,.85][ra];
+   const ret=95*[.6,.85,.95,1][f]*[.8,.92,1,.97][ca]*[.88,.96,1,.9][pl]*[.85,.95,1,.97][ra];
+   if(f===0)n.push("粒子が 割れて 孤立（体積膨張 約 300 %）");
+   if(f===1)n.push("ナノ化で 割れは減ったが 表面での 副反応が多い");
+   if(f===3)n.push("SiOx は 膨張が小さいが 初回の 不可逆容量が大きい");
+   if(ca===0)n.push("電子伝導パスが 足りない");
+   if(pl===0)n.push("初回クーロン効率が 低く Li を 失う");
+   if(pl===3)n.push("過剰な Li が 析出");
+   if(ra===0)n.push("イオンパス不足で 利用率が 低い");
+   if(ra===3)n.push("SE が多すぎて 容量が 目減り");
+   return {v:[cap,ret],n};
+  }},
  {id:"cell",col:"#00e8d8",kind:"cell",icon:"🔋",name:"全固体電池セル試作",short:"セル",sub:"エネルギー密度と寿命の両立",
   skills:["denki","hyoka"],cost:40,
-  intro:"いよいよセル試作だ。君が開発した電解質と正極を組み合わせて、事業部が求める 350 Wh/kg・300 サイクル 80 % を達成してほしい。Li 金属負極はエネルギーでは最強だが、電解質によっては還元されるし、拘束圧をかけすぎるとクリープで短絡するぞ。",
+  intro:"いよいよセル試作だ。君が開発した電解質・正極・Si 負極を組み合わせて、事業部が求める 350 Wh/kg・300 サイクル 80 % を達成してほしい。Li 金属負極はエネルギーでは最強だが、電解質によっては還元されるし、拘束圧をかけすぎるとクリープで短絡するぞ。",
   params:[
-   {l:"負極",o:["In–Li 合金","黒鉛","Si","Li 金属"]},
+   {l:"負極",o:["In–Li 合金","黒鉛","Si（自社開発）","Li 金属"]},
    {l:"正極合材比（活物質:SE）",o:["60:40","70:30","75:25","80:20","85:15"]},
    {l:"拘束圧",o:["1 MPa","5 MPa","10 MPa","50 MPa","100 MPa"]},
    {l:"固体電解質（自分で開発したもの）",o:[]}
@@ -280,8 +305,9 @@ const PROJ = [
   calc(c){
    const [ng,ra,pr,si]=c,n=[];
    const se=PB[S.cellSE[si]]||PB.argy;
-   let E=420*[.55,.72,.9,1][ng]*[.8,.9,.96,1,.9][ra]*[.85,.95,1,1,.98][pr]*se.cellE;
-   let R=100*[1,.98,.88,.92][ng]*[1,1,.98,.94,.8][ra]*[.7,.9,1,.97,.75][pr]*se.cellR;
+   const sd=S.P[PB.si.idx].done;
+   let E=420*[.55,.72,sd?.97:.9,1][ng]*[.8,.9,.96,1,.9][ra]*[.85,.95,1,1,.98][pr]*se.cellE;
+   let R=100*[1,.98,sd?1:.88,.92][ng]*[1,1,.98,.94,.8][ra]*[.7,.9,1,.97,.75][pr]*se.cellR;
    if(ng===3&&pr===4){R=0;n.push("Li クリープで内部短絡！");}
    else if(ng===3&&pr===3){R*=.93;n.push("Li の侵入で微小短絡の兆候");}
    if(ng===3&&se.liR<1){R*=se.liR;n.push(`Li 金属で ${se.short} が還元分解`);}
@@ -325,6 +351,9 @@ const SE_IDS = PROJ.filter(p=>p.kind==="se").map(p=>p.id);
 const QZ = [
  // 電気化学
  {f:"denki",q:"黒鉛負極（LiC₆）の理論容量に最も近いのは？",c:["372 mAh/g","3860 mAh/g","170 mAh/g","4200 mAh/g"],a:0,e:"LiC₆ は C₆ あたり Li 1 個。Q = nF/(3.6M) = 96485/(3.6×72.06) ≈ 372 mAh/g。3860 は Li 金属、約 4200 は Si。"},
+ {f:"denki",q:"Si 負極（Li₁₅Si₄ まで）の理論容量はおよそ？",c:["約 3600 mAh/g","約 372 mAh/g","約 170 mAh/g","約 800 mAh/g"],a:0,e:"室温で到達する Li₁₅Si₄ 基準で約 3579 mAh/g。高温相 Li₂₂Si₅ 基準なら約 4200 mAh/g。黒鉛の約 10 倍。"},
+ {f:"gosei",q:"Si 負極が 劣化しやすい 主な原因は？",c:["リチウム化での 約 300 % の 体積膨張","電子伝導度が 高すぎる","融点が 低い","Li と 反応しない"],a:0,e:"膨張・収縮で 粒子が割れ、導電パスや 界面接触を 失う。ナノ化・炭素複合・SiOx などで 抑える。"},
+ {f:"hyoka",t:"tf",q:"プレリチウム化は、初回充電で 失われる Li を あらかじめ 補うための 処理である。",a:true,e:"Si や SiOx は 初回の 不可逆容量が大きい。あらかじめ Li を 入れておくと 初回クーロン効率が 上がる。"},
  {f:"denki",q:"Li 金属負極の理論容量はおよそ？",c:["3860 mAh/g","372 mAh/g","1000 mAh/g","2000 mAh/g"],a:0,e:"Li のモル質量 6.94 g/mol より 96485/(3.6×6.94) ≈ 3860 mAh/g。"},
  {f:"denki",q:"LiFePO₄ の平均作動電位（vs Li/Li⁺）に最も近いのは？",c:["3.4 V","4.7 V","1.5 V","2.5 V"],a:0,e:"Fe²⁺/Fe³⁺ で約 3.4–3.45 V。2 相反応なので電位が平坦。"},
  {f:"denki",q:"LiCoO₂ を 4.2 V まで充電したときの実用容量は？",c:["約 140 mAh/g","約 274 mAh/g","約 372 mAh/g","約 60 mAh/g"],a:0,e:"理論容量は全 Li 脱離で 274 mAh/g だが、構造安定性のため Li₀.₅CoO₂ 付近（約 140 mAh/g）までしか使わない。"},
@@ -463,8 +492,9 @@ const EVENTS = [
 
 // ===================== 状態 =====================
 let S=null;
-const SAVEKEY="battery_lab_save_v3";
-const TEAM_POOL=["N村","Y田","H野","M本"];
+const SAVEKEY="battery_lab_save_v4";
+const NAME_POOL=["N村","Y田","H野","M本","K藤","A部","I川","U野","F田","W田","G藤","R木","Z間","O野","T井","H田","M川","K田","S田","Y本"];
+function pickName(){return NAME_POOL.find(n=>!S.team.some(m=>m.n===n)&&!(S.gone||[]).includes(n))||("新人"+(S.team.length+1));}
 const FAVOR_REWARDS=[
  {f:45,k:"m1",t:"人員補充！ 部下が 1 人増えた"},
  {f:60,k:"b1",t:"特別予算 +200 万円"},
@@ -480,7 +510,7 @@ function newGame(bgi){
   const sk={denki:10,gosei:10,keisan:10,hyoka:10};
   Object.assign(sk,BG[bgi].sk);
   S={bg:bgi,w:1,TW:YEARS*48,soc:100,stress:10,favor:30,ready:15,budget:400,rep:0,sk,cur:null,
-     team:[{n:"T中",mot:70},{n:"S木",mot:70}],
+     team:[{n:"T中",mot:70},{n:"S木",mot:70}],eg:50,egNext:4,gone:[],quits:0,hires:0,rookies:0,
      P:PROJ.map(()=>({log:[],hits:0,done:false,doneW:0,pubs:0,comp:{},lit:{},acts:0,pat:0,patW:0,patP:0})),
      cellSE:[],flags:{},seen:{},grantCd:0,hist:[],over:false,clear:false,lastRank:0,mon:freshMon(),
      deptNext:5,deptI:0,costUntil:0,rewards:{},oui:{talk:0,ignore:0},tantrum:0};
@@ -491,7 +521,7 @@ function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
 function addStress(v){S.stress=clamp(Math.round(S.stress+v),0,100);}
 function addFavor(v){S.favor=clamp(Math.round(S.favor+v),0,100);}
 function addMot(v){S.team.forEach(m=>m.mot=clamp(Math.round(m.mot+v),0,100));}
-function avgMot(){return S.team.length?S.team.reduce((a,m)=>a+m.mot,0)/S.team.length:50;}
+function avgMot(){const w=workers();return w.length?w.reduce((a,m)=>a+m.mot,0)/w.length:50;}
 function rankIdx(){let r=0;RANKS.forEach((x,i)=>{if(S.rep>=x[0])r=i;});return r;}
 function rankName(){return RANKS[rankIdx()][1];}
 function monthlyBudget(){return 50+15*rankIdx()+Math.floor(S.favor/10)*5;}
@@ -499,7 +529,17 @@ function wkOf(w){return ((w-1)%4)+1;}
 function cal(w){const mi=Math.floor((w-1)/4),y=Math.floor(mi/12)+1,mo=(mi+3)%12+1;return `${y}ねんめ ${mo}がつ ${wkOf(w)}しゅう`;}
 function isPrepWeek(){return wkOf(S.w)===3;}
 function isMeetWeek(){return wkOf(S.w)===4;}
-function slots(){if(isPrepWeek())return 1;return Math.min(5,1+S.team.length+(S.flags.extra?1:0));}
+function mentorOf(m){return S.team.find(x=>x.mentee===m.n);}
+function capacity(){
+  // O西 1 ＋ 部下（新人 0・指導役 0.5）
+  let c=S.team.some(m=>m.rookie&&!mentorOf(m))?.5:1;
+  S.team.forEach(m=>{c+=m.rookie?0:m.mentee?.5:1;});
+  if(S.lendUntil>S.w)c-=1;
+  return Math.max(1,c);
+}
+function workers(){return S.team.filter(m=>!m.rookie);}
+function slots(){if(isPrepWeek())return 1;return clamp(Math.floor(capacity()+(S.w%2?.5:0))+(S.flags.extra?1:0),1,6);}
+function addEg(v){S.eg=clamp(Math.round(S.eg+v),0,100);}
 function costOf(p){return Math.round(p.cost*(S.w<S.costUntil?.85:1));}
 function skillAvg(p){return p.skills.reduce((a,k)=>a+S.sk[k],0)/p.skills.length;}
 function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
@@ -510,8 +550,8 @@ function params(p){if(p.kind!=="cell")return p.params;return p.params.map((x,i)=
 function seDone(){return SE_IDS.filter(id=>S.P[PB[id].idx].done).length;}
 function unlocked(p){
   if(p.kind==="se")return true;
-  if(p.kind==="cat")return seDone()>=NEED_SE;
-  if(p.kind==="cell")return S.P[PB.ncm.idx].done;
+  if(p.kind==="cat"||p.kind==="an")return seDone()>=NEED_SE;
+  if(p.kind==="cell")return S.P[PB.ncm.idx].done&&S.P[PB.si.idx].done;
   return S.P[PB.cell.idx].done;
 }
 function score(p,v){return v.reduce((a,x,j)=>a*Math.min(1.4,x/p.metrics[j].t),1);}
@@ -578,7 +618,7 @@ let Q=[];
 function pushQ(fn){Q.push(fn);}
 function runQ(){closeModal();const fn=Q.shift();if(fn)fn(runQ);else render();}
 function okModal(html,label){return next=>modal(`${html}<div class="btnrow"><button class="pri" id="ok">▶ ${label||"OK"}</button></div>`,sh=>sh.querySelector("#ok").onclick=next);}
-const WHO={onishi:{n:"O西",img:"onishi"},kawaguchi:{n:"K口 役員",img:"kawaguchi"},boss:{n:"M田 室長",img:"boss"}};
+const WHO={onishi:{n:"O西",img:"onishi"},kawaguchi:{n:"K口 役員",img:"kawaguchi"},boss:{n:"E口 室長",img:"boss"}};
 function face(k,cls){return`<img class="face ${cls||""}" src="${IMG[WHO[k].img]}" alt="${WHO[k].n}">`;}
 function talkHTML(k,html){return`<div class="talk">${face(k)}<div class="tb"><div class="nm">${WHO[k].n}</div><div class="tx tw">${html}</div></div></div>`;}
 // 文字送り（タグは一気に出す）
@@ -602,7 +642,7 @@ function titleScreen(){
    <div class="logo">全固体への道</div>
    <div class="sublogo">〜 O西 5ねん戦記 〜</div>
    <div class="duo">${face("onishi","big")}<div class="vs">と</div>${face("kawaguchi","big")}</div>
-   <div class="win lead">電池メーカーの開発主任 O西。<br>与えられた期間は 5 年。<br>固体電解質から正極、セル、そして<br><b class="y">プロト量産</b>までたどり着け！</div>
+   <div class="win lead">全固体電池プロジェクトの リーダー O西。<br>与えられた期間は 5 年。<br>固体電解質から 正極・Si 負極、セル、そして<br><b class="y">プロト量産</b>までたどり着け！</div>
    ${sv&&!sv.over?`<button class="pri wide" id="cont">▶ つづきから（${cal(sv.w)}）</button>`:""}
    <div class="win" style="text-align:left">
     <div class="small dim">O西の 専門は？</div>
@@ -611,10 +651,12 @@ function titleScreen(){
    </div>
    <div class="win small" style="text-align:left;line-height:1.85">
    ◆ まいしゅう 1 つ コマンドを えらぶ。<br>
-   ◆ 電解質を ${NEED_SE} つ → 正極 → セル → <span class="y">プロト量産</span> で クリア。<br>
+   ◆ 電解質を ${NEED_SE} つ → 正極 と Si 負極 → セル → <span class="y">プロト量産</span> で クリア。<br>
    ◆ 月末は 社内報告会。前の週は 資料作成で 実験は 1 水準まで。<br>
    ◆ <span class="p">K口役員</span>に「オウイ」と よばれたら… 話せば こうかんどUP（予算・人員）、でも <span class="r">ストレス</span>も たまる。<br>
-   ◆ ストレスが 高いと 部下に あたって モチベが さがり、ミスが ふえる。他部署や 社外との やりとりも うまくいかない。
+   ◆ ストレスが 高いと 部下に あたって モチベが さがり、ミスが ふえる。他部署や 社外との やりとりも うまくいかない。<br>
+   ◆ 部下を まとめるのは <span class="o">E口室長</span>。E口と うまく やらないと 部下が <span class="r">転職</span> してしまう。<br>
+   ◆ 半年ごとに キャリア入社、毎年 4 月に 新人🔰。新人は 戦力にならず、指導役の 工数が 半分になる。
    </div>
    <button class="ghost small" id="mute">${MUTE?"♪ おと：OFF":"♪ おと：ON"}</button>
   </div>`;
@@ -623,7 +665,8 @@ function titleScreen(){
   app.querySelector("#start").onclick=()=>{
     if(sv&&!sv.over&&!confirm("いまの セーブを けして はじめますか？"))return;
     newGame(bgi);
-    pushQ(say("boss","O西、今日から君が全固体電池プロジェクトの主任だ。<br>期限は 5 年。プロト量産までこぎつけてくれ。<br>まずは固体電解質。6 つの候補から選んで、2 つ仕上げたら正極に進もう。"));
+    pushQ(say("boss","室長の E口だ。O西、今日から君が 全固体電池プロジェクトの リーダーだな。<br>期限は 5 年。プロト量産まで こぎつけてくれ。<br>まずは固体電解質。6 つの候補から選んで、2 つ仕上げたら 正極と Si 負極に 進もう。"));
+    pushQ(say("boss","T中と S木は うちの室の メンバーだ。<br>部下の 面倒は 私が みている。私に 相談なしに 無理を させると、みんな 辞めてしまうからな。"));
     pushQ(say("kawaguchi","オウイ！ O西！<br>期待しとるぞ。わしが呼んだら、すぐ来いよ。"));
     pushQ(say("onishi","（K口役員に呼ばれると話が長いんだよな…）<br>はい！ がんばります！"));
     pushQ(next=>openThemes(next,true));
@@ -649,9 +692,10 @@ function statusWin(){
     <div>ストレス　 ${bar(S.stress,S.stress>=75?"#f83800":"#f8b800")} <b class="${S.stress>=75?"r":""}">${S.stress}</b></div>
     <div>K口こうかん ${bar(S.favor,"#f878f8")} <b>${S.favor}</b></div>
     <div>生技れんけい ${bar(S.ready,"#3cbcfc")} <b>${S.ready}</b></div>
+    <div>E口かんけい ${bar(S.eg,S.eg<40?"#f83800":"#ac7c00")} <b class="${S.eg<40?"r":""}">${S.eg}</b>${S.eg<40?' <span class="r small">転職注意</span>':""}</div>
    </div>
    <div class="small kv"><span>よさん <b class="y">${S.budget}</b>万</span><span>ひょうか <b>${S.rep}</b></span></div>
-   <div class="small team">ぶか：${S.team.map(m=>`${m.n}<span class="${m.mot<50?"r":m.mot>=75?"g":""}">${m.mot<35?"(×_×)":m.mot<50?"(-_-)":m.mot>=75?"(^o^)":"(・_・)"}</span>`).join(" ")}</div>
+   <div class="small team">ぶか（${S.team.length}）：${S.team.length?"":"いない…"}${S.team.map(m=>`${m.rookie?"🔰":m.career?"★":""}${m.n}${m.mentee?'<span class="dim">[指導]</span>':""}<span class="${m.mot<50?"r":m.mot>=75?"g":""}">${m.mot<35?"(×_×)":m.mot<50?"(-_-)":m.mot>=75?"(^o^)":"(・_・)"}</span>`).join(" ")}</div>
    <div class="skills">${SKK.map(k=>`<div>${SK[k].n}<b> ${Math.round(S.sk[k])}</b><div class="mini"><i style="width:${S.sk[k]}%;background:${SK[k].c}"></i></div></div>`).join("")}</div>
   </div>`;
 }
@@ -670,6 +714,7 @@ function render(){
     pat:S.soc>=20&&S.budget>=30&&patOK,
     grant:S.soc>=15&&S.grantCd<=0,
     care:S.budget>=10,
+    eg:S.soc>=10,
     rest:true
   };
   const avail=PROJ.filter(q=>unlocked(q)&&!S.P[q.idx].done);
@@ -692,13 +737,14 @@ function render(){
     ${cmd("pat","とっきょ","30万",can.pat)}
     ${cmd("grant","よさん",S.grantCd>0?`あと${S.grantCd}週`:"しんせい",can.grant)}
     ${cmd("care","チームケア","モチベUP 10万",can.care)}
+    ${cmd("eg","E口とそうだん","かんけいUP",can.eg)}
     ${cmd("rest","やすむ","ストレス−20",can.rest)}
    </div><div class="small dim" style="margin-top:6px">こんげつの成果：試料${S.mon.samples}・更新${S.mon.up}・特許${S.mon.pat}・発表${S.mon.pub} → みこみ <b class="y">${grade(monScore()).g}</b></div></div>
    ${active?chartCard(pi)+hintCard(pi)+logCard(pi):""}
    ${patCard()}${histCard()}
    <div style="text-align:center;margin:10px 0"><button class="ghost small" id="totitle">タイトルへ</button></div>
   </main>`;
-  app.querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>({exp:openExp,comp:openComp,study:openStudy,pub:openPub,pat:openPat,grant:doGrant,care:doCare,rest:doRest})[b.dataset.act]());
+  app.querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>({exp:openExp,comp:openComp,study:openStudy,pub:openPub,pat:openPat,grant:doGrant,care:doCare,eg:doEg,rest:doRest})[b.dataset.act]());
   const pk=app.querySelector("#pick"); if(pk)pk.onclick=()=>openThemes(render,false);
   app.querySelector("#mute").onclick=()=>{MUTE=!MUTE;try{localStorage.setItem("battery_lab_mute",MUTE?"1":"0");}catch(_){}render();};
   app.querySelector("#totitle").onclick=()=>{save();titleScreen();};
@@ -706,7 +752,7 @@ function render(){
 }
 function progRow(){
   return`<div class="prog">${PROJ.map((q,i)=>`<span class="${S.P[i].done?"d":i===S.cur?"c":""}" style="${S.P[i].done?`background:${q.col}`:""}"></span>`).join("")}</div>
-  <div class="small dim">電解質 ${seDone()}/6 ・ 正極 ${S.P[PB.ncm.idx].done?"○":unlocked(PB.ncm)?"かのう":"×"} ・ セル ${S.P[PB.cell.idx].done?"○":unlocked(PB.cell)?"かのう":"×"} ・ <span class="p">プロト量産 ${S.P[PB.proto.idx].done?"○":unlocked(PB.proto)?"かのう":"×"}</span></div>`;
+  <div class="small dim">電解質 ${seDone()}/6 ・ 正極 ${S.P[PB.ncm.idx].done?"○":unlocked(PB.ncm)?"かのう":"×"} ・ Si負極 ${S.P[PB.si.idx].done?"○":unlocked(PB.si)?"かのう":"×"} ・ セル ${S.P[PB.cell.idx].done?"○":unlocked(PB.cell)?"かのう":"×"} ・ <span class="p">プロト量産 ${S.P[PB.proto.idx].done?"○":unlocked(PB.proto)?"かのう":"×"}</span></div>`;
 }
 function shortCond(p,c){const ps=params(p);return c.map((o,i)=>ps[i].o[o]).join(" / ");}
 function logCard(pi){
@@ -773,8 +819,8 @@ function openExp(){
   let use=n;
   const draw=sh=>{
     sh.innerHTML=`<div class="wt">じっけん けいかく</div>
-    <div class="small dim" style="margin-bottom:8px">1 試料 ${cost} 万円。部下の人数で 1 週の水準数が きまる。モチベが ひくいと ミスが ふえる（いまの しっぱい率 ${Math.round(failProb()*100)}%）。${isPrepWeek()?'<br><span class="o">資料作成週：こんしゅうは 1 水準のみ</span>':""}${S.flags.wet?'<br><span class="o">露点 悪化中：しっぱいしやすい</span>':""}</div>
-    ${sel.map((c,si)=>`<div class="sample" style="${si>=use?"opacity:.35":""}"><div class="hd"><b>水準 ${si+1}</b>${si>0&&S.team[si-1]?`<span class="small dim"> 担当 ${S.team[si-1].n}</span>`:""}<span style="flex:1"></span>${si>0?`<button class="small" data-tog="${si}">${si<use?"つくらない":"つくる"}</button>`:""}</div>
+    <div class="small dim" style="margin-bottom:8px">1 試料 ${cost} 万円。部下の人数で 1 週の水準数が きまる（新人🔰の 指導役は 半分）。モチベが ひくいと ミスが ふえる（いまの しっぱい率 ${Math.round(failProb()*100)}%）。${isPrepWeek()?'<br><span class="o">資料作成週：こんしゅうは 1 水準のみ</span>':""}${S.flags.wet?'<br><span class="o">露点 悪化中：しっぱいしやすい</span>':""}${S.lendUntil>S.w?'<br><span class="o">部下を 1 人 応援に 出している</span>':""}</div>
+    ${sel.map((c,si)=>`<div class="sample" style="${si>=use?"opacity:.35":""}"><div class="hd"><b>水準 ${si+1}</b>${si>0&&workers()[si-1]?`<span class="small dim"> 担当 ${workers()[si-1].n}</span>`:""}<span style="flex:1"></span>${si>0?`<button class="small" data-tog="${si}">${si<use?"つくらない":"つくる"}</button>`:""}</div>
      ${ps.map((pr,k)=>`<div class="prm"><div class="small dim">${pr.l}</div><div class="seg">${pr.o.map((o,oi)=>`<button data-s="${si}" data-k="${k}" data-o="${oi}" class="${c[k]===oi?"on":""}">${esc(o)}</button>`).join("")}</div></div>`).join("")}
     </div>`).join("")}
     <div class="btnrow"><button id="cx">▶ やめる</button><button class="pri" id="go">▶ ${use}水準 つくる（${use*cost}万）</button></div>`;
@@ -815,8 +861,8 @@ function completeProj(pi){
   pushQ(next=>{SFX.fan();next();});
   let msg=`<b>「${p.name}」達成！</b><br>${P.acts}週ぶんの検討で 再現性まで確認できたな。ひょうか +${r}、報奨予算 +100 万円。`;
   if(P.pat===0&&p.kind!=="proto")msg+=`<br>発表の前に 特許出願も 忘れずにな。`;
-  if(p.kind==="se"&&seDone()===NEED_SE)msg+=`<br><br>電解質が ${NEED_SE} つ そろった。<b>正極テーマ</b>が 解放されたぞ。`;
-  if(p.kind==="cat")msg+=`<br><br>次は <b>セル試作</b>だ。君が作った電解質から 選んで組んでくれ。`;
+  if(p.kind==="se"&&seDone()===NEED_SE)msg+=`<br><br>電解質が ${NEED_SE} つ そろった。<b>正極テーマ</b>と <b>Si 負極テーマ</b>が 解放されたぞ。`;
+  if(p.kind==="cat"||p.kind==="an")msg+=unlocked(PB.cell)?`<br><br>正極も 負極も そろった。次は <b>セル試作</b>だ。君が作った電解質から 選んで組んでくれ。`:`<br><br>${p.kind==="cat"?"Si 負極":"正極"}も 仕上げれば <b>セル試作</b>に 進めるぞ。`;
   if(p.kind==="cell")msg+=`<br><br>セルができた！ 最後は <b>プロト量産</b>だ。生技部と しっかり連携しておけよ。`;
   S.cur=null;
   if(p.kind==="proto"){
@@ -866,7 +912,8 @@ function compComment(id,k){
    "oxcl:1":"Ta に O を結合させた配置が LaOCl を作るより安定。1 個目 −1.08 eV、2 個目 −0.43 eV で、O/Ta ≈ 2 を超えると LaOCl 析出が優勢になる見込み。",
    "llzo:0":"Ga³⁺ は立方晶を強く安定化しつつ、Al³⁺ ほど Li の伝導経路を塞がない。",
    "latp:0":"Al³⁺ 置換で格子が縮み、Li 過剰分が隙間サイトを占めて伝導度が上がる。x ≈ 0.3 を超えると AlPO₄ が出やすい。",
-   "ncm:2":"LiNbO₃ は硫化物と反応しにくく Li 伝導もあるが、厚すぎると抵抗になる。"
+   "ncm:2":"LiNbO₃ は硫化物と反応しにくく Li 伝導もあるが、厚すぎると抵抗になる。",
+   "si:0":"マイクロ Si は 膨張応力で 割れる。炭素と 複合化すると 応力が 緩和され、SiOx は 膨張自体が 小さい。容量と 寿命の 落としどころを 探ろう。"
   })[id+":"+k]||"計算結果を 実験計画に 活かそう。";
 }
 
@@ -963,7 +1010,7 @@ function openPat(){
 function doPat(i){
   const P=S.P[i],p=PROJ[i];
   P.pat=1;P.patW=S.w;P.patP=patProb(i);S.soc-=20;S.budget-=30;S.mon.pat++;S.rep+=2;gain("denki",1);gain("gosei",1);addStress(3);
-  const claim=p.kind==="se"?`${p.sub.split(" ")[0]}を含む固体電解質およびその製造方法`:p.kind==="cat"?"被覆層を有する全固体電池用正極活物質":p.kind==="cell"?"全固体電池およびその製造方法":"全固体電池用電極の連続製造方法";
+  const claim=p.kind==="se"?`${p.sub.split(" ")[0]}を含む固体電解質およびその製造方法`:p.kind==="cat"?"被覆層を有する全固体電池用正極活物質":p.kind==="an"?"全固体電池用シリコン複合負極およびその製造方法":p.kind==="cell"?"全固体電池およびその製造方法":"全固体電池用電極の連続製造方法";
   log(`とっきょ出願：${p.short}`);
   pushQ(okModal(`<div class="wt">しゅつがん した</div><div class="res">発明の名称：<b>${esc(claim)}</b><div class="small dim" style="margin-top:4px">${PATENT_WAIT} 週後に 審査けっか。ひょうか +2</div></div>`,"つぎの しゅうへ"));
   endWeek();
@@ -984,6 +1031,13 @@ function doCare(){
   const line=rnd(["焼き肉で 部下と 語り合った。","1on1 で 部下の 悩みを 聞いた。","みんなで 昼休みに キャッチボールをした。","部下の 実験の 工夫を みんなの前で ほめた。"]);
   log(`チームケア：${line}`);
   pushQ(say("onishi",`${line}<br><span class="g">チームの モチベ +15</span>・ストレス −8`));
+  endWeek();
+}
+function doEg(){
+  S.soc-=10;addStress(4);const g=S.eg>=80?4:10;addEg(g);addMot(3);
+  const line=rnd(["E口室長と 部下の 育成方針を すりあわせた。","E口室長と 来月の 工数配分を 相談した。","E口室長の 武勇伝を 聞きながら 飲みに いった。","E口室長に テーマの 進捗を ていねいに 説明した。"]);
+  log(`E口とそうだん：${line}`);
+  pushQ(say("boss",`${line}<br><span class="g">E口かんけい +${g}</span>・モチベ +3・<span class="r">ストレス +4</span>`));
   endWeek();
 }
 function doRest(){S.soc=Math.min(100,S.soc+40);addStress(-20);log("やすんだ");toast("リフレッシュ！ たいりょく+40 ストレス−20");endWeek();}
@@ -1018,7 +1072,7 @@ function favorRewards(next){
   const r=FAVOR_REWARDS.find(x=>S.favor>=x.f&&!S.rewards[x.k]);
   if(!r){next();return;}
   S.rewards[r.k]=1;
-  if(r.k[0]==="m"){const nm=TEAM_POOL.find(n=>!S.team.some(m=>m.n===n))||"新人";S.team.push({n:nm,mot:80});}
+  if(r.k[0]==="m"){S.team.push({n:pickName(),mot:80});}
   else S.budget+=r.k==="b1"?200:300;
   log(`K口役員から：${r.t}`);SFX.fan();
   say("kawaguchi",`O西、君は よう 話を 聞いてくれる。<br>わしから 手を まわしといたで。<br><b class="y">${r.t}</b>`)(()=>favorRewards(next));
@@ -1051,9 +1105,77 @@ function deptEvent(){
 }
 function tantrum(){
   const who=rnd(S.team);
-  addMot(-15);addStress(-10);S.tantrum++;
+  addMot(-15);addStress(-10);addEg(-8);S.tantrum++;
   log(`ストレスで ${who?who.n:"部下"}に あたってしまった（チームのモチベ −15）`);
-  return next=>{SFX.hit();modal(talkHTML("onishi",`なんで こんな ミスするんだ！！<br><span class="small dim">……${who?who.n:"部下"}に きつく あたってしまった。</span><br><span class="r">チームの モチベ −15</span>`)+`<div class="btnrow"><button class="pri" id="ok">▶ つぎへ</button></div>`,sh=>{typeIn(sh);sh.querySelector("#ok").onclick=next;});};
+  return next=>{SFX.hit();modal(talkHTML("onishi",`なんで こんな ミスするんだ！！<br><span class="small dim">……${who?who.n:"部下"}に きつく あたってしまった。</span><br><span class="r">チームの モチベ −15</span><br><span class="small dim">E口室長の 耳にも 入った…（E口かんけい −8）</span>`)+`<div class="btnrow"><button class="pri" id="ok">▶ つぎへ</button></div>`,sh=>{typeIn(sh);sh.querySelector("#ok").onclick=next;});};
+}
+
+// ---------- E口室長・人事 ----------
+const EG_EVENTS=[
+ {t:who=>`${who}を 2 週間、別プロジェクトの 応援に 出したいんだが…`,
+  a:{l:"了承する",d:"E口かんけい UP ／ 2 週間 1 水準 へる",f:()=>{addEg(10);S.lendUntil=S.w+2;return"E口かんけい +10・2 週間 部下が 1 人 応援へ";}},
+  b:{l:"ことわる",d:"E口かんけい DOWN",f:()=>{addEg(-12);return"E口かんけい −12";}}},
+ {t:()=>"最近 プロジェクトの 進捗が 室に 共有されていないぞ。定例に 顔を 出してくれ。",
+  a:{l:"出席して 説明する",d:"E口かんけい UP ／ たいりょく・ストレス",f:()=>{addEg(8);addStress(4);S.soc=Math.max(0,S.soc-10);return"E口かんけい +8・たいりょく −10・ストレス +4";}},
+  b:{l:"いそがしいと ことわる",d:"E口かんけい DOWN",f:()=>{addEg(-10);return"E口かんけい −10";}}},
+ {t:()=>"部下の 残業が 多すぎる。実験計画を 見直してくれないか。",
+  a:{l:"計画を 見直す",d:"E口かんけい・モチベ UP ／ こんしゅう 1 水準 へる",f:()=>{addEg(8);addMot(8);S.lendUntil=Math.max(S.lendUntil||0,S.w+1);return"E口かんけい +8・モチベ +8・こんしゅう 1 水準 へる";}},
+  b:{l:"このまま 押しきる",d:"E口かんけい・モチベ DOWN",f:()=>{addEg(-10);addMot(-5);return"E口かんけい −10・モチベ −5";}}},
+ {t:who=>`人事評価の 面談だ。${who}について O西の 意見も 聞かせてくれ。`,
+  a:{l:"しっかり 推す",d:"E口かんけい・モチベ UP ／ ストレス",f:()=>{addEg(6);addMot(10);addStress(3);return"E口かんけい +6・モチベ +10・ストレス +3";}},
+  b:{l:"おまかせ します",d:"E口かんけい 少し DOWN",f:()=>{addEg(-3);return"E口かんけい −3";}}}
+];
+function egEvent(){
+  const ev=rnd(EG_EVENTS),who=(rnd(workers())||{n:"だれか"}).n;
+  return next=>{
+    modal(talkHTML("boss",`O西、ちょっと いいか。<br>${ev.t(who)}`)+["a","b"].map(k=>`<button class="qopt" data-e="${k}">▶ ${ev[k].l}<br><span class="small dim">${ev[k].d}</span></button>`).join(""),sh=>{
+      typeIn(sh);
+      sh.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>{
+        let t=ev[b.dataset.e].f();
+        if(S.stress>=75){addEg(-5);t+="<br><span class=\"r\">ストレスで 口調が きつくなり E口かんけい −5</span>";}
+        log(`E口室長：${ev[b.dataset.e].l}（${t.replace(/<[^>]+>/g,"")}）`);
+        okModal(`<div class="wt">E口室長と</div><div class="res">${t}</div>`)(next);
+      });
+    });
+  };
+}
+function quitProb(m){return Math.min(.35,Math.max(0,(45-S.eg)/150)+Math.max(0,(50-m.mot)/200));}
+function quitCheck(){
+  const q=S.team.filter(m=>Math.random()<quitProb(m));
+  if(!q.length)return null;
+  q.forEach(m=>{
+    S.team=S.team.filter(x=>x!==m);S.gone.push(m.n);S.quits++;
+    if(m.mentee){const r=S.team.find(x=>x.n===m.mentee);m.mentee=null;if(r)assignMentor(r);}
+    const mt=S.team.find(x=>x.mentee===m.n);if(mt)mt.mentee=null;
+  });
+  addStress(8);addEg(-5);
+  const names=q.map(m=>m.n).join("・");
+  log(`${names}が 転職した…`);
+  return next=>{SFX.bad();say("boss",`O西……${names}が 転職すると 言ってきた。<br>${S.eg<45?"私も 正直、君の プロジェクトの 進め方には 思うところが あった。":"モチベーションが 下がっていたようだ。"}<br><span class="r">部下が ${q.length} 人 へった</span>・ストレス +8`)(next);};
+}
+function assignMentor(r){
+  const c=S.team.filter(m=>!m.rookie&&!m.mentee).sort((a,b)=>b.mot-a.mot)[0];
+  if(c)c.mentee=r.n;
+  return c;
+}
+function careerHire(){
+  const m={n:pickName(),mot:70,career:1};S.team.push(m);S.hires++;
+  log(`キャリア入社：${m.n}`);
+  return next=>{SFX.fan();say("boss",`今日から うちの室に キャリア入社の <b>${m.n}</b>が 入る。<br>前職でも 電池を やっていた 即戦力だ。<br><span class="g">部下 +1</span>`)(next);};
+}
+function rookieJoin(){
+  const m={n:pickName(),mot:85,rookie:1,until:S.w+48};S.team.push(m);S.rookies++;
+  const mt=assignMentor(m);
+  log(`新人🔰 ${m.n} 配属（指導役 ${mt?mt.n:"O西"}）`);
+  return next=>{SFX.fan();say("boss",`4 月だ。新人の <b>${m.n}</b>🔰が 配属された。<br>まだ ほとんど 何も できないから、${mt?`<b>${mt.n}</b>に 指導役を たのんだ。${mt.n}の 工数は 半分に なるぞ`:"指導役が いないから O西、君が みてくれ。君の 工数が 半分に なる"}。`)(next);};
+}
+function rookieGrad(){
+  const g=S.team.filter(m=>m.rookie&&S.w>=m.until);
+  if(!g.length)return null;
+  g.forEach(m=>{m.rookie=0;const mt=mentorOf(m);if(mt)mt.mentee=null;});
+  const names=g.map(m=>m.n).join("・");
+  log(`${names}が 一人前に なった`);
+  return next=>{SFX.ok();say("boss",`${names}も 1 年で ずいぶん 成長したな。<br>今日から 一人前の 戦力だ。指導役も おつかれさま。`)(next);};
 }
 
 // ---------- 社内報告会 ----------
@@ -1061,13 +1183,13 @@ function monScore(){const m=S.mon;return m.samples*.8+m.up*3+m.done*8+m.pat*4+m.
 function grade(sc){return sc>=14?{g:"S",r:6,b:60,s:-8}:sc>=8?{g:"A",r:4,b:30,s:-3}:sc>=3.5?{g:"B",r:1,b:0,s:2}:{g:"C",r:-3,b:0,s:10};}
 function meeting(){
   const m=S.mon,G=grade(monScore());
-  S.rep=Math.max(0,S.rep+G.r);S.budget+=G.b;S.soc=Math.max(5,S.soc-5);addStress(G.s);
+  S.rep=Math.max(0,S.rep+G.r);S.budget+=G.b;S.soc=Math.max(5,S.soc-5);addStress(G.s);addEg({S:4,A:2,B:0,C:-4}[G.g]);
   const lines={S:["素晴らしい月だった。事業部長も メモを 取っていたぞ。","この調子だ。"],A:["着実に 進んでいるな。","いい報告だった。次は 再現性を もう一押し。"],B:["まあまあだな。もう少し 水準を 振っても いいんじゃないか。","方向性は 悪くない。来月は 数字で 語ってくれ。"],C:["今月は 何を していたんだ？","正直、厳しい。来月は 巻き返そう。"]}[G.g];
   const q=rnd(["K口役員「それ、量産でも 同じ性能 出るんか？」","品証「原料コストは どれくらい？」","事業部「いつ頃 サンプル出荷 できそう？」","企画部「競合と 比べて 何が 勝ってる？」"]);
   let hint="";
   if((G.g==="S"||G.g==="A")&&S.cur!==null&&!S.P[S.cur].done&&Math.random()<.4){
     const p=PROJ[S.cur],P=S.P[S.cur],ps=params(p),cand=ps.map((_,k)=>k).filter(k=>P.lit[k]===undefined);
-    if(cand.length){const k=rnd(cand),b=bestOf(p);P.lit[k]=b[k];hint=`<div class="expl">M田室長「${esc(ps[k].l)}は ${esc(ps[k].o[b[k]])} あたりを 試してみたら どうだ」（ヒントに きろく）</div>`;}
+    if(cand.length){const k=rnd(cand),b=bestOf(p);P.lit[k]=b[k];hint=`<div class="expl">E口室長「${esc(ps[k].l)}は ${esc(ps[k].o[b[k]])} あたりを 試してみたら どうだ」（ヒントに きろく）</div>`;}
   }
   log(`社内報告会 ${G.g}（ひょうか ${G.r>=0?"+":""}${G.r}）`);
   S.mon=freshMon();
@@ -1085,18 +1207,24 @@ function endWeek(){
   S.w++;S.soc=Math.min(100,S.soc+6);addStress(-2);if(S.grantCd>0)S.grantCd--;
   if(S.stress<50)addMot(2);else if(S.stress>=80)addMot(-2);
   if(S.stress>=90){S.soc=Math.max(0,S.soc-8);}
-  if(wkOf(S.w)===1){S.budget+=monthlyBudget();addFavor(-1);if(S.favor<15){S.budget=Math.max(0,S.budget-20);log("K口役員の 機嫌が わるい（予算 −20 万）");}}
+  if(wkOf(S.w)===1){S.budget+=monthlyBudget();addFavor(-1);addEg(-1);if(S.favor<15){S.budget=Math.max(0,S.budget-20);log("K口役員の 機嫌が わるい（予算 −20 万）");}}
   S.P.forEach((P,i)=>{if(P.pat===1&&S.w-P.patW>=PATENT_WAIT){
     const ok=Math.random()<P.patP;P.pat=ok?2:-1;
     if(ok){S.rep+=10;S.budget+=50;log(`とっきょ登録：${PROJ[i].short}`);}else log(`とっきょ拒絶：${PROJ[i].short}`);
     pushQ(next=>{(ok?SFX.fan:SFX.bad)();okModal(`<div class="wt">とっきょ 審査けっか</div><div class="res"><span class="sq" style="background:${PROJ[i].col}"></span> ${PROJ[i].name}<div class="big ${ok?"g":"r"}" style="margin-top:6px">${ok?"とうろく さてい！":"きょぜつ さてい…"}</div><div class="small dim">${ok?"ひょうか +10・発明報奨金 +50 万円":P.disclosed?"先に学会発表していたことが響いた。":"先行文献との差が認められなかった。"}</div></div>`)(next);});
   }});
   if(S.w>S.TW){pushQ(()=>finishGame(false));render();runQ();return;}
+  // 人事
+  const gr=rookieGrad();if(gr)pushQ(gr);
+  if(S.w>1&&(S.w-1)%48===0)pushQ(rookieJoin());
+  else if(S.w>1&&(S.w-1)%24===0)pushQ(careerHire());
+  if(wkOf(S.w)===1&&S.w>4){const qc=quitCheck();if(qc)pushQ(qc);}
   // ストレス爆発
   if(S.stress>=75&&Math.random()<.3)pushQ(tantrum());
   // 部署・社外とのやりとり
   let busy=false;
-  if(S.w>=S.deptNext){S.deptNext=S.w+5+Math.floor(Math.random()*4);pushQ(deptEvent());busy=true;}
+  if(S.w>=S.egNext){S.egNext=S.w+6+Math.floor(Math.random()*5);if(S.team.length){pushQ(egEvent());busy=true;}}
+  if(!busy&&S.w>=S.deptNext){S.deptNext=S.w+5+Math.floor(Math.random()*4);pushQ(deptEvent());busy=true;}
   // K口役員
   if(!busy&&S.w>2&&Math.random()<.17){pushQ(ouiEvent());busy=true;}
   // ランダムイベント
@@ -1128,11 +1256,11 @@ function endScreen(){
   const done=S.P.filter(x=>x.done).length, r=rankIdx();
   const pats=S.P.filter(x=>x.pat===2).length;
   const skillSum=SKK.reduce((a,k)=>a+S.sk[k],0);
-  const score=Math.round(S.rep*10+skillSum*2+done*120+pats*80+(S.clear?2000:0)+S.favor*5-S.tantrum*30);
+  const score=Math.round(S.rep*10+skillSum*2+done*120+pats*80+(S.clear?2000:0)+S.favor*5+S.eg*3-S.tantrum*30-S.quits*40);
   let ending;
-  if(S.clear)ending=S.tantrum===0?"O西は 部下に 一度も 声を 荒げることなく、プロト量産を なしとげた。チームは 伝説と なった。":S.favor>=80?"K口役員の 後ろ盾を 得て、O西は 量産工場の 立ち上げ責任者に 抜擢された。":"プロト量産 達成！ O西の 名は 全固体電池の 歴史に 刻まれた。";
+  if(S.clear)ending=S.tantrum===0&&S.quits===0?"O西は 部下に 一度も 声を 荒げず、ひとりの 転職者も 出さずに プロト量産を なしとげた。チームは 伝説と なった。":S.favor>=80?"K口役員の 後ろ盾を 得て、O西は 量産工場の 立ち上げ責任者に 抜擢された。":"プロト量産 達成！ O西の 名は 全固体電池の 歴史に 刻まれた。";
   else if(S.P[PB.cell.idx].done)ending="セルは 完成したが、量産の 壁は 厚かった。O西の 挑戦は 次の 5 年へ 続く。";
-  else if(S.P[PB.ncm.idx].done)ending="電解質と 正極の 成果は 高く 評価された。セル化は 次の 世代へ 託される。";
+  else if(S.P[PB.ncm.idx].done||S.P[PB.si.idx].done)ending="電解質と 正極の 成果は 高く 評価された。セル化は 次の 世代へ 託される。";
   else if(done>=1)ending="電解質の 開発で 手応えを つかんだ。研究者人生は まだ 始まったばかりだ。";
   else ending="思うような 成果は 出なかったが、多くを 学んだ 5 年間だった。";
   if(S.clear)SFX.fan();
@@ -1147,6 +1275,8 @@ function endScreen(){
     <div class="tbox"><div class="small dim">K口こうかんど</div><div class="v p">${S.favor}</div></div>
     <div class="tbox"><div class="small dim">オウイに応じた</div><div class="v">${S.oui.talk} 回</div></div>
     <div class="tbox"><div class="small dim">部下に あたった</div><div class="v ${S.tantrum?"r":""}">${S.tantrum} 回</div></div>
+    <div class="tbox"><div class="small dim">E口かんけい</div><div class="v">${S.eg}</div></div>
+    <div class="tbox"><div class="small dim">転職した 部下</div><div class="v ${S.quits?"r":""}">${S.quits} 人</div></div>
     <div class="tbox"><div class="small dim">そうごう スコア</div><div class="v y">${score}</div></div>
    </div></div>
    <div class="win"><div class="wt">テーマべつ</div>${PROJ.map((p,i)=>{const P=S.P[i];return`<div class="hint"><span class="sq" style="background:${p.col}"></span> <b>${p.name}</b> ${P.done?`<span class="badge g">達成 ${cal(P.doneW)}</span>`:P.log.length?`<span class="badge r">未達</span>`:`<span class="badge r">未着手</span>`}${P.pat===2?' <span class="badge y">特許</span>':""}<div class="small dim">試料 ${P.log.length}・発表 ${P.pubs}${P.log.length?`・最高 ${p.metrics.map((m,j)=>fmt(Math.max(...P.log.map(e=>e.v[j])),m.d)+" "+m.u).join(" / ")}`:""}</div></div>`;}).join("")}</div>
