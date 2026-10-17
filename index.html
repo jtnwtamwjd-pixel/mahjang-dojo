@@ -168,13 +168,13 @@ td.l,th.l{text-align:left}
 .mode.game .k{font-size:clamp(18px,2.8vw,24px)}
 .mode.game .tiles4{display:flex;gap:2px;flex:none}
 .mode.game .tiles4 .tile{--tw:22px}
-.gbar{display:flex;align-items:center;gap:10px;padding-block:6px;font-size:12px;flex:none;flex-wrap:wrap}
+.gbar{display:flex;align-items:center;gap:10px;padding-block:6px;font-size:12px;flex:none;flex-wrap:nowrap;overflow:hidden;white-space:nowrap}
 .gbar .kyoku{font-family:var(--f-display);font-size:15px}
 .gbar .chip .tile{--tw:16px}
 .gbar .sp{flex:1}
 .gbar .opt{border:1px solid var(--line);background:transparent;border-radius:20px;padding:3px 10px;font-size:11px;color:var(--muted)}
 .gbar .opt[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
-.board{flex:1;min-height:0;overflow:hidden;display:grid;grid-template-columns:1fr auto 1fr;grid-template-rows:auto 1fr auto;gap:4px 10px;align-items:center;justify-items:center;--tw:var(--ptw,18px)}
+.board{flex:1;min-height:0;overflow:hidden;display:grid;grid-template-columns:1fr auto 1fr;grid-template-rows:auto minmax(0,1fr) auto;gap:4px 10px;align-items:center;justify-items:center;--tw:var(--ptw,18px)}
 .pond{display:grid;grid-template-columns:repeat(6,var(--tw));gap:1px;align-content:start;min-height:calc(var(--tw)*1.5)}
 .pond.wide{grid-template-columns:repeat(12,var(--tw))}
 .pond .tile{margin-bottom:calc(var(--tw)*.06);box-shadow:0 calc(var(--tw)*.08) 0 var(--tile-back)}
@@ -211,11 +211,16 @@ td.l,th.l{text-align:left}
 .myhand .tile.dim{filter:brightness(.55)}
 .mymelds{display:flex;gap:5px;--tw:calc(var(--htw,44px)*.72)}
 .mymelds .ts{display:flex;gap:1px}
-.waitchip{position:absolute;left:0;bottom:calc(var(--htw,44px)*1.55);font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px;--tw:18px}
+/* 待ちとボタンは自分の河の左右に置き、河に重ならないようにする */
+.board{position:relative}
+.waitchip{position:absolute;left:0;bottom:0;max-width:calc(50% - 6*var(--ptw,18px) - 14px);flex-wrap:wrap;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px;--tw:18px}
 .waitchip .tile{margin:0;box-shadow:0 2px 0 var(--tile-back)}
-.actions{position:absolute;right:0;bottom:calc(var(--htw,44px)*1.55 + 4px);display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;max-width:100%}
+/* 操作ボタンは中央の点数表示の上に重ねる（どの河にも重ならない）。contain:sizeで列幅に影響させない */
+.actions{grid-column:2;grid-row:2;justify-self:stretch;align-self:stretch;contain:size;z-index:3;display:flex;gap:5px;flex-wrap:wrap-reverse;align-content:flex-start;justify-content:center;align-items:flex-end;padding-bottom:4px;pointer-events:none}
+.actions .act{pointer-events:auto}
 .act{border-radius:12px;border:2px solid var(--gold);background:var(--gold);color:var(--gold-ink);font-family:var(--f-display);font-size:18px;padding:8px 18px;display:flex;align-items:center;gap:6px;--tw:18px;box-shadow:0 4px 14px rgba(0,0,0,.45)}
 .act .tile{margin:0;box-shadow:0 2px 0 var(--tile-back)}
+.board .act{font-size:14px;padding:4px 8px;gap:3px;border-radius:9px;--tw:12px}
 .act.win{background:var(--ng);border-color:var(--ng);color:var(--rail)}
 .act.sub{background:var(--rail);color:var(--ink)}
 .act.on{outline:3px solid var(--ink)}
@@ -319,6 +324,25 @@ table.effq .mini{gap:2px;--tw:26px}
 table.effq .mini .tile{--tw:26px}
 table.effq td b{font-size:18px}
 table.effq .you{font-size:11px;display:block;margin:2px 0 0}
+
+/* 低い画面：中央の点数表示を詰めて、自分の河の行を優先する */
+@media (max-height:340px){
+  .gbar{gap:6px;padding-block:3px}
+  .gbar .kyoku{font-size:13px}
+  .gbar .opt{padding:2px 7px;font-size:10px}
+  .center{padding:3px 8px;gap:0 8px;font-size:11px}
+  .center .ps b{font-size:12px}
+  .center .mid{font-size:13px}
+  .center .mid small{font-size:10px}
+}
+
+.rvmodes{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-top:8px}
+.rvmodes .opt{border:1px solid var(--line);background:transparent;border-radius:20px;padding:5px 12px;font-size:12px;color:var(--muted);text-align:left}
+.rvmodes .opt b{color:var(--ink)}
+.rvmodes .opt[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);background:rgba(232,181,83,.1)}
+.rvmodes .opt[aria-pressed="true"] b{color:var(--gold)}
+.effq td.dg{font-weight:700}
+.effq td.d安全{color:var(--ok)} .effq td.d低{color:var(--ok)} .effq td.d中{color:var(--gold)} .effq td.d高{color:var(--ng)}
 
 @media (orientation:portrait){
   :root{--tw:min(calc((100vw - 56px) / 9), 42px)}
@@ -440,8 +464,10 @@ table.effq .you{font-size:11px;display:block;margin:2px 0 0}
     <div class="center" id="center"></div>
     <div class="seat right" id="seat1"></div>
     <div class="seat me" id="seat0"></div>
+    <div class="waitchip" id="waitchip"></div>
+    <div class="actions" id="actions"></div>
   </div>
-  <div class="myarea"><div class="waitchip" id="waitchip"></div><div class="myhand" id="myhand"></div><div class="mymelds" id="mymelds"></div><div class="actions" id="actions"></div></div>
+  <div class="myarea"><div class="myhand" id="myhand"></div><div class="mymelds" id="mymelds"></div></div>
   <div id="toast"></div>
   <div id="fx"></div>
   <div class="gover" id="gover" hidden></div>
@@ -457,7 +483,11 @@ table.effq .you{font-size:11px;display:block;margin:2px 0 0}
       <button class="mode lv" data-level="hard"><span class="k">強い</span><span class="d">受け入れが最も広い牌を切る。リーチには安全牌でしっかり降りる。</span></button>
       <button class="mode lv ml" data-level="mleague"><span class="k">Mリーガー</span><span class="d">3人が別々の打ち筋。下家は多井風（速度と守備）、対面は佐々木風（攻め）、上家は瀬戸熊風（門前で高打点）。</span></button>
     </div>
-    <label class="toggle"><input type="checkbox" id="optReview"> 各局のあとに、自分の打牌を1手ずつ牌効率で採点する</label>
+    <label class="toggle"><input type="checkbox" id="optReview"> 各局のあとに、自分の打牌を1手ずつ採点する</label>
+    <div class="rvmodes"><span>採点方法</span>
+      <button class="opt" data-rvmode="total" aria-pressed="true"><b>総合</b>　牌効率＋守り＋役・ドラ（その時の河で危険度を判定）</button>
+      <button class="opt" data-rvmode="eff" aria-pressed="false"><b>牌効率だけ</b>　受け入れ枚数のみ</button>
+    </div>
   </div>
 </section>
 
@@ -1342,7 +1372,7 @@ document.addEventListener('keydown', e => {
 
 // ===== 対局モード（東風戦・CPU3人） =====
 const SEATS = ['あなた', '下家', '対面', '上家'];
-const GS = { callConfirm: store.get('g:call', true), pointsOnly: store.get('g:ptsonly', false), level: store.get('g:level', 'normal'), review: store.get('g:review', true) };
+const GS = { callConfirm: store.get('g:call', true), pointsOnly: store.get('g:ptsonly', false), level: store.get('g:level', 'normal'), review: store.get('g:review', true), rvMode: store.get('g:rvmode', 'total') };
 const LEVEL_NAME = { easy:'弱い', normal:'普通', hard:'強い', mleague:'Mリーガー' };
 // Mリーガー：席ごとに打ち筋を変える（本人ではなく、プレースタイルを参考にした傾向）
 const MSTYLE = {
@@ -1415,10 +1445,10 @@ async function playHand(g) {
     if (act.type === 'tsumo') return winHand(g, p, null, drawn);
 
     const t = act.tile;
-    if (p === 0 && !act.auto) g.log.push({ hand:g.hands[0].slice(), mN:g.melds[0].length, melds:g.melds[0].map(m => ({ ...m })), rest:remainingFor(g, 0), chosen:t, junme:g.ponds[0].length + 1, riichi:!!act.riichi });
+    if (p === 0 && !act.auto) g.log.push({ hand:g.hands[0].slice(), mN:g.melds[0].length, melds:g.melds[0].map(m => ({ ...m })), rest:remainingFor(g, 0), chosen:t, junme:g.ponds[0].length + 1, riichi:!!act.riichi, ctx:moveContext(g) });
     removeTile(g.hands[p], t);
     if (act.riichi) g.riichi[p] = true;
-    g.ponds[p].push({ t, rii:!!act.riichi });
+    g.ponds[p].push({ t, rii:!!act.riichi, seq:g.seq = (g.seq || 0) + 1 });
     g.last = { p, i:g.ponds[p].length - 1 };
     if (!g.riichi[p]) g.skipFuriten[p] = false;
     g.drawn = null; g.sel = -1; g.riichiSel = false;
@@ -1953,22 +1983,88 @@ function ukeire(c, mN, rest) {
   }
   return { s, n, kinds };
 }
+// 打牌時点の場の状況（守備と打点の採点に使う）
+function moveContext(g) {
+  const threats = [];
+  for (let q = 1; q < 4; q++) {
+    const w = g.riichi[q] ? 1 : g.melds[q].length >= 2 ? 0.5 : 0;
+    if (!w) continue;
+    const rSeq = g.riichi[q] ? (g.ponds[q].find(d => d.rii) || {}).seq || 0 : Infinity;
+    const safe = new Set(g.ponds[q].map(d => d.t));
+    g.ponds.forEach(pd => pd.forEach(d => { if (d.seq > rSeq) safe.add(d.t); }));
+    threats.push({ q, w, riichi:!!g.riichi[q], safe:[...safe], pond:g.ponds[q].map(d => d.t) });
+  }
+  return { threats, doras:g.doraInd.map(doraOf), yakuhai:[27,28,29,30,31,32,33].filter(t => isYakuhaiFor(g, 0, t)), left:g.wall.length };
+}
+// 危険度 0（現物）〜1（無筋の中張牌）
+function dangerOf(t, th, rest) {
+  if (th.safe.includes(t)) return 0;
+  if (t >= 27) { const seen = 4 - rest[t]; return seen >= 3 ? 0.05 : seen === 2 ? 0.25 : 0.45; }
+  const n = t % 9, has = x => th.pond.includes(x);
+  const base = n === 0 || n === 8 ? 0.55 : n === 1 || n === 7 ? 0.75 : 1;
+  const lo = n >= 3 && has(t - 3), hi = n <= 5 && has(t + 3);
+  const suji = n <= 2 ? hi : n >= 6 ? lo : lo && hi;
+  if (suji) return base * 0.3;
+  if (n >= 3 && n <= 5 && (lo || hi)) return base * 0.65;
+  return base;
+}
+const dangerWord = d => d === 0 ? '安全' : d < 0.3 ? '低' : d < 0.7 ? '中' : '高';
+// 副露していても役が残る見込みがあるか（ざっくり判定）
+function yakuAlive(c, melds, ctx) {
+  if (!melds.length) return true;
+  const mt = melds.flatMap(meldTiles).filter(t => t >= 0);
+  if (melds.some(x => x.type === 'pon' && ctx.yakuhai.includes(x.tile)) || ctx.yakuhai.some(y => c[y] >= 2)) return true;
+  const yao = t => t >= 27 || t % 9 === 0 || t % 9 === 8;
+  let handYao = 0; for (let t = 0; t < 34; t++) if (yao(t)) handYao += c[t];
+  if (!mt.some(yao) && handYao <= 2) return true;
+  for (let su = 0; su < 3; su++) {
+    if (mt.some(t => t < 27 && Math.floor(t / 9) !== su)) continue;
+    let off = 0; for (let t = 0; t < 27; t++) if (Math.floor(t / 9) !== su) off += c[t];
+    if (off <= 3) return true;
+  }
+  if (melds.every(x => x.type === 'pon') && c.filter(v => v >= 2).length >= 3) return true;
+  return false;
+}
 function evalMove(m) {
   const c = countsOf(m.hand);
   const cands = [];
   for (const t of new Set(m.hand)) {
     c[t]--;
     const u = ukeire(c, m.mN, m.rest);
+    const alive = m.ctx ? yakuAlive(c, m.melds, m.ctx) : true;
     c[t]++;
-    cands.push({ t, ...u });
+    cands.push({ t, ...u, alive });
   }
   cands.sort((a, b) => a.s - b.s || b.n - a.n || a.t - b.t);
+  if (GS.rvMode === 'total' && m.ctx) return evalTotal(m, c, cands);
   const best = cands[0], mine = cands.find(x => x.t === m.chosen);
   let score;
   if (mine.s > best.s) score = 0;
   else if (best.n === 0) score = 100;
   else score = Math.round(mine.n / best.n * 100);
   return { cands, best, mine, score };
+}
+// 総合採点：牌効率＋守備（リーチ・仕掛けの危険度）＋打点（ドラ・役牌・役の有無）
+function evalTotal(m, c, cands) {
+  const ctx = m.ctx, minS = cands[0].s;
+  const bestN = s => Math.max(1, ...cands.filter(x => x.s === s).map(x => x.n));
+  let k = minS === 0 ? 0.35 : minS === 1 ? 0.8 : 1.3;
+  if (ctx.left < 20) k += 0.2;
+  if (ctx.doras.reduce((a, d) => a + c[d], 0) >= 3) k -= 0.2;
+  for (const x of cands) {
+    x.A = x.s === minS ? x.n / bestN(minS) : x.s === minS + 1 ? 0.35 * x.n / bestN(minS + 1) : 0;
+    x.V = 0; x.notes = [];
+    if (ctx.doras.includes(x.t)) { x.V -= 0.15; x.notes.push('dora'); }
+    if (ctx.yakuhai.includes(x.t) && c[x.t] >= 2) { x.V -= 0.2; x.notes.push('yakuhai'); }
+    if (!x.alive) { x.V -= 0.5; x.notes.push('noyaku'); }
+    x.D = ctx.threats.length ? Math.max(...ctx.threats.map(th => th.w * dangerOf(x.t, th, m.rest))) : 0;
+    x.T = x.A + x.V - (ctx.threats.length ? k * x.D : 0);
+  }
+  const hi = Math.max(...cands.map(x => x.T)), lo = Math.min(...cands.map(x => x.T));
+  cands.forEach(x => { x.sc = hi - lo < 1e-6 ? 100 : Math.round((x.T - lo) / (hi - lo) * 100); });
+  cands.sort((a, b) => b.T - a.T || a.s - b.s || b.n - a.n);
+  const best = cands[0], mine = cands.find(x => x.t === m.chosen);
+  return { cands, best, mine, score:mine.sc, total:true, threats:ctx.threats };
 }
 const gradeOf = s => s >= 100 ? ['◎', '最善'] : s >= 80 ? ['○', '良い'] : s >= 50 ? ['△', 'もう一歩'] : ['×', '要改善'];
 const shantenName = s => s < 0 ? 'アガリ' : s === 0 ? '聴牌' : `${s}向聴`;
@@ -1996,14 +2092,16 @@ function reviewFlow(g) {
       const melds = m.melds.map(x => `<div class="ts">${tilesHTML(meldTiles(x))}</div>`).join('');
       const rows = ev.cands.slice(0, 5);
       if (!rows.includes(ev.mine)) rows.push(ev.mine);
-      const table = `<div class="tblwrap"><table class="effq"><tr><th class="l">打牌</th><th>打牌後</th><th>受け入れ</th><th class="l">有効牌</th></tr>${rows.map(x =>
-        `<tr class="${x === ev.mine ? 'mine' : ''} ${x.t === ev.best.t ? 'top' : ''}"><td class="l">${tileHTML(x.t)}${x === ev.mine ? '<span class="you">あなた</span>' : ''}</td><td>${shantenName(x.s)}</td><td><b>${x.n}</b>枚</td><td class="l"><span class="mini">${x.kinds.map(k => tileHTML(k)).join('')}</span></td></tr>`).join('')}</table></div>`;
+      const tot = !!ev.total, thr = tot && ev.threats.length;
+      const table = `<div class="tblwrap"><table class="effq"><tr><th class="l">打牌</th>${tot ? '<th>評価</th>' : ''}<th>打牌後</th><th>受け入れ</th>${thr ? '<th>危険度</th>' : ''}<th class="l">有効牌</th></tr>${rows.map(x =>
+        `<tr class="${x === ev.mine ? 'mine' : ''} ${x.t === ev.best.t ? 'top' : ''}"><td class="l">${tileHTML(x.t)}${x === ev.mine ? '<span class="you">あなた</span>' : ''}</td>${tot ? `<td><b>${x.sc}</b></td>` : ''}<td>${shantenName(x.s)}</td><td><b>${x.n}</b>枚</td>${thr ? `<td class="dg d${dangerWord(x.D)}">${dangerWord(x.D)}</td>` : ''}<td class="l"><span class="mini">${x.kinds.map(k => tileHTML(k)).join('')}</span></td></tr>`).join('')}</table></div>`;
       let comment;
-      if (ev.score >= 100) comment = '受け入れが最も広い打牌です。';
+      if (tot) comment = totalComment(ev, m);
+      else if (ev.score >= 100) comment = '受け入れが最も広い打牌です。';
       else if (ev.mine.s > ev.best.s) comment = `${tileName(m.chosen)}を切ると${shantenName(ev.mine.s)}に戻ります（向聴戻し）。${tileName(ev.best.t)}切りなら${shantenName(ev.best.s)}を保てます。`;
       else comment = `${tileName(ev.best.t)}切りなら受け入れが${ev.best.n}枚、${tileName(m.chosen)}切りは${ev.mine.n}枚です。`;
       if (m.riichi) comment += '（リーチ宣言牌）';
-      ov.innerHTML = `<div class="ohead"><span class="who">打牌の振り返り</span><span class="sub">東${g.passes + 1}局　${i + 1} / ${moves.length}手目　この局の平均 <b>${avg}点</b>　（牌効率だけで採点。守りや役は考えません）</span></div>
+      ov.innerHTML = `<div class="ohead"><span class="who">打牌の振り返り</span><span class="sub">東${g.passes + 1}局　${i + 1} / ${moves.length}手目　この局の平均 <b>${avg}点</b>　${tot ? '（総合採点：牌効率＋守り＋役・ドラ）' : '（牌効率だけで採点。守りや役は考えません）'}</span></div>
         <div class="obody">
           <div class="effhead"><span class="grade g${mark === '◎' ? 0 : mark === '○' ? 1 : mark === '△' ? 2 : 3}">${mark}<small>${word}</small></span><div><div class="effscore">${ev.score}<small>点</small></div><div class="effsub">${m.junme}巡目・打牌前 ${shantenName(shanten(countsOf(m.hand), m.mN) )}</div></div><p class="effc">${comment}</p></div>
           <div class="hand revhand"><div class="grp"><div class="ts">${tiles}</div><em>赤枠＝あなたが切った牌　緑枠＝最善</em></div>${melds ? `<div class="grp"><div class="ts">${melds}</div></div>` : ''}</div>
@@ -2021,12 +2119,34 @@ function reviewFlow(g) {
   });
 }
 
+function totalComment(ev, m) {
+  const { best, mine } = ev, ctx = m.ctx;
+  const who = ev.threats.map(th => `${nm(th.q)}${th.riichi ? 'のリーチ' : 'の仕掛け'}`).join('・');
+  const sit = ev.threats.length ? `${who}がある場面。` : '';
+  if (ev.score >= 100) {
+    if (ev.threats.length && mine.D === 0) return sit + `${tileName(mine.t)}は現物で、守りと手作りを両立した打牌です。`;
+    return sit + (mine.s === 0 && ev.threats.length ? '聴牌を保って押す判断は妥当です。' : '受け入れ・守り・打点のバランスが最も良い打牌です。');
+  }
+  const why = [];
+  if (ev.threats.length && mine.D - best.D >= 0.3) why.push(`${tileName(mine.t)}は危険度「${dangerWord(mine.D)}」、${tileName(best.t)}は「${dangerWord(best.D)}」`);
+  if (!mine.alive && best.alive) why.push(`${tileName(mine.t)}を切ると役がなくなります`);
+  if (mine.notes.includes('yakuhai') && !best.notes.includes('yakuhai')) why.push('役牌の対子を崩しています');
+  if (mine.notes.includes('dora') && !best.notes.includes('dora')) why.push('ドラを手放しています');
+  if (mine.s > best.s) why.push(`${tileName(mine.t)}切りは${shantenName(mine.s)}に戻ります`);
+  else if (best.n > mine.n) why.push(`受け入れは${tileName(best.t)}切り${best.n}枚、${tileName(mine.t)}切り${mine.n}枚`);
+  if (best.D < mine.D && best.s > mine.s) why.push('ここは手を崩してでも降りる場面です');
+  return sit + (why.length ? why.join('。') + '。' : '') + `おすすめは${tileName(best.t)}切りです。`;
+}
+
 // ---- 対局の設定 ----
 function renderSetup() {
   document.querySelectorAll('[data-level]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.level === GS.level)));
   $('#optReview').checked = GS.review;
+  document.querySelectorAll('[data-rvmode]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.rvmode === GS.rvMode)));
 }
 $('#optReview').addEventListener('change', e => { GS.review = e.target.checked; store.set('g:review', GS.review); });
+
+document.querySelectorAll('[data-rvmode]').forEach(b => b.addEventListener('click', () => { GS.rvMode = b.dataset.rvmode; store.set('g:rvmode', GS.rvMode); renderSetup(); }));
 
 $('#deco').innerHTML = [0, 13, 22, 33].map(t => tileHTML(t)).join('');
 $('#gameDeco').innerHTML = [27, 27, 27, 31].map(t => tileHTML(t)).join('');
