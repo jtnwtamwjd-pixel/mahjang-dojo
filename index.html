@@ -1430,6 +1430,7 @@ async function startHand(g) {
     riichi:[false,false,false,false], skipFuriten:[false,false,false,false], log:[],
     last:null, turn:g.dealer, phase:'wait', drawn:null, sel:-1, riichiSel:false, opts:null, callOpts:null, callTile:null,
   });
+  bgmSync();
   g.doraInd = [g.dead[4]];
   g.uraInd = [g.dead[9]];
   for (let i = 0; i < 13; i++) for (let p = 0; p < 4; p++) g.hands[p].push(g.wall.pop());
@@ -1462,7 +1463,7 @@ async function playHand(g) {
     const t = act.tile;
     if (p === 0 && !act.auto) g.log.push({ hand:g.hands[0].slice(), mN:g.melds[0].length, melds:g.melds[0].map(m => ({ ...m })), rest:remainingFor(g, 0), chosen:t, junme:g.ponds[0].length + 1, riichi:!!act.riichi, ctx:moveContext(g) });
     removeTile(g.hands[p], t);
-    if (act.riichi) g.riichi[p] = true;
+    if (act.riichi) { g.riichi[p] = true; bgmSync(); }
     g.ponds[p].push({ t, rii:!!act.riichi, seq:g.seq = (g.seq || 0) + 1 });
     g.last = { p, i:g.ponds[p].length - 1 };
     if (!g.riichi[p]) g.skipFuriten[p] = false;
@@ -1954,14 +1955,24 @@ $('#actions').addEventListener('click', e => {
   g.waiter({ type:act });
 });
 $('#gOptCall').addEventListener('click', () => { GS.callConfirm = !GS.callConfirm; store.set('g:call', GS.callConfirm); renderGame(); });
-// ---- BGM（bgm.mp3 をHTMLと同じフォルダに置く。対局画面にいる間だけループ再生） ----
-let bgmEl = null;
+// ---- BGM（bgm.mp3 / bgm_riichi.mp3 をHTMLと同じフォルダに置く。対局画面にいる間だけループ再生。誰かがリーチしたらリーチ曲に切り替え） ----
+const bgmEls = {};
+let bgmNow = null;
 function bgmSync() {
   const on = GS.bgm && !$('#game').hidden && !document.hidden;
-  if (on) {
-    if (!bgmEl) { bgmEl = new Audio('bgm.mp3'); bgmEl.loop = true; bgmEl.volume = 0.35; }
-    bgmEl.play().catch(() => {});
-  } else if (bgmEl) bgmEl.pause();
+  const want = !on ? null : G && G.riichi && G.riichi.some(Boolean) ? 'riichi' : 'normal';
+  if (want === bgmNow && (!want || !bgmEls[want].paused)) return;
+  if (bgmNow && bgmEls[bgmNow]) bgmEls[bgmNow].pause();
+  if (want) {
+    if (!bgmEls[want]) {
+      const el = new Audio(want === 'riichi' ? 'bgm_riichi.mp3' : 'bgm.mp3');
+      el.loop = true; el.volume = want === 'riichi' ? 0.45 : 0.35;
+      bgmEls[want] = el;
+    }
+    if (want !== bgmNow) bgmEls[want].currentTime = 0;
+    bgmEls[want].play().catch(() => {});
+  }
+  bgmNow = want;
 }
 document.addEventListener('visibilitychange', bgmSync);
 $('#gOptBgm').addEventListener('click', () => { GS.bgm = !GS.bgm; store.set('g:bgm', GS.bgm); bgmSync(); renderGame(); });
