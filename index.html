@@ -361,6 +361,14 @@ table.effq .you{font-size:11px;display:block;margin:2px 0 0}
 .waitchip:empty{display:none}
 .lenmodes{margin:0 0 8px}
 
+.mpros{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:10px}
+.mpro{position:relative;text-align:left;background:rgba(6,37,32,.55);border:1px solid var(--line);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:3px;color:var(--ink)}
+.mpro b{font-family:var(--f-body);font-weight:800;font-size:16px}
+.mpro span{font-size:11px;color:var(--muted);line-height:1.4}
+.mpro[aria-pressed="true"]{border-color:var(--gold);background:rgba(232,181,83,.12)}
+.mpro .seat{position:absolute;top:6px;right:8px;font-size:11px;font-weight:700;color:var(--gold-ink);background:var(--gold);border-radius:8px;padding:1px 6px}
+@media (orientation:portrait){.mpros{grid-template-columns:1fr 1fr}}
+
 @media (orientation:portrait){
   :root{--tw:min(calc((100vw - 56px) / 9), 42px)}
   body{overflow:auto}
@@ -493,7 +501,7 @@ table.effq .you{font-size:11px;display:block;margin:2px 0 0}
 </section>
 <section class="screen" id="gsetup" hidden>
   <div class="bar"><button class="back" data-go="home">◀ メニュー</button><span class="title">対局の設定</span></div>
-  <div class="setup">
+  <div class="setup" id="gsetupMain">
     <div class="rvmodes lenmodes"><span>対局の長さ</span>
       <button class="opt" data-len="tonpu" aria-pressed="true"><b>東風戦</b>　東1〜4局</button>
       <button class="opt" data-len="hanchan" aria-pressed="false"><b>半荘戦（東南戦）</b>　東1局〜南4局</button>
@@ -503,7 +511,7 @@ table.effq .you{font-size:11px;display:block;margin:2px 0 0}
       <button class="mode lv" data-level="easy"><span class="k">弱い</span><span class="d">ときどき適当に捨てる。リーチされても気にせず攻める。</span></button>
       <button class="mode lv" data-level="normal"><span class="k">普通</span><span class="d">手を進める牌を選ぶ。リーチには安全な牌で少し守る。</span></button>
       <button class="mode lv" data-level="hard"><span class="k">強い</span><span class="d">受け入れが最も広い牌を切る。リーチには安全牌でしっかり降りる。</span></button>
-      <button class="mode lv ml" data-level="mleague"><span class="k">Mリーガー</span><span class="d">3人が別々の打ち筋。下家は多井風（速度と守備）、対面は佐々木風（攻め）、上家は瀬戸熊風（門前で高打点）。</span></button>
+      <button class="mode lv ml" data-level="mleague"><span class="k">Mリーガー</span><span class="d">7人の中から3人を選んで対局。それぞれ打ち筋が違う。</span></button>
     </div>
     <label class="toggle"><input type="checkbox" id="optReview"> 各局のあとに、自分の打牌を1手ずつ採点する</label>
     <div class="rvmodes"><span>採点方法</span>
@@ -511,6 +519,7 @@ table.effq .you{font-size:11px;display:block;margin:2px 0 0}
       <button class="opt" data-rvmode="eff" aria-pressed="false"><b>牌効率だけ</b>　受け入れ枚数のみ</button>
     </div>
   </div>
+  <div class="setup" id="mpick" hidden></div>
 </section>
 
 </div>
@@ -1149,7 +1158,7 @@ function show(id) {
   if (id === 'home') { renderBests(); $('#gameBest').textContent = gameBestText(); }
   if (id === 'levels') renderLevels();
   if (id === 'guide') renderGuide(currentTab);
-  if (id === 'gsetup') renderSetup();
+  if (id === 'gsetup') { $('#mpick').hidden = true; $('#gsetupMain').hidden = false; renderSetup(); }
 }
 
 function startMode(mode) {
@@ -1367,7 +1376,10 @@ document.addEventListener('click', e => {
   const gm = e.target.closest('[data-game]');
   if (gm) return show('gsetup');
   const lv = e.target.closest('[data-level]');
-  if (lv) { GS.level = lv.dataset.level; store.set('g:level', GS.level); return newGame(); }
+  if (lv) {
+    if (lv.dataset.level === 'mleague') { proPick = GS.mPlayers.slice(); renderProPick(); $('#gsetupMain').hidden = true; $('#mpick').hidden = false; return; }
+    GS.level = lv.dataset.level; store.set('g:level', GS.level); return newGame();
+  }
   const c = e.target.closest('#play .choice');
   if (c) return answer(+c.dataset.i);
   const t = e.target.closest('.tab');
@@ -1397,14 +1409,22 @@ document.addEventListener('keydown', e => {
 const SEATS = ['あなた', '下家', '対面', '上家'];
 const GS = { callConfirm: store.get('g:call', true), pointsOnly: store.get('g:ptsonly', false), level: store.get('g:level', 'normal'), review: store.get('g:review', true), bgm: store.get('g:bgm', true), len: store.get('g:len', 'tonpu'), rvMode: store.get('g:rvmode', 'total') };
 const LEVEL_NAME = { easy:'弱い', normal:'普通', hard:'強い', mleague:'Mリーガー' };
-// Mリーガー：席ごとに打ち筋を変える（本人ではなく、プレースタイルを参考にした傾向）
-const MSTYLE = {
-  1: { key:'balance', name:'多井風' },  // 速度と守備のバランス。危ない時は早めに降りる
-  2: { key:'attack',  name:'佐々木風' }, // 攻め重視。リーチ即押し、ほとんど降りない
-  3: { key:'menzen',  name:'瀬戸熊風' }, // 門前で打点重視。鳴かずに高い手を狙う
+// Mリーガー：選んだ3人が下家・対面・上家に座る（本人ではなく、プレースタイルを参考にした傾向）
+const MPRO = {
+  oi:       { key:'balance', name:'多井風',   desc:'速度と守備のバランス。危ない時は早めに降りる' },
+  sasaki:   { key:'attack',  name:'佐々木風', desc:'攻め重視。聴牌即リーチで、ほとんど降りない' },
+  setokuma: { key:'menzen',  name:'瀬戸熊風', desc:'門前で高打点。鳴かずにドラ・役牌・染め手を狙う' },
+  kobayashi:{ key:'call',    name:'小林風',   desc:'仕掛けて速く。鳴ける牌は積極的に鳴き、押し引きは精密' },
+  nikaido:  { key:'defense', name:'二階堂風', desc:'守備重視。リーチや仕掛けには聴牌していても安全に降りる' },
+  hori:     { key:'dama',    name:'堀風',     desc:'柔軟なダマテン。役がある聴牌はリーチせずに待つ' },
+  suzuki:   { key:'value',   name:'たろう風', desc:'大胆な打点狙い。ドラや役牌を抱え、手が高い時は押し切る' },
 };
-const styleOf = p => GS.level === 'mleague' && p ? MSTYLE[p].key : null;
-const nm = p => GS.level === 'mleague' && p ? `${SEATS[p]}（${MSTYLE[p].name}）` : SEATS[p];
+const MPRO_IDS = Object.keys(MPRO);
+GS.mPlayers = (store.get('g:mpl', ['oi', 'sasaki', 'setokuma']) || []).filter(id => MPRO[id]);
+if (GS.mPlayers.length !== 3) GS.mPlayers = ['oi', 'sasaki', 'setokuma'];
+const proOf = p => GS.level === 'mleague' && p ? MPRO[GS.mPlayers[p - 1]] : null;
+const styleOf = p => proOf(p) ? proOf(p).key : null;
+const nm = p => proOf(p) ? `${SEATS[p]}（${proOf(p).name}）` : SEATS[p];
 const ABORT = { abort: true };
 let G = null;
 
@@ -1568,6 +1588,19 @@ function cpuWantsPon(g, q, t) {
   const st = styleOf(q);
   if (st === 'menzen') return false; // 瀬戸熊風：鳴かない
   if (isYakuhaiFor(g, q, t)) return true;
+  if (st === 'value' && g.doraInd.map(doraOf).includes(t)) return true; // たろう風：ドラはポンして打点確保
+  if (st === 'call') {
+    // 小林風：役が確定している（役牌を鳴いている）か、タンヤオで向かえるなら、向聴が進むポンはすべて鳴く
+    const tan = x => x < 27 && x % 9 > 0 && x % 9 < 8;
+    const yakuOK = g.melds[q].some(m => m.type === 'pon' && isYakuhaiFor(g, q, m.tile))
+      || (tan(t) && g.melds[q].every(m => m.type === 'pon' ? tan(m.tile) : tan(m.tile) && tan(m.tile + 2)) && g.hands[q].filter(x => !tan(x)).length <= 2);
+    if (!yakuOK) return false;
+    const c = countsOf(g.hands[q]), mN = g.melds[q].length, before = shanten(c, mN);
+    c[t] -= 2;
+    let best = 9;
+    for (let x = 0; x < 34; x++) if (c[x] > 0) { c[x]--; best = Math.min(best, shanten(c, mN + 1)); c[x]++; }
+    return best < before;
+  }
   if (st === 'balance') {
     // 多井風：タンヤオで仕掛けて速度を上げる（手がほぼ中張牌で、鳴くとシャンテンが進む時）
     const tan = x => x < 27 && x % 9 > 0 && x % 9 < 8;
@@ -1654,25 +1687,40 @@ function cpuChooseDiscard(g, p) {
   if (st) {
     const rest = remainingFor(g, p);
     pool.forEach(x => { c[x.t]--; x.uke = ukeire(c, mN, rest).n; c[x.t]++; });
-    if (st === 'menzen') {
+    if (st === 'menzen' || st === 'value') {
       // 瀬戸熊風：ドラ・役牌・染め色を残し、受け入れが近いなら打点を優先
       const suitN = [0, 0, 0]; hand.forEach(x => { if (x < 27) suitN[Math.floor(x / 9)]++; });
       const main = suitN.indexOf(Math.max(...suitN));
       const somete = suitN[main] + hand.filter(x => x >= 27).length >= 9;
       pool.forEach(x => {
         let keep = 0;
-        if (doras.includes(x.t)) keep += 3;
+        if (doras.includes(x.t)) keep += st === 'value' ? 5 : 3;
         if (x.t >= 27 && isYakuhaiFor(g, p, x.t) && c[x.t] >= 2) keep += 3;
         if (somete && (x.t >= 27 || Math.floor(x.t / 9) === main)) keep += 2;
         x.score = (x.uke || 0) - keep * 2;
       });
-      if (danger.length && minS >= 2) { const safes = cands.filter(x => x.safe); if (safes.length) pool = safes; }
+      // たろう風：ドラ2枚以上なら押し切る
+      const big = st === 'value' && doras.reduce((a, d) => a + c[d], 0) >= 2;
+      if (danger.length && minS >= 2 && !big) { const safes = cands.filter(x => x.safe); if (safes.length) pool = safes; }
     } else {
       pool.forEach(x => { x.score = x.uke || 0; });
       if (st === 'balance' && danger.length) {
         // 多井風：リーチにはイーシャンテン以下なら現物で降りる。聴牌でも現物で回せるなら回す
         const safes = cands.filter(x => x.safe && (minS >= 1 || x.s === minS));
         if (safes.length) pool = safes;
+      }
+      if ((st === 'call' || st === 'dama') && danger.length && minS >= 1) {
+        // 小林風・堀風：聴牌していなければ現物で降りる
+        const safes = cands.filter(x => x.safe);
+        if (safes.length) pool = safes;
+      }
+      if (st === 'defense') {
+        // 二階堂風：リーチ者・2副露以上の相手がいれば、聴牌でも現物を優先
+        const th = [0,1,2,3].filter(q => q !== p && (g.riichi[q] || g.melds[q].length >= 2));
+        if (th.length) {
+          const safes = cands.filter(x => th.every(q => g.ponds[q].some(d => d.t === x.t)));
+          if (safes.length) pool = safes;
+        }
       }
       // 佐々木風：降りない
     }
@@ -1702,6 +1750,13 @@ function cpuTurn(g, p, drawn) {
     riichi = shanten(c, 0) === 0;
     // 多井風：終盤や他家リーチ中の無理なリーチは控える
     if (riichi && styleOf(p) === 'balance' && (g.wall.length < 12 || g.riichi.some((r, q) => r && q !== p))) riichi = false;
+    // 堀風：役牌の対子か、全部中張牌（タンヤオ）なら役があるのでダマにする
+    if (riichi && styleOf(p) === 'dama') {
+      const tan = x => x < 27 && x % 9 > 0 && x % 9 < 8;
+      if (c.some((n, x) => n >= 2 && x >= 27 && isYakuhaiFor(g, p, x)) || c.every((n, x) => !n || tan(x))) riichi = false;
+    }
+    // 二階堂風：他家リーチ中は追いかけリーチしない
+    if (riichi && styleOf(p) === 'defense' && g.riichi.some((r, q) => r && q !== p)) riichi = false;
   }
   return { type:'discard', tile:t, riichi };
 }
@@ -1869,7 +1924,7 @@ function renderGame() {
       : `<div class="srow">${p === 3 ? hand : ''}<div class="scol">${melds}${pond}</div>${p === 1 ? hand : ''}</div>`;
   }
   const pos = ['b', 'r', 't', 'l'];
-  $('#center').innerHTML = [0,1,2,3].map(p => `<div class="ps ${pos[p]} ${p === g.dealer ? 'dealer' : ''} ${p === g.turn ? 'turn' : ''}"><span class="w">${HONOR[seatWind(g, p) - 27]}${p === g.dealer ? '・親' : ''}</span><b>${fmt(g.scores[p])}</b>${styleOf(p) ? `<span class="sty">${MSTYLE[p].name}</span>` : ''}${g.riichi[p] ? '<span class="tenbou" title="リーチ棒"></span>' : ''}</div>`).join('') +
+  $('#center').innerHTML = [0,1,2,3].map(p => `<div class="ps ${pos[p]} ${p === g.dealer ? 'dealer' : ''} ${p === g.turn ? 'turn' : ''}"><span class="w">${HONOR[seatWind(g, p) - 27]}${p === g.dealer ? '・親' : ''}</span><b>${fmt(g.scores[p])}</b>${proOf(p) ? `<span class="sty">${proOf(p).name}</span>` : ''}${g.riichi[p] ? '<span class="tenbou" title="リーチ棒"></span>' : ''}</div>`).join('') +
     `<div class="mid">${kyokuName(g)}<small>残り ${g.wall.length}枚</small><small>${g.honba}本場・供託${g.sticks}</small></div>`;
   renderMyHand(g);
   renderActions(g);
@@ -2220,11 +2275,38 @@ function renderSetup() {
   $('#optReview').checked = GS.review;
   document.querySelectorAll('[data-rvmode]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.rvmode === GS.rvMode)));
   document.querySelectorAll('[data-len]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.len === GS.len)));
+  renderProPick();
 }
 $('#optReview').addEventListener('change', e => { GS.review = e.target.checked; store.set('g:review', GS.review); });
 
 document.querySelectorAll('[data-rvmode]').forEach(b => b.addEventListener('click', () => { GS.rvMode = b.dataset.rvmode; store.set('g:rvmode', GS.rvMode); renderSetup(); }));
 document.querySelectorAll('[data-len]').forEach(b => b.addEventListener('click', () => { GS.len = b.dataset.len; store.set('g:len', GS.len); renderSetup(); }));
+
+// ---- Mリーガーの3人を選ぶ ----
+let proPick = GS.mPlayers.slice();
+function renderProPick() {
+  const box = $('#mpick');
+  if (!box) return;
+  const seatOf = id => proPick.indexOf(id);
+  box.innerHTML = `<p class="setup-q">対戦するMリーガーを3人選んでください（選んだ順に 下家・対面・上家）</p>
+    <div class="mpros">${MPRO_IDS.map(id => { const i = seatOf(id); return `<button class="mpro" data-pro="${id}" aria-pressed="${i >= 0}">${i >= 0 ? `<span class="seat">${SEATS[i + 1]}</span>` : ''}<b>${MPRO[id].name}</b><span>${MPRO[id].desc}</span></button>`; }).join('')}</div>
+    <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn ghost" id="mpBack">戻る</button><button class="btn primary" id="mpStart" ${proPick.length === 3 ? '' : 'disabled'}>この3人と対局 ▶</button></div>`;
+}
+document.addEventListener('click', e => {
+  const pb = e.target.closest('[data-pro]');
+  if (pb) {
+    const id = pb.dataset.pro, i = proPick.indexOf(id);
+    if (i >= 0) proPick.splice(i, 1); else if (proPick.length < 3) proPick.push(id); else { proPick.shift(); proPick.push(id); }
+    return renderProPick();
+  }
+  if (e.target.closest('#mpBack')) { $('#mpick').hidden = true; $('#gsetupMain').hidden = false; return; }
+  if (e.target.closest('#mpStart') && proPick.length === 3) {
+    GS.mPlayers = proPick.slice(); store.set('g:mpl', GS.mPlayers);
+    GS.level = 'mleague'; store.set('g:level', 'mleague');
+    $('#mpick').hidden = true; $('#gsetupMain').hidden = false;
+    newGame();
+  }
+});
 
 $('#deco').innerHTML = [0, 13, 22, 33].map(t => tileHTML(t)).join('');
 $('#gameDeco').innerHTML = [27, 27, 27, 31].map(t => tileHTML(t)).join('');
