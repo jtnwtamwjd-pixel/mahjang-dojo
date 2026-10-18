@@ -544,14 +544,30 @@ function runTies(ties,userM,ko){const res=[];
  return res;}
 /* ================= international ================= */
 const INTL_MD=[2,5,7,10,12,15,16,19,21],INTL_NAME='ワールドチャンピオンズ',INTL_SLOTS={jp:2,en:3,es:3,de:3,it:3,fr:2};
+function scandalTick(){for(const t of S.teams){if(t.lg==='jp')continue;
+  if(t.crisis&&t.id!==S.team&&Math.random()<.15)fireSale(t);
+  if(t.crisis||Math.random()>=.0018)continue;
+  const loss=Math.round(Math.max(t.budget,0)*rnd(.6,.85));t.budget-=loss;t.crisis=S.season+1;
+  const why=pick(['理事会の不正会計が発覚','会長の背任疑惑が浮上','理事による裏金問題が発覚','オーナーの脱税事件が発覚','理事会の放漫経営が明るみに']);
+  if(t.id===S.team){S.board=clamp(S.board-8,0,100);inbox('🚨 クラブ不祥事',`${why}。クラブは${fmtM(loss)}の損失を出し、財政難に陥りました。\n来季終了まで財政難が続きます。人件費に注意しましょう。`);}
+  else inbox('【不祥事】'+t.name,`${t.name}で${why}。クラブは財政難に陥り、主力選手を安値で放出する可能性があります（移籍金が約30%安くなります）。`);}}
+function fireSale(t){const sq=teamPlayers(t.id).filter(p=>!p.loan).sort((a,b)=>b.ovr-a.ovr);if(sq.length<=20)return;const p=sq[ri(0,3)];if(!p)return;const fee=Math.round(valueOf(p)*.65/100)*100;
+ const bs=S.teams.filter(b=>b.id!==t.id&&b.id!==S.team&&!b.crisis&&b.budget>=fee*1.5&&b.rep>=t.rep-8&&teamPlayers(b.id).length<30);if(!bs.length)return;const b=pick(bs);
+ markMove(p,t.id,b.id);b.budget-=fee;t.budget+=fee;p.tid=b.id;p.con=ri(2,4);p.wage=calcWage(p);p.list=false;
+ if(p.ovr>=80||(b.lg===ULG()&&p.ovr>=72))inbox('【投げ売り】'+p.name,`財政難の${t.name}が${p.name}（${POS_JP[p.pos]}・${Math.round(p.ovr)}）を${b.name}へ${fmtM(fee)}で放出しました。`);}
+const JP_INTL_JOIN=30000,JP_INTL_KO=20000,HOST_BONUS=40000;
+const intlHost=season=>LG_ORDER[(season+2)%LG_ORDER.length];
 function intlRoundName(r){return r<6?'グループ第'+(r+1)+'節':['準々決勝','準決勝','決勝'][r-6];}
 function makeIntl(){const ids=[];for(const lg of LG_ORDER){const ord=((S.lastRanks&&S.lastRanks[lg])||teamsOf(lg).sort((a,b)=>b.rep-a.rep).map(t=>t.id)).filter(id=>T(id));ids.push(...ord.slice(0,INTL_SLOTS[lg]));}
  const sorted=ids.slice().sort((a,b)=>T(b).rep-T(a).rep);const pots=[0,1,2,3].map(i=>shuffle(sorted.slice(i*4,i*4+4)));
  const groups=[0,1,2,3].map(g=>pots.map(p=>p[g]));
  const gfx=[[],[],[],[],[],[]];groups.forEach(g=>makeFixtures(g).forEach((m,r)=>gfx[r].push(...m)));
- S.intl={ids,groups,gfx,gres:[],ko:[],kres:[],r:0,winner:null,out:null};
+ const host=intlHost(S.season);S.intl={ids,groups,gfx,gres:[],ko:[],kres:[],r:0,winner:null,out:null,host};
+ const myB=[];ids.forEach(id=>{const t=T(id);let b=0;if(t.lg==='jp'){b+=JP_INTL_JOIN;if(id===S.team)myB.push('日本クラブ出場報酬 '+fmtM(JP_INTL_JOIN));}
+  if(t.lg===host){b+=HOST_BONUS;if(id===S.team)myB.push('開催国ボーナス '+fmtM(HOST_BONUS));}t.budget+=b;if(id===S.team)S.fin.prize+=b;});
  const gi=groups.findIndex(g=>g.includes(S.team));
- if(gi>=0)inbox('🌍 '+INTL_NAME+' 出場決定',`今季の${INTL_NAME}に出場します！\nグループ${'ABCD'[gi]}：${groups[gi].map(id=>T(id).name).join('、')}`);}
+ if(gi>=0)inbox('🌍 '+INTL_NAME+' 出場決定',`今季の${INTL_NAME}（開催国: ${LG_DEF[host].flag} ${LG_DEF[host].short}）に出場します！\nグループ${'ABCD'[gi]}：${groups[gi].map(id=>T(id).name).join('、')}${myB.length?'\n\n💴 '+myB.join('、')+' を受け取りました。':''}`);}
+function jpKoBonus(ids,label){ids.forEach(id=>{const t=T(id);if(t.lg!=='jp')return;t.budget+=JP_INTL_KO;if(id===S.team){S.fin.prize+=JP_INTL_KO;inbox('💴 '+INTL_NAME+' 報酬',`${label}進出により、日本クラブ特別報酬 ${fmtM(JP_INTL_KO)} を受け取りました。`);}});}
 function intlDue(){const I=S.intl;return!!(I&&S.phase==='season'&&I.r<9&&S.md===INTL_MD[I.r]);}
 function intlTies(){const I=S.intl;return I.r<6?I.gfx[I.r]:I.ko[I.r-6];}
 function tally(results,ids){const t={};ids.forEach(id=>t[id]={id,p:0,w:0,d:0,l:0,gf:0,ga:0,pts:0,form:[]});
@@ -566,11 +582,11 @@ function playIntlRound(userM){const I=S.intl,r=I.r,ko=r>=6;const res=runTies(int
  if(!ko)I.gres[r]=res;else I.kres[r-6]=res;
  I.r++;
  if(I.r===6){const q=[0,1,2,3].map(groupTable);I.ko[0]=[[q[0][0].id,q[1][1].id],[q[1][0].id,q[0][1].id],[q[2][0].id,q[3][1].id],[q[3][0].id,q[2][1].id]];
-  const qual=I.ko[0].flat();qual.forEach(id=>{T(id).budget+=20000;if(id===S.team)S.fin.prize+=20000;});
+  const qual=I.ko[0].flat();qual.forEach(id=>{T(id).budget+=20000;if(id===S.team)S.fin.prize+=20000;});jpKoBonus(qual,'準々決勝');
   if(I.ids.includes(S.team)){if(qual.includes(S.team)){S.board=clamp(S.board+5,0,100);inbox('🌍 グループ突破！',`${INTL_NAME}の決勝トーナメント進出が決まりました。準々決勝の相手は${T(I.ko[0].find(t=>t.includes(S.team)).find(x=>x!==S.team)).name}です。`);}
    else{I.out='グループ敗退';inbox('🌍 グループ敗退',`${INTL_NAME}はグループステージで敗退となりました。`);}}}
  else if(ko){const W=res.map(x=>x.w);if(mine&&mine.w!==S.team)I.out=intlRoundName(r);
-  if(I.r<9){const t=[];for(let i=0;i<W.length;i+=2)t.push([W[i],W[i+1]]);I.ko[I.r-6]=t;W.forEach(id=>{T(id).budget+=30000;if(id===S.team)S.fin.prize+=30000;});}
+  if(I.r<9){const t=[];for(let i=0;i<W.length;i+=2)t.push([W[i],W[i+1]]);I.ko[I.r-6]=t;W.forEach(id=>{T(id).budget+=30000;if(id===S.team)S.fin.prize+=30000;});jpKoBonus(W,intlRoundName(I.r));}
   else{const win=W[0],fr=res[0],ru=fr.h===win?fr.a:fr.h;I.winner=win;T(win).budget+=100000;T(ru).budget+=40000;
    if(win===S.team){S.fin.prize+=100000;S.mgr.trophies++;S.board=clamp(S.board+15,0,100);I.out='優勝';inbox('🌍🏆 '+INTL_NAME+'制覇！',`決勝で${T(ru).name}を破り、世界の頂点に立ちました！ 賞金 ${fmtM(100000)}`);}
    else{if(ru===S.team)S.fin.prize+=40000;inbox(INTL_NAME+' 決勝',`${T(win).name}（${LG_DEF[T(win).lg].short}）が${T(ru).name}を破って優勝。`);}}}
@@ -655,6 +671,7 @@ function weekly(){
    inbox('移籍オファー: '+p.name,`${b.name}が${p.name}（${POS_JP[p.pos]} / 総合${Math.round(p.ovr)}）に${fmtM(fee)}のオファーを提示しました。\n市場価値: ${fmtM(v)}`,{offer:o.id});}
  });
  for(let k=0;k<4;k++)if(Math.random()<.35)aiTransfer();
+ scandalTick();
  if(S.md===18){const lo=teamPlayers(S.team).filter(p=>p.loan&&p.loan.opt);if(lo.length)inbox('買取オプションの期限',lo.map(p=>p.name+'（'+fmtM(p.loan.opt)+'）').join('、')+' の買取オプションはシーズン終了とともに失効します。獲得したい場合は選手画面から行使しましょう。');}
  if(S.md===14){const ex=teamPlayers(S.team).filter(p=>p.con<=1&&!p.loan);if(ex.length)inbox('契約満了が近い選手',ex.map(p=>p.name).join('、')+' の契約が今季で満了します。残したい選手は選手画面から契約延長しましょう。');}
  if(me.budget<0&&Math.random()<.5){S.board=clamp(S.board-2,0,100);inbox('理事会より','クラブの資金がマイナスです。人件費の見直しを求めます。');}
@@ -675,7 +692,7 @@ function doAwaken(p,why,quiet){const isU=p.tid===S.team||p.tid===-1;
 function grow(p,mult){const a=p.age;let g=a<=20?.38:a<=23?.26:a<=26?.12:a<=29?.03:a<=31?-.07:a<=33?-.17:-.3;
  if(g>0){const gap=p.pot-p.ovr;g=gap<=0?0:g*Math.min(1,gap/6)*mult;}g*=rnd(.4,1.6);p.ovr=clamp(p.ovr+g,35,94);}
 function aiTransfer(){
- const t=pick(S.teams.filter(x=>x.id!==S.team));const sq=teamPlayers(t.id);if(sq.length>=28)return;
+ const t=pick(S.teams.filter(x=>x.id!==S.team));const sq=teamPlayers(t.id);if(sq.length>=28||t.crisis)return;
  const l=autoPick(t.id,t.form).lineup;const roles=FORMS[t.form].map(f=>f[0]);
  let wi=0,wv=999;l.forEach((id,i)=>{if(id==null){wi=i;wv=0;return;}const v=effOvr(P(id),roles[i]);if(v<wv){wv=v;wi=i;}});
  const role=roles[wi];
@@ -818,7 +835,7 @@ function finishConv(p){const from=p.pos,to=p.cvTo;if(!to){delete p.cv;return;}co
   inbox((up?'🎉 コンバート大成功: ':'コンバート完了: ')+p.name,p.cnote+(up?'\nコーチの指導で新たな才能が開花しました。':''));if(up)toast('🎉 '+p.name+'のコンバートが大成功！');}}
 
 /* ================= transfers ================= */
-function askPrice(p){if(p.tid===0)return 0;const t=T(p.tid);const top=autoPick(p.tid,t.form).lineup.includes(p.id);let a=valueOf(p)*(top?1.3:1.05);if(p.con<=1)a*=.8;if(coachSp('net')&&T(p.tid).lg!=='jp')a*=.88;a*=1-.03*negoEdge(t);return Math.round(a/100)*100;}
+function askPrice(p){if(p.tid===0)return 0;const t=T(p.tid);const top=autoPick(p.tid,t.form).lineup.includes(p.id);let a=valueOf(p)*(top?1.3:1.05);if(p.con<=1)a*=.8;if(coachSp('net')&&T(p.tid).lg!=='jp')a*=.88;a*=1-.03*negoEdge(t);if(t.crisis)a*=.7;return Math.round(a/100)*100;}
 function wageDemand(p){return Math.round(Math.max(p.wage*1.15,calcWage(p)*1.1)/10)*10;}
 function buyPlayer(p,fee){const me=myTeam();
  if(me.budget<fee)return'資金が足りません';if(teamPlayers(S.team).length>=32)return'スカッドが満員です（最大32人）';
@@ -891,7 +908,7 @@ function newSeason(){
  genFreeAgents(Math.max(0,30-teamPlayers(0).length));
  {const sq=teamPlayers(S.team);const need={GK:2,DF:6,MF:6,FW:3};const add=[];for(const g of Object.keys(need)){let c=sq.filter(p=>POS_GROUP[p.pos]===g).length;while(c<need[g]){const fa=teamPlayers(0).filter(p=>POS_GROUP[p.pos]===g).sort((a,b)=>a.ovr-b.ovr)[0]||genPlayer(pick(SQUAD_ROLES.filter(r=>POS_GROUP[r]===g)),55,ri(24,30),0);fa.tid=S.team;fa.con=1;fa.wage=calcWage(fa);add.push(fa.name);c++;}}
   if(add.length)inbox('緊急補強','選手が不足したため、理事会がフリーの '+add.join('、')+' と1年契約を結びました。');}
- S.season++;startSeasonCommon();fixUserLineup();
+ S.season++;S.teams.forEach(t=>{if(t.crisis&&t.crisis<S.season){delete t.crisis;if(t.id===S.team)inbox('財政再建','クラブの財政難が解消されました。');}});startSeasonCommon();fixUserLineup();
  inbox('シーズン'+S.season+' 開幕',`理事会の今季目標は「${S.obj.text}」です。（戦力評価 ${S.obj.exp}位）`);
  save();}
 /* ================= youth ================= */
@@ -1090,8 +1107,8 @@ VIEWS.league=()=>{const m=U.lg;const L=U.lgSel||ULG();let h=`<div class="chips" 
   h+=`<div class="card"><div class="row between" style="margin-bottom:8px"><button class="sm" ${i<=0?'disabled':''} onclick="U.fxMd--;render()">◀</button><b>第${i+1}節</b><button class="sm" ${i>=FX.length-1?'disabled':''} onclick="U.fxMd++;render()">▶</button></div>
   ${FX[i].map(([hh,aa])=>{const r=res&&res.find(x=>x.h===hh);const me=hh===S.team||aa===S.team;return`<div class="row" style="padding:7px 4px;border-top:1px solid var(--line);${me?'background:rgba(61,220,132,.1);border-radius:6px':''}" ${r?`onclick="showMatchDetail(${i},${hh},'${L}')"`:''}><span style="flex:1;text-align:right;font-size:12px;font-weight:700">${esc(T(hh).city)}</span>${badge(T(hh),'s')}<b style="width:52px;text-align:center">${r?r.hg+' - '+r.ag:'vs'}</b>${badge(T(aa),'s')}<span style="flex:1;font-size:12px;font-weight:700">${esc(T(aa).city)}</span></div>`;}).join('')}</div>`;}
  return h;};
-function intlView(){const I=S.intl;if(!I)return`<div class="card muted">${INTL_NAME}は次のシーズンから開催されます。各国リーグの上位クラブ（日本2・英西独伊3・仏2）が出場します。</div>`;
- let h=`<div class="card"><h3>🌍 ${INTL_NAME}</h3><p class="muted" style="font-size:12px;margin:0">各国リーグ上位16クラブによる国際大会。4組のグループ（ホーム＆アウェイ）上位2クラブが決勝トーナメントへ。優勝賞金 ${fmtM(100000)}。</p>
+function intlView(){const I=S.intl;if(!I)return`<div class="card muted">${INTL_NAME}は次のシーズンから開催されます（開催国: ${LG_DEF[intlHost(S.season+1)].short}）。各国リーグの上位クラブ（日本2・英西独伊3・仏2）が出場します。</div>`;
+ let h=`<div class="card"><h3>🌍 ${INTL_NAME}</h3><p style="margin:0 0 4px">今季の開催国: <b>${LG_DEF[I.host||intlHost(S.season)].flag} ${LG_DEF[I.host||intlHost(S.season)].short}</b> <small class="muted">（来季 ${LG_DEF[intlHost(S.season+1)].flag} ${LG_DEF[intlHost(S.season+1)].short}）</small></p><p class="muted" style="font-size:12px;margin:0">各国リーグ上位16クラブによる国際大会。4組のグループ（ホーム＆アウェイ）上位2クラブが決勝トーナメントへ。優勝賞金 ${fmtM(100000)}。日本のクラブは出場で ${fmtM(JP_INTL_JOIN)}、トーナメントの各ラウンド進出ごとに ${fmtM(JP_INTL_KO)} の特別報酬。開催国リーグのクラブは出場で ${fmtM(HOST_BONUS)} のボーナス。</p>
  ${I.winner?`<div style="text-align:center;margin:8px 0"><div style="font-size:36px">🏆</div><b class="gold">${esc(T(I.winner).name)}</b> が優勝</div>`:''}${I.ids.includes(S.team)?`<div class="muted" style="font-size:12px;margin-top:6px">あなたのクラブ: ${I.out||'勝ち残り中'}</div>`:'<div class="muted" style="font-size:12px;margin-top:6px">あなたのクラブは今季出場していません。</div>'}</div>`;
  for(let k=0;k<3;k++){const R_=I.ko[k];if(!R_)continue;h+=`<div class="card" style="padding:10px"><div class="lbl">${intlRoundName(6+k)} · 第${INTL_MD[6+k]+1}節の週</div>${I.kres[k]?cupResRows(I.kres[k]):R_.map(([a,b])=>`<div class="row" style="padding:6px 0;border-top:1px solid var(--line)"><span style="flex:1;text-align:right;font-size:12px;font-weight:700">${esc(T(a).city)}</span>${badge(T(a),'s')}<b style="width:64px;text-align:center">vs</b>${badge(T(b),'s')}<span style="flex:1;font-size:12px;font-weight:700">${esc(T(b).city)}</span></div>`).join('')}</div>`;}
  I.groups.forEach((g,gi)=>{h+=`<div class="card" style="padding:8px"><div class="lbl" style="margin:4px 6px">グループ${'ABCD'[gi]}</div>${groupHTML(gi)}</div>`;});
@@ -1109,7 +1126,7 @@ function cupView(){const c=S.cup;if(!c)return'<div class="card muted">カップ�
   h+='</div>';}
  return h;}
 function showTeam(tid){const t=T(tid);const sq=teamPlayers(tid).sort((a,b)=>POS_ORDER.indexOf(a.pos)-POS_ORDER.indexOf(b.pos)||b.ovr-a.ovr);
- openModal(`<button class="x" onclick="closeModal()">×</button><div class="row" style="margin-bottom:10px">${badge(t,'l')}<div><h2 style="margin:0">${esc(t.name)}</h2><small class="muted">${t.form} · ${tid===S.team?S.tactics.style:t.style} · 総合 ${teamRating(tid)} · ${rankOf(tid)}位</small></div></div>${S.md?'<div style="margin-bottom:10px">直近 '+formHTML(tid)+'</div>':''}<div class="plist">${sq.map(p=>prow(p,fmtM(valueOf(p)))).join('')}</div>`);}
+ openModal(`<button class="x" onclick="closeModal()">×</button><div class="row" style="margin-bottom:10px">${badge(t,'l')}<div><h2 style="margin:0">${esc(t.name)}</h2><small class="muted">${t.form} · ${tid===S.team?S.tactics.style:t.style} · 総合 ${teamRating(tid)} · ${rankOf(tid)}位</small>${t.crisis?'<div class="redt" style="font-size:12px">💸 不祥事で財政難（移籍金が約30%安い）</div>':''}</div></div>${S.md?'<div style="margin-bottom:10px">直近 '+formHTML(tid)+'</div>':''}<div class="plist">${sq.map(p=>prow(p,fmtM(valueOf(p)))).join('')}</div>`);}
 function showMatchDetail(md,h,lg){const r=LRES(lg)[md].find(x=>x.h===h);const H=T(r.h),A=T(r.a);
  openModal(`<button class="x" onclick="closeModal()">×</button><div class="lbl">第${md+1}節</div><div class="vs"><div class="side">${badge(H,'l')}<span>${esc(H.name)}</span></div><div class="score">${r.hg} - ${r.ag}</div><div class="side">${badge(A,'l')}<span>${esc(A.name)}</span></div></div>
  ${r.gl.map(([m,k,pid])=>{const p=P(pid);return`<div class="row" style="justify-content:${k==='h'?'flex-start':'flex-end'};padding:3px 0">⚽ ${p?esc(p.name):'（退団選手）'} <span class="muted">${m}</span></div>`;}).join('')||'<p class="muted" style="text-align:center">得点なし</p>'}`);}
@@ -1124,7 +1141,8 @@ VIEWS.club=()=>{const t=myTeam(),f=S.fin;const inc=f.gate+f.tv+f.tin+f.prize,exp
 function resetGame(){if(!confirm('セーブデータを削除して最初からやり直しますか？'))return;localStorage.removeItem(SAVE_KEY);S=null;render();}
 function showHelp(){openModal(`<button class="x" onclick="closeModal()">×</button><h2>遊び方</h2><div class="help">
  <p>あなたは監督として、日本と海外5カ国（イングランド・スペイン・ドイツ・イタリア・フランス）のリーグから1クラブを選び、12クラブで争うリーグを全22節（ホーム＆アウェイ）戦います。</p>
- <p><b>🏆 カップ戦・国際大会</b>：国内カップに加え、各国リーグ上位クラブが集まる国際大会（グループステージ→決勝トーナメント）があります。前季の順位で出場権が決まります。</p>
+ <p><b>🏆 カップ戦・国際大会</b>：国内カップに加え、各国リーグ上位クラブが集まる国際大会（グループステージ→決勝トーナメント）があります。前季の順位で出場権が決まります。開催国は毎年変わり、開催国リーグのクラブは出場ボーナスを獲得。日本のクラブは出場するだけで特別報酬があり、決勝トーナメントの各ラウンドに進むたびに追加報酬が入ります。</p>
+ <p><b>🚨 不祥事</b>：海外クラブではたまに理事会の不祥事が起き、財政難に陥ります。財政難のクラブは主力を安値で放出し、移籍金も約30%安くなります。</p>
  <p><b>🌏 外国人枠</b>：日本リーグでは先発＋控えに入れる外国籍選手は最大${FOREIGN_MAX}人までです。</p>
  <p><b>🌱 ユース</b>：選手タブの「ユース」で下部組織を管理。毎季新入団があり、施設強化やスカウト派遣で有望株を発掘、トップチームへ昇格させられます。</p>
  <p><b>📋 作戦</b>：フォーメーションと先発・控えを決め、戦術スタイルとトレーニング強度を選びます。本職以外のポジションに置くと能力が下がります。</p>
