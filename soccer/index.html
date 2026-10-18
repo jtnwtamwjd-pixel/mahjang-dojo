@@ -274,7 +274,9 @@ const myTeam=()=>T(S.team);
 const teamPlayers=tid=>Object.values(S.players).filter(p=>p.tid===tid);
 const baseOf=rep=>58+rep*.215;
 function markMove(p,from,to){if(p.nat!=='jp'||!(to>0)||!T(to)||T(to).lg==='jp')return;p.ab=1;if(from>0&&T(from)&&T(from).lg==='jp'){p.ex={tid:from};delete p.exd;}}
-const lgMul=lg=>lg==='jp'||!LG_DEF[lg]?1:LG_DEF[lg].tv/1500*1.3;
+const lgMul=lg=>lg==='jp'||!LG_DEF[lg]?1:LG_DEF[lg].tv/1500*2.5;
+const wageMul=tid=>{const t=tid>0&&T(tid);return t&&t.lg!=='jp'?1+(lgMul(t.lg)-1)*.35:1;};
+const champBonus=lg=>Math.round(15000*lgMul(lg));
 const teamBase=t=>t&&t.lg==='jp'?55+t.rep*.2:baseOf(t?t.rep:60);
 const jpLim=(bonus)=>Math.random()<.05+(bonus||0)?ri(76,80):75;
 const jpCtx=tid=>(tid>0&&T(tid)&&T(tid).lg==='jp')||(tid===-1&&S.team&&ULG()==='jp');
@@ -293,7 +295,7 @@ function genPlayer(pos,ovr,age,tid,pref){
 function valueOf(p){const o=p.ovr;let v=1000*Math.pow(10,(o-55)/11);const a=p.age,gap=Math.max(0,p.pot-o);
  if(a<=21)v*=1+gap/22;else if(a<=24)v*=1+gap/35;else if(a<=29)v*=1;else if(a<=31)v*=.75;else if(a<=33)v*=.5;else v*=.3;
  if(p.con<=1&&p.tid>0)v*=.85;return Math.max(50,Math.round(v/10)*10);}
-function calcWage(p){return Math.round((200+valueOf(p)*.15)/10)*10;}
+function calcWage(p){return Math.round((200+valueOf(p)*.15)*wageMul(p.tid)/10)*10;}
 function genSquad(tid,rep){
  const b=T(tid)&&T(tid).lg==='jp'?teamBase({lg:'jp',rep}):baseOf(rep);const cnt={};
  SQUAD_ROLES.forEach(r=>{cnt[r]=(cnt[r]||0)+1;const k=cnt[r];
@@ -327,7 +329,7 @@ function makeFixtures(ids){const n=ids.length;const arr=shuffle(ids.slice());con
  return rounds.concat(rounds.map(m=>m.map(([h,a])=>[a,h])));}
 
 function newGame(tid,mgr){
- S={v:5,coaches:{},scout:null,wcHist:[],nextId:1,season:1,md:0,phase:'season',team:tid,mgr:{name:mgr||'監督',w:0,d:0,l:0,trophies:0,clubs:[tid]},players:{},teams:[],L:{},youth:{lvl:1,scout:null,reports:[]},inbox:[],offers:[],neg:{},hist:[],board:60,obj:null,fin:null,endInfo:null,msgId:1};
+ S={v:6,coaches:{},scout:null,wcHist:[],nextId:1,season:1,md:0,phase:'season',team:tid,mgr:{name:mgr||'監督',w:0,d:0,l:0,trophies:0,clubs:[tid]},players:{},teams:[],L:{},youth:{lvl:1,scout:null,reports:[]},inbox:[],offers:[],neg:{},hist:[],board:60,obj:null,fin:null,endInfo:null,msgId:1};
  const forms=Object.keys(FORMS);
  TEAMS.forEach((d,i)=>{const id=i+1;const rep=d[5];
   S.teams.push(mkTeam(id,'jp',d[0],d[1],d[2],d[3],d[4],rep,i));
@@ -360,7 +362,9 @@ function startSeasonCommon(){
  S.obj={exp:er,target,text:target===1?'リーグ優勝':target===11?'最下位回避（11位以内）':target+'位以内'};
 }
 
-function migrate(){const v0=S.v||1;if(v0<3)migrate3(v0);if(S.v<4)migrate4();if(S.v<5){(S.cpool||[]).forEach(fillCand);Object.values(S.coaches||{}).forEach(c=>c&&fillCand(c));S.scout=S.scout||null;S.v=5;inbox('🆕 アップデート','ポジションコンバート（選手画面）とチーフスカウト（クラブ画面）が追加されました。コーチ・スカウト候補は全員が特殊能力を持つようになりました。');save();}}
+function migrate(){const v0=S.v||1;if(v0<3)migrate3(v0);if(S.v<4)migrate4();if(S.v<5){(S.cpool||[]).forEach(fillCand);Object.values(S.coaches||{}).forEach(c=>c&&fillCand(c));S.scout=S.scout||null;S.v=5;inbox('🆕 アップデート','ポジションコンバート（選手画面）とチーフスカウト（クラブ画面）が追加されました。コーチ・スカウト候補は全員が特殊能力を持つようになりました。');save();}if(S.v<6)migrate6(v0);}
+function migrate6(v0){if(v0>=3)S.teams.forEach(t=>{if(t.lg!=='jp')t.budget=Math.round(t.budget*2.5/1.3);});Object.values(S.players).forEach(p=>{if(p.tid>0&&T(p.tid).lg!=='jp'&&!p.loan)p.wage=Math.max(p.wage,calcWage(p));});
+ inbox('💴 バランス調整','海外クラブの予算が大幅に増え、海外リーグの選手の年俸も高くなりました。海外リーグの賞金（特に優勝賞金）も引き上げられています。');S.v=6;save();}
 function migrate4(){S.coaches={};S.wcHist=[];genCoachPool();Object.values(S.players).forEach(p=>{if(p.nat==='jp'&&p.tid>0&&T(p.tid).lg!=='jp')p.ab=1;p.pk=p.ovr;});if(wcYear()&&S.phase==='season'&&S.md<WC_MD[0])S.wc={season:S.season,r:0,nats:null,sq:{},res:[],gs:{}};S.v=4;
  inbox('🆕 アップデート',`コーチ制度（クラブ画面）、4年に一度の${WC_NAME}（リーグ画面の「代表」）、海外移籍した日本人選手の活躍で古巣の若手が覚醒する仕組みが追加されました。`);save();}
 function migrate3(v0){if(v0<2)migrate2();
@@ -837,7 +841,7 @@ function scorers(n,lg){lg=lg||ULG();return Object.values(S.players).filter(p=>p.
 function seasonEnd(){
  S.lastRanks={};const champs={};
  for(const lg of LG_ORDER){const tl=table(lg);S.lastRanks[lg]=tl.map(r=>r.id);champs[lg]=tl[0].id;const mul=LG_DEF[lg].tv/1500;
-  tl.forEach((r,i)=>{const t=T(r.id);const prize=Math.round((13-(i+1))*8000*Math.sqrt(mul));t.budget+=prize;if(r.id===S.team)S.fin.prize+=prize;t.rep=clamp(t.rep+(6.5-(i+1))*.7,35,99);});}
+  tl.forEach((r,i)=>{const t=T(r.id);const prize=Math.round((13-(i+1))*8000*(lg==='jp'?1:lgMul(lg)))+(i===0?champBonus(lg):0);t.budget+=prize;if(r.id===S.team)S.fin.prize+=prize;t.rep=clamp(t.rep+(6.5-(i+1))*.7,35,99);});}
  const tb=table();const pos=tb.findIndex(r=>r.id===S.team)+1;const row=tb[pos-1];const champ=tb[0].id;
  const tgt=S.obj.target;let dc=pos<=tgt?15+(tgt-pos)*4:-(pos-tgt)*9;if(pos===1)dc+=10;S.board=clamp(S.board+dc,0,100);
  const fired=S.board<25;
@@ -1130,7 +1134,7 @@ function showHelp(){openModal(`<button class="x" onclick="closeModal()">×</butt
  <p><b>🧑‍🏫 コーチ・スカウト</b>：クラブ画面で、引退した選手をコーチやチーフスカウトとして招聘できます。全員が特殊能力を1つ以上持ち、海外でプレーした日本人の元選手はさらに追加能力を持ちます（コーチの追加能力は日本リーグのクラブで発動）。スカウトの能力が相手クラブのスカウトより高いほど移籍交渉がうまくいきやすく、ユース探索では潜在能力の高い選手が見つかりやすくなります。</p>
  <p><b>🔄 コンバート</b>：選手画面から好きなポジションへコンバートできます。${CONV_MD}節（約1ヶ月）メンバー外になり、担当コーチの能力次第では元のポジションより能力が上がることもあります。</p>
  <p><b>🌏 海外組</b>：日本人選手が日本のクラブから海外へ移籍して活躍すると、その古巣の若手が刺激を受けて必ず覚醒します。</p>
- <p><b>💴 資金と能力</b>：海外クラブは日本より資金が潤沢です。日本リーグの選手は能力75前後が上限で、80に届く選手はごく稀です（若手の覚醒は例外）。</p>
+ <p><b>💴 資金と能力</b>：海外クラブは日本よりはるかに資金が潤沢ですが、選手の年俸も高額です。海外リーグは順位賞金・優勝賞金も高くなっています。日本リーグの選手は能力75前後が上限で、80に届く選手はごく稀です（若手の覚醒は例外）。</p>
  <p><b>📈 育成</b>：若手は試合に出るほど成長。潜在能力が高い選手を「重点育成」に指定すると伸びが速くなります。30歳を過ぎると衰えます。</p>
  <p><b>🏢 理事会</b>：目標を達成すると信頼度が上がり、上位クラブからオファーが届くことも。信頼度が25%未満でシーズンを終えると解任です。</p>
  <p><b>💴 財政</b>：収入は入場料・放映権・賞金。人件費に注意して資金をマイナスにしないように。</p></div>`);}
