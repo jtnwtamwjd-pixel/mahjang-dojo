@@ -704,6 +704,22 @@ function ratio(pi){
 
 // ===================== 効果音（矩形波） =====================
 let AC=null,MUTE=false;
+// BGM：タイトル＝オープニング、開発中、プロト量産開始後、4 年目以降
+const BGM_SRC={opening:"bgm/opening.mp3",dev:"bgm/dev.mp3",proto:"bgm/proto.mp3",late:"bgm/late.mp3"};
+let BGM_EL=null,BGM_KEY=null;
+function bgmKey(){if(!S||S.over)return "opening";if(S.w>48*3)return "late";if(S.equipIn||S.cEquipIn)return "proto";return "dev";}
+function bgmApply(key){
+  if(key)BGM_KEY=key;if(!BGM_KEY)return;
+  try{
+    if(!BGM_EL){BGM_EL=new Audio();BGM_EL.loop=true;BGM_EL.volume=.35;}
+    const src=BGM_SRC[BGM_KEY];
+    if(!BGM_EL.src.endsWith(src))BGM_EL.src=src;
+    if(MUTE){BGM_EL.pause();return;}
+    if(BGM_EL.paused){const p=BGM_EL.play();if(p&&p.catch)p.catch(()=>{});}
+  }catch(e){}
+}
+// ブラウザは 操作の前に 音を 出せないので、最初の タップで 鳴らし始める
+["pointerdown","keydown"].forEach(t=>document.addEventListener(t,()=>bgmApply(),{passive:true}));
 try{MUTE=localStorage.getItem("battery_lab_mute")==="1";}catch(e){}
 function tone(f,d,t0,type,vol){
   if(MUTE)return;
@@ -752,6 +768,7 @@ function bar(v,col,max){const n=10,f=Math.round(clamp(v,0,max||100)/(max||100)*n
 
 // ===================== タイトル =====================
 function titleScreen(){
+  bgmApply("opening");
   const sv=load();
   let bgi=0;
   app.innerHTML=`<div class="title">
@@ -784,7 +801,7 @@ function titleScreen(){
    <button class="ghost small" id="mute">${MUTE?"♪ おと：OFF":"♪ おと：ON"}</button>
   </div>`;
   app.querySelectorAll("#bgs button").forEach(b=>b.onclick=()=>{bgi=+b.dataset.i;app.querySelectorAll("#bgs button").forEach(x=>x.classList.toggle("on",x===b));});
-  app.querySelector("#mute").onclick=e=>{MUTE=!MUTE;try{localStorage.setItem("battery_lab_mute",MUTE?"1":"0");}catch(_){}e.target.textContent=MUTE?"♪ おと：OFF":"♪ おと：ON";};
+  app.querySelector("#mute").onclick=e=>{MUTE=!MUTE;bgmApply();try{localStorage.setItem("battery_lab_mute",MUTE?"1":"0");}catch(_){}e.target.textContent=MUTE?"♪ おと：OFF":"♪ おと：ON";};
   app.querySelector("#start").onclick=()=>{
     if(sv&&!sv.over&&!confirm("いまの セーブを けして はじめますか？"))return;
     newGame(bgi);
@@ -826,6 +843,7 @@ function statusWin(){
 function cmd(k,t,c,en){return`<button class="cmd" data-act="${k}" ${en?"":"disabled"}><span class="ct">${t}</span><span class="cc">${c}</span></button>`;}
 function render(){
   closeModal();
+  bgmApply(bgmKey());
   if(S.over){endScreen();return;}
   const pi=S.cur, p=pi===null?null:PROJ[pi], P=pi===null?null:S.P[pi];
   const patOK=S.P.some((x,i)=>x.pat===0&&ratio(i)>=.8);
@@ -880,7 +898,7 @@ function render(){
   const ex=app.querySelector("#ext");if(ex)ex.onclick=openExt;
   const hk=app.querySelector("#hk");if(hk)hk.onclick=openHaken;
   app.querySelectorAll(".eqbuy").forEach(b=>b.onclick=()=>buyEquip(b.dataset.eq));
-  app.querySelector("#mute").onclick=()=>{MUTE=!MUTE;try{localStorage.setItem("battery_lab_mute",MUTE?"1":"0");}catch(_){}render();};
+  app.querySelector("#mute").onclick=()=>{MUTE=!MUTE;bgmApply();try{localStorage.setItem("battery_lab_mute",MUTE?"1":"0");}catch(_){}render();};
   app.querySelector("#totitle").onclick=()=>{save();titleScreen();};
   save();
 }
@@ -1648,6 +1666,7 @@ function finishGame(clear){
 }
 function endScreen(){
   closeModal();
+  bgmApply("opening");
   const done=S.P.filter(x=>x.done).length, r=rankIdx();
   const pats=S.P.filter(x=>x.pat===2).length;
   const skillSum=SKK.reduce((a,k)=>a+S.sk[k],0);
@@ -1682,7 +1701,7 @@ function endScreen(){
    <button class="pri wide" id="again">▶ もういちど あそぶ</button>
   </main>`;
   app.querySelector("#again").onclick=()=>{clearSave();titleScreen();};
-  const mu=app.querySelector("#mute");if(mu)mu.onclick=()=>{MUTE=!MUTE;mu.textContent=MUTE?"♪OFF":"♪ON";};
+  const mu=app.querySelector("#mute");if(mu)mu.onclick=()=>{MUTE=!MUTE;bgmApply();mu.textContent=MUTE?"♪OFF":"♪ON";};
 }
 
 titleScreen();
