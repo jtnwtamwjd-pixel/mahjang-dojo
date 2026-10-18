@@ -273,6 +273,7 @@ const ULG=()=>myTeam().lg;const teamsOf=lg=>S.teams.filter(t=>t.lg===lg);const L
 const myTeam=()=>T(S.team);
 const teamPlayers=tid=>Object.values(S.players).filter(p=>p.tid===tid);
 const baseOf=rep=>58+rep*.215;
+function markMove(p,from,to){if(p.nat!=='jp'||!(to>0)||!T(to)||T(to).lg==='jp')return;p.ab=1;if(from>0&&T(from)&&T(from).lg==='jp'){p.ex={tid:from};delete p.exd;}}
 const lgMul=lg=>lg==='jp'||!LG_DEF[lg]?1:LG_DEF[lg].tv/1500*1.3;
 const teamBase=t=>t&&t.lg==='jp'?55+t.rep*.2:baseOf(t?t.rep:60);
 const jpLim=(bonus)=>Math.random()<.05+(bonus||0)?ri(76,80):75;
@@ -326,7 +327,7 @@ function makeFixtures(ids){const n=ids.length;const arr=shuffle(ids.slice());con
  return rounds.concat(rounds.map(m=>m.map(([h,a])=>[a,h])));}
 
 function newGame(tid,mgr){
- S={v:3,nextId:1,season:1,md:0,phase:'season',team:tid,mgr:{name:mgr||'監督',w:0,d:0,l:0,trophies:0,clubs:[tid]},players:{},teams:[],L:{},youth:{lvl:1,scout:null,reports:[]},inbox:[],offers:[],neg:{},hist:[],board:60,obj:null,fin:null,endInfo:null,msgId:1};
+ S={v:4,coaches:{},wcHist:[],nextId:1,season:1,md:0,phase:'season',team:tid,mgr:{name:mgr||'監督',w:0,d:0,l:0,trophies:0,clubs:[tid]},players:{},teams:[],L:{},youth:{lvl:1,scout:null,reports:[]},inbox:[],offers:[],neg:{},hist:[],board:60,obj:null,fin:null,endInfo:null,msgId:1};
  const forms=Object.keys(FORMS);
  TEAMS.forEach((d,i)=>{const id=i+1;const rep=d[5];
   S.teams.push(mkTeam(id,'jp',d[0],d[1],d[2],d[3],d[4],rep,i));
@@ -337,6 +338,7 @@ function newGame(tid,mgr){
  S.tactics=defaultTactics(tid);
  startSeasonCommon();
  for(let i=0;i<5;i++)genYouth(ULG()==='jp'?'jp':(Math.random()<.6?ULG():'jp'),rnd(0,6));
+ genCoachPool();Object.values(S.players).forEach(p=>{p.pk=p.ovr;});
  inbox('ようこそ、'+(mgr||'監督')+'！',`${myTeam().name}の新監督就任おめでとうございます。\n理事会の今季目標は「${S.obj.text}」です。\nスカッドを確認し、作戦を整えて開幕戦に臨みましょう。`);
  save();
 }
@@ -349,6 +351,7 @@ function addForeignLeagues(){let id=Math.max(...S.teams.map(t=>t.id))+1;
 function startSeasonCommon(){
  S.L={};for(const lg of LG_ORDER)S.L[lg]={fx:makeFixtures(teamsOf(lg).map(t=>t.id)),res:[]};S.md=0;S.phase='season';S.offers=[];S.neg={};S.endInfo=null;
  S.fin={gate:0,tv:0,tin:0,prize:0,wage:0,tout:0};
+ if(S.v>=4&&wcYear()&&(!S.wc||S.wc.season!==S.season)){S.wc={season:S.season,r:0,nats:null,sq:{},res:[],gs:{}};inbox('🌐 '+WC_NAME+'開催年','今季は4年に一度の'+WC_NAME+'が開催されます（第'+(WC_MD[0]+1)+'〜'+(WC_MD[3]+1)+'節の週）。各国の代表は大会直前に、その時点で能力が高く負傷していない選手から選ばれます。');}
  makeCup();
  makeIntl();
  const ranked=teamsOf(ULG()).map(t=>[t.id,strengthRating(t.id)]).sort((a,b)=>b[1]-a[1]);
@@ -357,7 +360,9 @@ function startSeasonCommon(){
  S.obj={exp:er,target,text:target===1?'リーグ優勝':target===11?'最下位回避（11位以内）':target+'位以内'};
 }
 
-function migrate(){const v0=S.v||1;if(v0<3)migrate3(v0);}
+function migrate(){const v0=S.v||1;if(v0<3)migrate3(v0);if(S.v<4)migrate4();}
+function migrate4(){S.coaches={};S.wcHist=[];genCoachPool();Object.values(S.players).forEach(p=>{if(p.nat==='jp'&&p.tid>0&&T(p.tid).lg!=='jp')p.ab=1;p.pk=p.ovr;});if(wcYear()&&S.phase==='season'&&S.md<WC_MD[0])S.wc={season:S.season,r:0,nats:null,sq:{},res:[],gs:{}};S.v=4;
+ inbox('🆕 アップデート',`コーチ制度（クラブ画面）、4年に一度の${WC_NAME}（リーグ画面の「代表」）、海外移籍した日本人選手の活躍で古巣の若手が覚醒する仕組みが追加されました。`);save();}
 function migrate3(v0){if(v0<2)migrate2();
  if(v0===2)S.teams.forEach(t=>{if(t.lg!=='jp')t.budget=Math.round(t.budget*lgMul(t.lg));});
  Object.values(S.players).forEach(p=>{if(p.tid>0&&p.tid!==S.team&&T(p.tid).lg==='jp'&&!p.awk&&!p.loan)capJp(p);});
@@ -435,7 +440,8 @@ function sideStr(s){let sa=0,sm=0,sd=0,wa=0,wm=0,wd=0,miss=0;
   const e=effOvr(p,sl.role)*(.8+.2*clamp(s.energy[sl.pid],0,100)/100)*moraleF(p);
   sa+=e*w[0];wa+=w[0];sm+=e*w[1];wm+=w[1];sd+=e*w[2];wd+=w[2];}
  const f=(x,w,r)=>w>0?x/w+12*(w/r-1):40;
- return{a:f(sa,wa,REF[0])-miss*4,m:f(sm,wm,REF[1])-miss*4,d:f(sd,wd,REF[2])-miss*4};}
+ const eb=s.isU&&coachSp('euro')?1.5:0;
+ return{a:f(sa,wa,REF[0])-miss*4+eb,m:f(sm,wm,REF[1])-miss*4+eb,d:f(sd,wd,REF[2])-miss*4+eb};}
 function dispMin(M){return M.half===1?(M.min<=45?M.min+"'":"45+"+(M.min-45)+"'"):(M.min<=90?M.min+"'":"90+"+(M.min-90)+"'");}
 function lg(M,side,txt,cls){M.log.push({t:M.min?dispMin(M):'',s:side,txt,cls:cls||''});}
 const nm=pid=>{const p=P(pid);return p?p.short:'?';};
@@ -506,6 +512,7 @@ function processMatchday(userM){
  const md=S.md,ul=ULG();const evOut=[];
  if(cupDue())evOut.push(playCupRound(null));
  if(intlDue())evOut.push(playIntlRound(null));
+ wcTick();
  Object.values(S.players).forEach(p=>{if(p.susp>0)p.susp--;if(p.inj>0)p.inj--;});
  let myRes=null;
  for(const lg of LG_ORDER){const res=[];
@@ -617,16 +624,16 @@ function weekly(){
  const tr=TRAIN[S.tactics.train];
  Object.values(S.players).forEach(p=>{
   if(p.tid===0||p.tid===-2){p.fit=100;return;}
-  if(p.tid===-1){grow(p,yMult()*(S.tactics.train==='ハード'?1.15:1));return;}
+  if(p.tid===-1){grow(p,yMult()*(S.tactics.train==='ハード'?1.15:1)*(coachSp('academy')?1.3:1));return;}
   const isU=p.tid===S.team;
-  const rec=isU?tr.rec:22;p.fit=clamp(p.fit+rec*rnd(.8,1.2),0,100);
-  let mult=(p.lp===S.md?1.25:.8);if(isU){mult*=tr.g;if(p.focus)mult*=1.5;}
+  const rec=isU?tr.rec*(1+coachLv('phy')*.05):22;p.fit=clamp(p.fit+rec*rnd(.8,1.2),0,100);
+  let mult=(p.lp===S.md?1.25:.8);if(isU){mult*=tr.g*coachMult(p);if(p.focus)mult*=1.5;if(coachSp('mental')&&p.mor<60)p.mor=60;}
   grow(p,mult);
-  if(isU&&tr.inj&&p.inj===0&&Math.random()<tr.inj){p.inj=ri(1,3);inbox('練習中の負傷',p.name+'が練習中に負傷しました（全治'+p.inj+'試合）。');}
+  if(isU&&tr.inj&&p.inj===0&&Math.random()<tr.inj*(1-coachLv('phy')*.08)){p.inj=ri(1,3);inbox('練習中の負傷',p.name+'が練習中に負傷しました（全治'+p.inj+'試合）。');}
  });
  awaken();scoutTick();
  const me=myTeam();
- const wages=teamPlayers(S.team).reduce((s,p)=>s+p.wage,0)/LFX().length;me.budget-=wages;S.fin.wage+=wages;
+ const wages=(teamPlayers(S.team).reduce((s,p)=>s+p.wage,0)+coachWages())/LFX().length;me.budget-=wages;S.fin.wage+=wages;
  const tv=LG_DEF[ULG()].tv;me.budget+=tv;S.fin.tv+=tv;
  const myFx=LFX()[S.md].find(f=>f[0]===S.team);if(myFx)me.budget+=Math.round(me.rep*120*lgMul(me.lg));
  S.teams.forEach(t=>{if(t.id!==S.team)t.budget+=Math.round(t.rep*70*lgMul(t.lg));});
@@ -637,9 +644,10 @@ function weekly(){
   if(p.loan)return;
   if(p.list&&Math.random()<.42)fee=v*rnd(.72,1.08);
   else if(!p.list&&p.ovr>=strengthRating(S.team)+2&&Math.random()<.035)fee=v*rnd(1.1,1.5);
+  let fb=null;if(!fee&&ULG()==='jp'&&p.nat==='jp'&&p.ovr>=71&&p.age<=28&&Math.random()<.025){fee=v*rnd(1.05,1.35);fb=pick(S.teams.filter(t=>t.lg!=='jp'&&t.rep<88&&t.budget>=fee));}
   if(fee&&!S.offers.some(o=>o.pid===p.id)){fee=Math.round(fee/100)*100;
    const buyers=S.teams.filter(t=>t.id!==S.team&&t.budget>=fee&&teamPlayers(t.id).length<30);if(!buyers.length)return;
-   const b=pick(buyers);const o={id:S.msgId+1000,pid:p.id,tid:b.id,fee,exp:S.md+3};S.offers.push(o);
+   const b=fb||pick(buyers);const o={id:S.msgId+1000,pid:p.id,tid:b.id,fee,exp:S.md+3};S.offers.push(o);
    inbox('移籍オファー: '+p.name,`${b.name}が${p.name}（${POS_JP[p.pos]} / 総合${Math.round(p.ovr)}）に${fmtM(fee)}のオファーを提示しました。\n市場価値: ${fmtM(v)}`,{offer:o.id});}
  });
  for(let k=0;k<4;k++)if(Math.random()<.35)aiTransfer();
@@ -650,13 +658,16 @@ function weekly(){
 function awaken(){
  Object.values(S.players).forEach(p=>{if((p.tid<=0&&p.tid!==-1)||p.age>21||p.awk||p.pot>=95)return;const isU=p.tid===S.team||p.tid===-1;
   let c=isU?.005+(p.lp===S.md?.005:0)+(p.focus?.008:0)+(p.lp===S.md&&p.lr>=8?.12:0):.003;
+  if(isU&&coachSp('academy'))c*=2;
   if(Math.random()>=c)return;
+  doAwaken(p,p.lp===S.md&&p.lr>=8?'前節の大活躍をきっかけに':pick(['練習で何かをつかんだ','先輩のアドバイスで','自主練の成果が出て','試合中に突然']));
+ });}
+function doAwaken(p,why,quiet){const isU=p.tid===S.team||p.tid===-1;
   const b=ri(5,12),o0=Math.round(p.ovr);p.awk=1;p.pot=Math.min(95,p.pot+b);p.ovr=Math.min(p.pot,p.ovr+ri(2,5));p.pl=p.pot-ri(1,4);p.ph=Math.min(99,p.pot+ri(1,4));p.mor=95;
-  const why=p.lp===S.md&&p.lr>=8?'前節の大活躍をきっかけに':pick(['練習で何かをつかんだ','先輩のアドバイスで','自主練の成果が出て','試合中に突然']);
   if(isU){S.events=S.events||[];S.events.push(`✨ ${p.name}が覚醒！ 総合 ${o0}→${Math.round(p.ovr)}、潜在 ${p.pot}`);
    inbox('✨ 覚醒: '+p.name,`${p.age}歳の${p.name}（${POS_JP[p.pos]}）が${why}覚醒しました！\n総合力 ${o0} → ${Math.round(p.ovr)}、潜在能力は ${p.pot} まで上昇。`);}
-  else if(p.ovr>=64)inbox('【注目の若手】'+p.name,`${T(p.tid).name}の${p.age}歳 ${p.name}（${POS_JP[p.pos]}）が急成長中との噂。`);
- });}
+  else if(!quiet&&p.ovr>=64)inbox('【注目の若手】'+p.name,`${T(p.tid).name}の${p.age}歳 ${p.name}（${POS_JP[p.pos]}）が急成長中との噂。`);
+}
 function grow(p,mult){const a=p.age;let g=a<=20?.38:a<=23?.26:a<=26?.12:a<=29?.03:a<=31?-.07:a<=33?-.17:-.3;
  if(g>0){const gap=p.pot-p.ovr;g=gap<=0?0:g*Math.min(1,gap/6)*mult;}g*=rnd(.4,1.6);p.ovr=clamp(p.ovr+g,35,94);}
 function aiTransfer(){
@@ -668,20 +679,115 @@ function aiTransfer(){
  if(t.lg==='jp'){const lim=Math.random()<.1?80:75;for(let i=cands.length-1;i>=0;i--)if(cands[i].ovr>lim)cands.splice(i,1);}
  if(!cands.length)return;const p=cands.sort((a,b)=>effOvr(b,role)-effOvr(a,role))[Math.min(cands.length-1,ri(0,3))];
  const fee=p.tid===0?0:Math.round(valueOf(p)*rnd(1,1.25)/100)*100;const from=p.tid;
- if(from)T(from).budget+=fee;t.budget-=fee;p.tid=t.id;p.con=ri(2,4);p.wage=calcWage(p);p.list=false;
+ markMove(p,from,t.id);if(from)T(from).budget+=fee;t.budget-=fee;p.tid=t.id;p.con=ri(2,4);p.wage=calcWage(p);p.list=false;
  if(p.ovr>=77||(t.lg===ULG()&&(p.ovr>=68||Math.random()<.3)))inbox('【移籍ニュース】'+p.name,`${p.name}（${POS_JP[p.pos]}・${Math.round(p.ovr)}）が${from?T(from).name:'フリー'}から${t.name}へ移籍。${fee?'移籍金 '+fmtM(fee):'（フリー移籍）'}`);
 }
 
+/* ================= abroad / national team / coaches ================= */
+function abroadCheck(){for(const p of Object.values(S.players)){if(!p.ex||p.exd||!(p.tid>0)||T(p.tid).lg==='jp'||p.st.a<10)continue;
+  const avg=p.st.r/p.st.a;if(!(avg>=6.9||p.st.g+p.st.as>=7))continue;p.exd=1;const c=T(p.ex.tid);if(!c)continue;
+  let pool=teamPlayers(c.id).filter(q=>q.age<=21&&!q.awk&&q.pot<95);if(c.id===S.team)pool=pool.concat(teamPlayers(-1).filter(q=>!q.awk&&q.pot<95));
+  let q=pool.sort((a,b)=>b.pot-a.pot)[0];
+  if(!q){q=genPlayer(pick(SQUAD_ROLES),teamBase(c)-14+gauss()*2,ri(17,19),c.id,'jp');q.con=3;q.wage=calcWage(q);}
+  const why=`${T(p.tid).name}で活躍する先輩・${p.name}に刺激を受けて`;
+  doAwaken(q,why,true);
+  if(c.id!==S.team)inbox('🌏 海外組の刺激: '+q.name,`${c.name}出身の${p.name}が${T(p.tid).name}で活躍（${p.st.a}試合${p.st.g}得点${p.st.as}アシスト）。\nその姿に刺激を受けた古巣の若手・${q.name}（${q.age}歳）が覚醒しました！`);
+  else inbox('🌏 海外組の刺激','かつての所属選手・'+p.name+'が'+T(p.tid).name+'で活躍（'+p.st.a+'試合'+p.st.g+'得点）。その刺激で'+q.name+'が覚醒しました！');}}
+function goAbroad(){const moved=[];
+ for(const p of Object.values(S.players)){if(p.nat!=='jp'||!(p.tid>0)||p.tid===S.team||p.loan||T(p.tid).lg!=='jp'||p.ovr<71||p.age>28||Math.random()>=.2)continue;
+  const fee=Math.round(valueOf(p)*1.1/100)*100;const ds=S.teams.filter(t=>t.lg!=='jp'&&t.rep<88&&t.budget>=fee&&teamPlayers(t.id).length<30);if(!ds.length)continue;
+  const d=pick(ds),from=p.tid;markMove(p,from,d.id);T(from).budget+=fee;d.budget-=fee;p.tid=d.id;p.con=ri(2,4);p.wage=calcWage(p);p.list=false;moved.push(`${p.name}（${T(from).ab}→${d.name}）`);}
+ if(moved.length)inbox('【海外移籍】日本人選手が海外へ',moved.join('\n')+'\n海外で活躍すると、古巣の若手が刺激を受けて覚醒します。');}
+
+const WC_NAME='ワールドネイションズカップ',WC_MD=[9,10,11,12],WC_PRIZE=20000;
+const NATN={jp:['日本','🇯🇵'],br:['ブラジル','🇧🇷'],es:['スペイン','🇪🇸'],ar:['アルゼンチン','🇦🇷'],en:['イングランド','🏴'],de:['ドイツ','🇩🇪'],nl:['オランダ','🇳🇱'],it:['イタリア','🇮🇹'],fr:['フランス','🇫🇷'],af:['セネガル','🇸🇳'],sl:['クロアチア','🇭🇷'],kr:['韓国','🇰🇷']};
+const natNm=c=>NATN[c]?NATN[c][1]+' '+NATN[c][0]:c;
+const wcYear=()=>S.season%4===2;
+function natSquad(c){const ps=Object.values(S.players).filter(p=>p.nat===c&&p.tid>0&&p.inj===0).sort((a,b)=>b.ovr-a.ovr);const need={GK:3,DF:8,MF:8,FW:4};const out=[];
+ for(const g in need)out.push(...ps.filter(p=>POS_GROUP[p.pos]===g).slice(0,need[g]));return out.map(p=>p.id);}
+function natStr(c){const sq=(S.wc.sq[c]||[]).map(P).filter(p=>p&&p.inj===0);const by=g=>sq.filter(p=>POS_GROUP[p.pos]===g).sort((a,b)=>b.ovr-a.ovr);
+ const xi=[...by('GK').slice(0,1),...by('DF').slice(0,4),...by('MF').slice(0,4),...by('FW').slice(0,2)];let s=xi.reduce((a,p)=>a+p.ovr,0);s+=(11-xi.length)*50;return s/11;}
+function poisson(l){let L=Math.exp(-l),k=0,p=1;do{k++;p*=Math.random();}while(p>L);return k-1;}
+function natScorer(c){const sq=(S.wc.sq[c]||[]).map(P).filter(p=>p&&p.inj===0);return wpick(sq,p=>({FW:3,MF:1.4,DF:.35,GK:0})[POS_GROUP[p.pos]]*(p.ovr/70));}
+function simNat(a,b,ko){const sa=natStr(a),sb=natStr(b);let ga=poisson(1.3*Math.exp((sa-sb)*.07)),gb=poisson(1.3*Math.exp((sb-sa)*.07));const r={a,b,ga,gb,sc:[]};
+ for(let i=0;i<ga;i++){const p=natScorer(a);if(p){r.sc.push([a,p.id]);S.wc.gs[p.id]=(S.wc.gs[p.id]||0)+1;}}
+ for(let i=0;i<gb;i++){const p=natScorer(b);if(p){r.sc.push([b,p.id]);S.wc.gs[p.id]=(S.wc.gs[p.id]||0)+1;}}
+ if(ko&&ga===gb){r.pk=Math.random()<.5+(sa-sb)*.02?a:b;}
+ r.w=ga>gb?a:gb>ga?b:(r.pk||null);
+ for(const c of[a,b]){for(const id of S.wc.sq[c]||[]){const p=P(id);if(!p||p.inj)continue;p.fit=clamp(p.fit-12,30,100);}
+  if(Math.random()<.18){const pool=(S.wc.sq[c]||[]).map(P).filter(p=>p&&p.inj===0);const p=pick(pool);if(p){p.inj=ri(1,3);if(p.tid===S.team)inbox('代表戦で負傷',p.name+'が'+WC_NAME+'の試合で負傷しました（全治'+p.inj+'試合）。');}}}
+ return r;}
+function wcGroupTable(g){const rows={};g.forEach(c=>rows[c]={c,p:0,w:0,d:0,l:0,gf:0,ga:0,pts:0});
+ for(const rd of S.wc.res.slice(0,3))for(const r of rd||[]){if(!rows[r.a]||!rows[r.b])continue;const A=rows[r.a],B=rows[r.b];A.p++;B.p++;A.gf+=r.ga;A.ga+=r.gb;B.gf+=r.gb;B.ga+=r.ga;
+  if(r.ga>r.gb){A.w++;B.l++;A.pts+=3;}else if(r.ga<r.gb){B.w++;A.l++;B.pts+=3;}else{A.d++;B.d++;A.pts++;B.pts++;}}
+ return Object.values(rows).sort((x,y)=>y.pts-x.pts||(y.gf-y.ga)-(x.gf-x.ga)||y.gf-x.gf);}
+const WC_PAIRS=[[[0,1],[2,3]],[[0,2],[1,3]],[[0,3],[1,2]]];
+function wcTick(){const W=S.wc;if(!W||W.season!==S.season||W.r>3||S.md!==WC_MD[W.r])return;
+ if(W.r===0){const cs=Object.keys(NATN).filter(c=>Object.values(S.players).filter(p=>p.nat===c&&p.tid>0).length>=16);
+  cs.forEach(c=>W.sq[c]=natSquad(c));const ord=cs.sort((a,b)=>natStr(b)-natStr(a)).slice(0,8);W.nats=ord;
+  W.groups=[[ord[0],ord[3],ord[4],ord[7]],[ord[1],ord[2],ord[5],ord[6]]];for(const c in W.sq)if(!ord.includes(c))delete W.sq[c];
+  const mine=[];for(const c of ord)for(const id of W.sq[c]){const p=P(id);if(p.tid===S.team)mine.push(`${p.name}（${NATN[c][0]}）`);}
+  inbox('🌐 '+WC_NAME+' 開幕',`出場国: ${ord.map(natNm).join('、')}\n${mine.length?'あなたのクラブからの選出: '+mine.join('、')+'\n代表戦で疲労や負傷を負うことがあります。':'あなたのクラブからの選出はありません。'}`);}
+ const rd=[];
+ if(W.r<3){for(const g of W.groups)for(const[i,j]of WC_PAIRS[W.r])rd.push(simNat(g[i],g[j],false));}
+ else{const f=[wcGroupTable(W.groups[0])[0].c,wcGroupTable(W.groups[1])[0].c];const r=simNat(f[0],f[1],true);rd.push(r);W.winner=r.w;W.runner=r.w===f[0]?f[1]:f[0];}
+ W.res[W.r]=rd;W.r++;
+ if(W.r===4){const top=Object.entries(W.gs).sort((a,b)=>b[1]-a[1])[0];const ts=top&&P(+top[0])?[P(+top[0]).name,+top[1]]:null;
+  S.wcHist=S.wcHist||[];S.wcHist.push({s:S.season,w:W.winner,ru:W.runner,ts});
+  let pz='';if(LG_DEF[W.winner]){const lgw=W.winner;teamsOf(lgw).forEach(t=>{t.budget+=WC_PRIZE;if(t.id===S.team)S.fin.prize+=WC_PRIZE;});pz=`\n優勝国のリーグ（${LG_DEF[lgw].name}）の全クラブに賞金 ${fmtM(WC_PRIZE)} が支払われました。${ULG()===lgw?'あなたのクラブにも賞金が入りました！':''}`;}
+  for(const id of W.sq[W.winner]||[]){const p=P(id);if(p&&p.tid===S.team)p.mor=clamp(p.mor+15,0,100);}
+  const f=W.res[3][0];inbox('🏆 '+WC_NAME+' 優勝: '+NATN[W.winner][0],`決勝 ${natNm(f.a)} ${f.ga}-${f.gb} ${natNm(f.b)}${f.pk?'（PK戦）':''}\n${natNm(W.winner)}が優勝しました！${ts?'\n得点王: '+ts[0]+'（'+ts[1]+'点）':''}${pz}`);}
+ else if(W.r<=3){const mineN=W.nats.filter(c=>(W.sq[c]||[]).some(id=>P(id)&&P(id).tid===S.team));inbox('🌐 '+WC_NAME+' '+(W.r===4?'決勝':'グループ第'+W.r+'節'),rd.map(r=>`${natNm(r.a)} ${r.ga}-${r.gb} ${natNm(r.b)}`).join('\n'));}}
+function wcView(){const W=S.wc&&S.wc.season===S.season?S.wc:null;let h=`<div class="card"><h3>🌐 ${WC_NAME}</h3><p class="muted" style="font-size:12px">4年に一度、各国代表8カ国が戦う大会。代表は大会直前に、出身国ごとに能力が高く負傷していない選手から選ばれます。優勝国のリーグの全クラブに賞金 ${fmtM(WC_PRIZE)}。</p>`;
+ const next=S.season+((2-S.season%4)+4)%4;
+ if(!W)h+=`<p>次回開催: シーズン${next}（第${WC_MD[0]+1}〜${WC_MD[3]+1}節の週）</p>`;
+ else if(!W.nats)h+=`<p>今季開催！ 第${WC_MD[0]+1}節の週に開幕します。</p>`;
+ h+='</div>';
+ if(W&&W.nats){W.groups.forEach((g,gi)=>{h+=`<div class="card" style="padding:8px"><div class="lbl" style="margin:4px 6px">グループ${'AB'[gi]}</div><table class="tb"><tr><th class="l">国</th><th>試</th><th>勝</th><th>分</th><th>負</th><th>差</th><th>点</th></tr>${wcGroupTable(g).map(r=>`<tr class="${(W.sq[r.c]||[]).some(id=>P(id)&&P(id).tid===S.team)?'me':''}" onclick="natSquadUI('${r.c}')"><td class="l">${natNm(r.c)}</td><td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td><td>${r.gf-r.ga>0?'+':''}${r.gf-r.ga}</td><td><b>${r.pts}</b></td></tr>`).join('')}</table></div>`;});
+  W.res.forEach((rd,i)=>{h+=`<div class="card" style="padding:10px"><div class="lbl">${i<3?'グループ第'+(i+1)+'節':'決勝'}</div>${rd.map(r=>`<div class="row" style="padding:5px 2px;border-top:1px solid var(--line);font-size:13px"><span style="flex:1;text-align:right">${natNm(r.a)}</span><b style="width:54px;text-align:center">${r.ga} - ${r.gb}</b><span style="flex:1">${natNm(r.b)}</span></div>${r.pk?`<div class="muted" style="font-size:11px;text-align:center">PK戦で${NATN[r.pk][0]}の勝利</div>`:''}`).join('')}</div>`;});
+  if(W.winner)h+=`<div class="card"><b class="gold">🏆 優勝 ${natNm(W.winner)}</b></div>`;
+  h+=`<p class="muted" style="font-size:11px">国をタップすると代表メンバーを表示。</p>`;}
+ if(S.wcHist&&S.wcHist.length)h+=`<div class="card"><h3>過去の大会</h3><table class="tb"><tr><th>季</th><th class="l">優勝</th><th class="l">準優勝</th><th class="l">得点王</th></tr>${S.wcHist.slice().reverse().map(x=>`<tr><td>${x.s}</td><td class="l">${natNm(x.w)}</td><td class="l">${natNm(x.ru)}</td><td class="l" style="font-size:11px">${x.ts?esc(x.ts[0])+' '+x.ts[1]+'点':'-'}</td></tr>`).join('')}</table></div>`;
+ return h;}
+function natSquadUI(c){const W=S.wc;const sq=(W.sq[c]||[]).map(P).filter(Boolean);openModal(`<button class="x" onclick="closeModal()">×</button><h2>${natNm(c)} 代表</h2><p class="muted" style="font-size:12px">総合力 ${natStr(c).toFixed(1)}</p><div class="plist">${sq.map(p=>prow(p,(p.tid>0?esc(T(p.tid).name):'')+(W.gs[p.id]?' · ⚽'+W.gs[p.id]:''))).join('')}</div>`);}
+
+const COACH_ROLES={att:'攻撃コーチ',def:'守備コーチ',gk:'GKコーチ',phy:'フィジカルコーチ'};
+const COACH_DESC={att:'FW・MFの成長を促進',def:'DF・MFの成長を促進',gk:'GKの成長を促進',phy:'体力回復を早め、練習中の負傷を減らす'};
+const COACH_SP={euro:['欧州式戦術','試合でのチーム力が常に少し上がる'],net:['海外ネットワーク','海外クラブの選手の移籍金が約12%安くなる'],mental:['海外流メンタル','選手の士気が60を下回らない'],academy:['育成メソッド','ユースの成長+30%・若手の覚醒率2倍']};
+const cStars=pk=>pk>=86?5:pk>=80?4:pk>=74?3:pk>=68?2:1;
+const cWage=c=>cStars(c.pk)*cStars(c.pk)*400+(c.sp?2000:0);
+function mkCand(name,nat,pos,pk,ab,club){const g=POS_GROUP[pos]||pos;let role=g==='GK'?'gk':g==='DF'?'def':g==='FW'?'att':pick(['att','def']);if(g!=='GK'&&Math.random()<.2)role='phy';
+ const c={id:'c'+(S.nextId++),name,nat,pos:g,pk:Math.round(pk),role,club:club||''};if(ab&&nat==='jp'){c.ab=1;c.sp=pick(Object.keys(COACH_SP));}return c;}
+function addCand(p){if(!((p.pk||p.ovr)>=66||p.ab))return;S.cpool=S.cpool||[];const club=p.tid>0&&T(p.tid)?T(p.tid).name:'';
+ S.cpool.unshift(mkCand(p.name,p.nat,p.pos,Math.max(p.pk||0,p.ovr),p.ab,club));
+ while(S.cpool.length>30){let i=S.cpool.length-1;while(i>0&&S.cpool[i].sp)i--;S.cpool.splice(i,1);}}
+function genCoachPool(){S.cpool=[];for(let i=0;i<7;i++){const[name,,nat]=genName(ULG());addCand({name,nat,pos:pick(SQUAD_ROLES),ovr:rnd(66,86),pk:0,tid:0});}
+ const[name]=genName('jp');S.cpool.push(mkCand(name,'jp',pick(SQUAD_ROLES),rnd(74,82),1,pick(teamsOf('en').concat(teamsOf('es'),teamsOf('de'))).name));}
+const coachOf=r=>S.coaches&&S.coaches[r];
+const coachLv=r=>{const c=coachOf(r);return c?cStars(c.pk):0;};
+function coachSp(k){if(!S||!S.coaches||ULG()!=='jp')return false;return Object.values(S.coaches).some(c=>c&&c.sp===k);}
+function coachMult(p){const g=POS_GROUP[p.pos];const a=coachLv('att'),d=coachLv('def'),k=coachLv('gk');const b=g==='FW'?a:g==='DF'?d:g==='GK'?k:(a+d)/2;return 1+b*.06;}
+const coachWages=()=>S.coaches?Object.values(S.coaches).filter(Boolean).reduce((s,c)=>s+cWage(c),0):0;
+function coachRow(c,btn){return`<div class="row" style="gap:8px;padding:8px 0;border-top:1px solid var(--line)"><div style="flex:1;min-width:0"><b>${esc(c.name)}</b> <small class="muted">${NATN[c.nat]?NATN[c.nat][1]:''} 元${c.pos}${c.club?' · '+esc(c.club):''}</small><div style="font-size:12px"><span class="stars">${'★'.repeat(cStars(c.pk))}${'☆'.repeat(5-cStars(c.pk))}</span> ${COACH_ROLES[c.role]} · 年俸 ${fmtM(cWage(c))}</div>${c.sp?`<div style="font-size:12px" class="gold">🌟 特殊能力「${COACH_SP[c.sp][0]}」${COACH_SP[c.sp][1]}${ULG()==='jp'?'':'（日本リーグのクラブでのみ発動）'}</div>`:''}</div>${btn}</div>`;}
+function coachCard(){S.coaches=S.coaches||{};let h=`<div class="card"><h3>🧑‍🏫 コーチ陣</h3>`;
+ for(const r in COACH_ROLES){const c=S.coaches[r];h+=c?coachRow(c,`<button class="sm" onclick="fireCoach('${r}')">解任</button>`):`<div class="row between" style="padding:8px 0;border-top:1px solid var(--line)"><span>${COACH_ROLES[r]} <small class="muted">${COACH_DESC[r]}</small></span><span class="muted">空き</span></div>`;}
+ h+=`<p class="muted" style="font-size:11px">引退した選手がコーチ候補になります。海外リーグでプレーした日本人選手は、日本リーグのクラブで特殊能力を発揮します。</p><button style="width:100%" onclick="coachMarket()">コーチ候補を見る（${(S.cpool||[]).length}人）</button></div>`;return h;}
+function coachMarket(){const L=(S.cpool||[]).slice().sort((a,b)=>(b.sp?1:0)-(a.sp?1:0)||b.pk-a.pk);
+ openModal(`<button class="x" onclick="closeModal()">×</button><h2>コーチ候補</h2><p class="muted" style="font-size:12px">同じ担当のコーチがいる場合は入れ替わります。年俸は毎節の人件費に含まれます。</p>${L.map(c=>coachRow(c,`<button class="sm pri" onclick="hireCoach('${c.id}')">招聘</button>`)).join('')||'<p class="muted">候補がいません。選手が引退すると候補に加わります。</p>'}`);}
+function hireCoach(id){const i=S.cpool.findIndex(c=>c.id===id);if(i<0)return;const c=S.cpool[i];S.cpool.splice(i,1);const old=S.coaches[c.role];if(old)S.cpool.push(old);S.coaches[c.role]=c;
+ inbox('コーチ就任: '+c.name,`${c.name}が${COACH_ROLES[c.role]}に就任しました。${c.sp?'\n特殊能力「'+COACH_SP[c.sp][0]+'」：'+COACH_SP[c.sp][1]:''}`);save();closeModal();toast(c.name+'が'+COACH_ROLES[c.role]+'に就任しました');render();}
+function fireCoach(r){const c=S.coaches[r];if(!c||!confirm(c.name+'を解任しますか？'))return;S.cpool.push(c);S.coaches[r]=null;save();render();}
+
 /* ================= transfers ================= */
-function askPrice(p){if(p.tid===0)return 0;const t=T(p.tid);const top=autoPick(p.tid,t.form).lineup.includes(p.id);let a=valueOf(p)*(top?1.3:1.05);if(p.con<=1)a*=.8;return Math.round(a/100)*100;}
+function askPrice(p){if(p.tid===0)return 0;const t=T(p.tid);const top=autoPick(p.tid,t.form).lineup.includes(p.id);let a=valueOf(p)*(top?1.3:1.05);if(p.con<=1)a*=.8;if(coachSp('net')&&T(p.tid).lg!=='jp')a*=.88;return Math.round(a/100)*100;}
 function wageDemand(p){return Math.round(Math.max(p.wage*1.15,calcWage(p)*1.1)/10)*10;}
 function buyPlayer(p,fee){const me=myTeam();
  if(me.budget<fee)return'資金が足りません';if(teamPlayers(S.team).length>=32)return'スカッドが満員です（最大32人）';
- const from=p.tid;if(from)T(from).budget+=fee;me.budget-=fee;S.fin.tout+=fee;
+ const from=p.tid;markMove(p,from,S.team);if(from)T(from).budget+=fee;me.budget-=fee;S.fin.tout+=fee;
  p.wage=wageDemand(p);p.tid=S.team;p.con=p.age<30?4:2;p.mor=78;p.list=false;p.focus=false;
  inbox('契約成立: '+p.name,`${p.name}が${from?T(from).name:'フリー'}から加入しました。${fee?'移籍金 '+fmtM(fee)+' / ':''}年俸 ${fmtM(p.wage)}`);
  fixUserLineup();save();return null;}
-function sellPlayer(p,tid,fee){const me=myTeam();me.budget+=fee;S.fin.tin+=fee;const t=T(tid);t.budget-=fee;p.tid=tid;p.list=false;p.focus=false;p.con=ri(2,4);p.wage=calcWage(p);
+function sellPlayer(p,tid,fee){markMove(p,S.team,tid);const me=myTeam();me.budget+=fee;S.fin.tin+=fee;const t=T(tid);t.budget-=fee;p.tid=tid;p.list=false;p.focus=false;p.con=ri(2,4);p.wage=calcWage(p);
  S.tactics.lineup=S.tactics.lineup.map(id=>id===p.id?null:id);S.tactics.bench=S.tactics.bench.filter(id=>id!==p.id);fixUserLineup();
  S.offers=S.offers.filter(o=>{if(o.pid===p.id){const m=S.inbox.find(x=>x.offer===o.id);if(m&&!m.done)m.done='無効';return false;}return true;});
  inbox('売却完了: '+p.name,`${p.name}が${t.name}へ移籍しました。移籍金 ${fmtM(fee)}`);save();}
@@ -709,13 +815,14 @@ function seasonEnd(){
  else if(pos<=Math.max(1,tgt-2)||pos===1)offers=shuffle(S.teams.filter(t=>t.id!==S.team&&t.rep>myRep+3)).slice(0,2).map(t=>t.id);
  if(fired&&offers.length<2)offers=shuffle(S.teams.filter(t=>t.id!==S.team)).slice(-3).map(t=>t.id);
  S.endInfo={pos,champ,ok:pos<=tgt,fired,offers,ts:ts?[ts.name,ts.tid,ts.st.g]:null,mvp:best?[best.name,best.tid,Math.round(best.st.r/best.st.a*100)/100]:null,pts:row.pts,champs,intlW:S.intl&&S.intl.winner};
+ abroadCheck();
  S.phase='end';
  inbox('シーズン'+S.season+' 終了',`最終順位: ${pos}位（勝点${row.pts}）\n目標「${S.obj.text}」: ${pos<=tgt?'達成 ✅':'未達成 ❌'}\n${fired?'理事会はあなたの解任を決定しました…':'理事会の信頼度: '+Math.round(S.board)+'%'}`);
 }
 function newSeason(){
  const retired=[],back=[];
  Object.values(S.players).forEach(p=>{if(!p.loan)return;const from=p.loan.from,o0=p.loan.o0;
-  if(from===S.team&&p.loan.opt&&(p.st.a>=8||p.ovr>=o0+2)&&T(p.tid).budget>=p.loan.opt&&Math.random()<.65){const c=p.loan.opt,t=T(p.tid);t.budget-=c;myTeam().budget+=c;S.fin.tin+=c;delete p.loan;p.con=ri(2,4);p.wage=calcWage(p);
+  if(from===S.team&&p.loan.opt&&(p.st.a>=8||p.ovr>=o0+2)&&T(p.tid).budget>=p.loan.opt&&Math.random()<.65){const c=p.loan.opt,t=T(p.tid);markMove(p,S.team,t.id);t.budget-=c;myTeam().budget+=c;S.fin.tin+=c;delete p.loan;p.con=ri(2,4);p.wage=calcWage(p);
    inbox('買取オプション行使: '+p.name,`${t.name}がレンタル中の${p.name}の買取オプションを行使しました。移籍金 ${fmtM(c)} を受け取りました。`);return;}
   if(from!==S.team&&p.tid===S.team&&p.loan.opt)inbox('買取オプション失効',p.name+'の買取オプションは行使されずに期限切れとなりました。');
   if(from===S.team)back.push(`${p.name}（${T(p.tid).ab}で${p.st.a}試合${p.st.g}得点、総合 ${R(o0)}→${R(p.ovr)}）`);
@@ -726,11 +833,13 @@ function newSeason(){
   p.age++;
   const rc=p.age>=33?(p.age-32)*.2+(p.ovr<62?.15:0):0;
   if(p.tid===0&&(p.age>=31||Math.random()<.4)){delete S.players[p.id];return;}
-  if(Math.random()<rc){if(p.tid===S.team)retired.push(p.name);delete S.players[p.id];return;}
+  p.pk=Math.max(p.pk||0,p.ovr);
+  if(Math.random()<rc){if(p.tid===S.team)retired.push(p.name);addCand(p);delete S.players[p.id];return;}
   if(p.tid>0){p.con--;if(p.con<=0){if(p.tid===S.team){inbox('契約満了',p.name+'は契約満了でクラブを去りました。');p.tid=0;p.list=false;p.focus=false;}else if(Math.random()<.75){p.con=ri(1,3);p.wage=calcWage(p);}else p.tid=0;}}
   p.st={a:0,g:0,as:0,r:0};p.yc=0;p.susp=0;p.fit=100;p.mor=clamp(p.mor*.5+33,30,90);
  });
- if(retired.length)inbox('現役引退',retired.join('、')+' が現役を引退しました。');
+ if(retired.length)inbox('現役引退',retired.join('、')+' が現役を引退しました。コーチ候補に加わりました。');
+ goAbroad();
  youthSeasonEnd();
  S.teams.forEach(t=>{const b=teamBase(t);
   if(t.id!==S.team)for(let i=0;i<2;i++){const p=genPlayer(pick(SQUAD_ROLES),b-17+gauss()*3.5,ri(16,18),t.id);p.con=3;p.wage=calcWage(p);}
@@ -826,7 +935,8 @@ const VIEWS={};
 VIEWS.home=()=>{
  const tb=table();const pos=tb.findIndex(r=>r.id===S.team)+1;const row=tb[pos-1];let h='';
  if(S.phase==='end')h+=seasonEndCard();
- else{const ev=userEvent();const fx=ev?ev.tie:myFixture();const H=T(fx[0]),A=T(fx[1]);const opp=fx[0]===S.team?A:H;const iss=lineupIssues();
+ if(S.phase==='season'&&S.wc&&S.wc.season===S.season&&S.wc.r<4&&S.md>=WC_MD[0]-2)h+=`<div class="card" onclick="U.tab='league';U.lg='nat';render()" style="cursor:pointer"><b>🌐 ${WC_NAME}</b> <small class="muted">${S.wc.nats?(S.wc.r<3?'グループ第'+(S.wc.r+1)+'節':'決勝')+'は第'+(WC_MD[S.wc.r]+1)+'節の週':'第'+(WC_MD[0]+1)+'節の週に開幕'} · タップで詳細</small></div>`;
+ if(S.phase!=='end'){const ev=userEvent();const fx=ev?ev.tie:myFixture();const H=T(fx[0]),A=T(fx[1]);const opp=fx[0]===S.team?A:H;const iss=lineupIssues();
   h+=`<div class="card"><div class="lbl">${ev?`<b class="gold">${ev.label}</b>（${ev.note}）`:'次の試合 · 第'+(S.md+1)+'節'} · ${fx[0]===S.team?'ホーム':'アウェイ'}</div>
   <div class="vs"><div class="side">${badge(H,'l')}<span>${esc(H.name)}</span><em>総合 ${teamRating(H.id)} · ${LG_DEF[H.lg].flag}${rankOf(H.id)}位</em></div><div class="vsx">VS</div><div class="side">${badge(A,'l')}<span>${esc(A.name)}</span><em>総合 ${teamRating(A.id)} · ${LG_DEF[A.lg].flag}${rankOf(A.id)}位</em></div></div>
   <div class="row between muted" style="font-size:12px;margin-bottom:8px"><span>相手: ${opp.form} · ${opp.style}</span>${S.md?formHTML(opp.id):''}</div>
@@ -926,11 +1036,12 @@ VIEWS.transfer=()=>{const f=U.tf;const me=myTeam();
  <div class="plist">${list.slice(0,60).map(p=>prow(p,(p.tid?esc(T(p.tid).ab):'フリー')+' · '+(p.tid?fmtM(valueOf(p)):'年俸 '+fmtM(wageDemand(p))))).join('')||'<p class="muted">該当する選手がいません</p>'}</div>`;
  return h;};
 
-VIEWS.league=()=>{const m=U.lg;const L=U.lgSel||ULG();let h=`<div class="chips" style="margin-bottom:8px">${LG_ORDER.map(lg=>`<button class="${L===lg?'on':''}" onclick="U.lgSel='${lg}';U.fxMd=null;render()">${LG_DEF[lg].flag} ${LG_DEF[lg].short}</button>`).join('')}</div><div class="seg">${[['table','順位表'],['cup','カップ'],['intl','国際'],['scorers','得点'],['fixtures','日程']].map(([k,l])=>`<button class="${m===k?'on':''}" onclick="U.lg='${k}';render()">${l}</button>`).join('')}</div>`;
+VIEWS.league=()=>{const m=U.lg;const L=U.lgSel||ULG();let h=`<div class="chips" style="margin-bottom:8px">${LG_ORDER.map(lg=>`<button class="${L===lg?'on':''}" onclick="U.lgSel='${lg}';U.fxMd=null;render()">${LG_DEF[lg].flag} ${LG_DEF[lg].short}</button>`).join('')}</div><div class="seg">${[['table','順位表'],['cup','カップ'],['intl','国際'],['nat','代表'],['scorers','得点'],['fixtures','日程']].map(([k,l])=>`<button class="${m===k?'on':''}" onclick="U.lg='${k}';render()">${l}</button>`).join('')}</div>`;
  if(m==='table'){const tb=table(L);h+=`<div class="card" style="padding:8px"><div class="lbl" style="margin:4px 6px 6px">${LG_DEF[L].flag} ${LG_DEF[L].name}</div><table class="tb"><tr><th>#</th><th class="l">クラブ</th><th>試</th><th>勝</th><th>分</th><th>負</th><th>差</th><th>点</th></tr>
  ${tb.map((r,i)=>{const t=T(r.id);return`<tr class="${r.id===S.team?'me':''}" onclick="showTeam(${r.id})"><td>${i<(INTL_SLOTS[L])?'<b style="color:var(--blue)">'+(i+1)+'</b>':i+1}</td><td class="l"><span class="tm">${badge(t,'s')}${esc(t.city)}</span></td><td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td><td>${r.gf-r.ga>0?'+':''}${r.gf-r.ga}</td><td><b>${r.pts}</b></td></tr>`;}).join('')}</table></div><p class="muted" style="font-size:11px">クラブをタップで詳細。<b style="color:var(--blue)">青い順位</b>は来季の${INTL_NAME}出場圏。</p>`;}
  else if(m==='cup'){h+=cupView();}
  else if(m==='intl'){h+=intlView();}
+ else if(m==='nat'){h+=wcView();}
  else if(m==='scorers'){const sc=scorers(20,L);const as=Object.values(S.players).filter(p=>p.st.as>0&&p.tid>0&&T(p.tid).lg===L).sort((a,b)=>b.st.as-a.st.as).slice(0,10);
   h+=`<div class="card" style="padding:8px"><h3 style="margin:6px">⚽ 得点</h3><table class="tb">${sc.map((p,i)=>`<tr class="${p.tid===S.team?'me':''}" onclick="openPlayer(${p.id})"><td>${i+1}</td><td class="l"><b>${esc(p.name)}</b></td><td>${p.tid?badge(T(p.tid),'s'):''}</td><td><b>${p.st.g}</b></td></tr>`).join('')||'<tr><td class="muted">まだ得点はありません</td></tr>'}</table></div>
   <div class="card" style="padding:8px"><h3 style="margin:6px">🅰️ アシスト</h3><table class="tb">${as.map((p,i)=>`<tr class="${p.tid===S.team?'me':''}" onclick="openPlayer(${p.id})"><td>${i+1}</td><td class="l"><b>${esc(p.name)}</b></td><td>${p.tid?badge(T(p.tid),'s'):''}</td><td><b>${p.st.as}</b></td></tr>`).join('')||'<tr><td class="muted">まだありません</td></tr>'}</table></div>`;}
@@ -966,6 +1077,7 @@ VIEWS.club=()=>{const t=myTeam(),f=S.fin;const inc=f.gate+f.tv+f.tin+f.prize,exp
  return`<div class="card"><h3>💴 今季の収支</h3><div class="kv"><div><small>入場料収入</small><b>${fmtM(f.gate)}</b></div><div><small>放映権料</small><b>${fmtM(f.tv)}</b></div><div><small>移籍金収入</small><b>${fmtM(f.tin)}</b></div><div><small>賞金</small><b>${fmtM(f.prize)}</b></div><div><small>人件費</small><b class="redt">-${fmtM(f.wage)}</b></div><div><small>移籍金支出</small><b class="redt">-${fmtM(f.tout)}</b></div></div>
  <div class="row between"><span class="muted">収支</span><b class="${inc-exp>=0?'green':'redt'}">${inc-exp>=0?'+':''}${fmtM(inc-exp)}</b></div><div class="row between" style="margin-top:4px"><span class="muted">クラブ資金</span><b class="gold">${fmtM(t.budget)}</b></div><div class="row between" style="margin-top:4px"><span class="muted">クラブ評価</span><span class="stars">${stars(t.rep)}</span></div></div>
  <div class="card"><h3>🧑‍💼 監督 ${esc(m.name)}</h3><div class="stats4"><div><b>${tot}</b><small>試合</small></div><div><b>${m.w}</b><small>勝</small></div><div><b>${tot?R(m.w/tot*100):0}%</b><small>勝率</small></div><div><b>${m.trophies}</b><small>🏆 優勝</small></div></div></div>
+ ${coachCard()}
  <div class="card"><h3>📜 キャリア履歴</h3>${S.hist.length?`<table class="tb"><tr><th>季</th><th class="l">クラブ</th><th>順位</th><th>勝点</th><th>杯</th><th>国際</th><th>目標</th></tr>${S.hist.slice().reverse().map(x=>`<tr><td>${x.s}</td><td class="l"><span class="tm">${badge(T(x.tid),'s')}${esc(T(x.tid).city)}</span></td><td>${x.pos===1?'🏆':x.pos+'位'}</td><td>${x.pts}</td><td style="font-size:11px">${x.cup==='優勝'?'🏆':x.cup||'-'}</td><td style="font-size:11px">${x.intl==='優勝'?'🏆':x.intl||'-'}</td><td>${x.ok?'✅':'❌'}</td></tr>`).join('')}</table>`:'<p class="muted">シーズンを終えると記録されます。</p>'}</div>
  <div class="card"><h3>⚙️ その他</h3><div class="row wrap"><button onclick="showHelp()">遊び方</button><button class="danger" onclick="resetGame()">データを削除して最初から</button></div><p class="muted" style="font-size:11px;margin:8px 0 0">進行はこの端末のブラウザに自動保存されます。</p></div>`;};
 function resetGame(){if(!confirm('セーブデータを削除して最初からやり直しますか？'))return;localStorage.removeItem(SAVE_KEY);S=null;render();}
@@ -977,6 +1089,9 @@ function showHelp(){openModal(`<button class="x" onclick="closeModal()">×</butt
  <p><b>📋 作戦</b>：フォーメーションと先発・控えを決め、戦術スタイルとトレーニング強度を選びます。本職以外のポジションに置くと能力が下がります。</p>
  <p><b>▶ 試合</b>：実況つきで試合が進みます。一時停止して戦術変更や選手交代（最大5人）ができます。疲れた選手は能力が落ちるので交代で活性化しましょう。</p>
  <p><b>🔁 移籍</b>：他クラブの選手にオファーを出して獲得。相手の要求額は主力ほど高くなります。売却リストに登録するとオファーが届きます。先方の希望額や届いたオファーには、金額を返答して最大3回まで交渉できます。レンタルは買取オプション付きにすると、期間中に決まった金額で完全移籍へ切り替えられます。</p>
+ <p><b>🌐 代表戦</b>：4年に一度、${WC_NAME}が開催されます（リーグ画面の「代表」）。操作はできませんが、各国代表はその時点で能力が高く負傷していない選手から選ばれ、代表戦で疲労や負傷を負うことも。優勝国のリーグの全クラブに賞金が入ります。</p>
+ <p><b>🧑‍🏫 コーチ</b>：クラブ画面でコーチを招聘できます。候補は引退した選手で、現役時代の実力が高いほど育成効果が大きくなります。海外リーグでプレーした日本人選手は、日本リーグのクラブで特殊能力を発揮します。</p>
+ <p><b>🌏 海外組</b>：日本人選手が日本のクラブから海外へ移籍して活躍すると、その古巣の若手が刺激を受けて必ず覚醒します。</p>
  <p><b>💴 資金と能力</b>：海外クラブは日本より資金が潤沢です。日本リーグの選手は能力75前後が上限で、80に届く選手はごく稀です（若手の覚醒は例外）。</p>
  <p><b>📈 育成</b>：若手は試合に出るほど成長。潜在能力が高い選手を「重点育成」に指定すると伸びが速くなります。30歳を過ぎると衰えます。</p>
  <p><b>🏢 理事会</b>：目標を達成すると信頼度が上がり、上位クラブからオファーが届くことも。信頼度が25%未満でシーズンを終えると解任です。</p>
@@ -1017,7 +1132,7 @@ function loanInUI(id){const p=P(id);const t=T(p.tid);const fee=Math.max(100,Math
 const optPrice=p=>Math.round(valueOf(p)*1.1/100)*100;
 function exerciseOpt(id){const p=P(id);const me=myTeam();if(!p||!p.loan||!p.loan.opt||p.tid!==S.team)return;const c=p.loan.opt;if(me.budget<c){toast('資金が足りません');return;}
  if(!confirm(fmtM(c)+'で'+p.name+'を完全移籍で獲得しますか？'))return;
- const from=p.loan.from;T(from).budget+=c;me.budget-=c;S.fin.tout+=c;delete p.loan;p.con=p.age<30?4:2;p.wage=wageDemand(p);p.mor=clamp(p.mor+10,0,100);
+ const from=p.loan.from;markMove(p,from,S.team);T(from).budget+=c;me.budget-=c;S.fin.tout+=c;delete p.loan;p.con=p.age<30?4:2;p.wage=wageDemand(p);p.mor=clamp(p.mor+10,0,100);
  inbox('買取オプション行使: '+p.name,`${p.name}を${T(from).name}から完全移籍で獲得しました。移籍金 ${fmtM(c)} / 年俸 ${fmtM(p.wage)}`);save();closeModal();toast(p.name+'を完全移籍で獲得しました');render();}
 function doLoanIn(id,fee,opt){const p=P(id);const me=myTeam();if(me.budget<fee){toast('資金が足りません');return;}if(teamPlayers(S.team).length>=32){toast('スカッドが満員です');return;}
  const from=p.tid;T(from).budget+=fee;me.budget-=fee;S.fin.tout+=fee;p.loan={from,o0:p.ovr};if(opt)p.loan.opt=opt;p.tid=S.team;p.mor=75;
