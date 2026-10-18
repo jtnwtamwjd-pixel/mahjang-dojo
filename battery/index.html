@@ -279,6 +279,26 @@ const PROJ = [
    if(co===4)n.push("被膜が厚く Li 輸送を阻害");
    return {v:[cap,ret],n};
   }},
+ {id:"lnmo",col:"#58d854",kind:"cat",icon:"🟢",name:"高電位 LNMO スピネル正極",short:"LNMO",sub:"LiNi₀.₅Mn₁.₅O₄ で 4.7 V 級の 高電圧化",
+  skills:["gosei","denki"],cost:30,
+  intro:"高 Ni とは 別に、Co を 使わない 高電位正極 LNMO も 検討するで。4.7 V と 電圧は 高いが、硫化物電解質は その電位で 酸化分解する。ハライド電解質や 界面コートで しのげるか 確かめてくれ。容量 130 mAh/g、100 サイクル 88 % が 目標や。",
+  params:[
+   {l:"Ni/Mn 規則化 アニール",o:["なし","600℃ 徐冷","700℃ 徐冷","800℃ 急冷"]},
+   {l:"Ni 量 x",o:["0.40","0.45","0.50","0.55"]},
+   {l:"表面コート",o:["なし","Li₃PO₄","LiNbO₃","Li₃BO₃"],comp:"DFT 高電位 界面安定性"},
+   {l:"合材の 電解質",o:["ハライド","硫化物"]}
+  ],
+  metrics:[{l:"放電容量 (0.1C)",u:"mAh/g",t:130,d:0},{l:"100 サイクル維持率",u:"%",t:88,d:1,max:100}],
+  calc(c){
+   const [an,ni,co,se]=c,n=[];
+   const cap=140*[.95,1,.98,.9][an]*[.9,.97,1,.94][ni]*[1,.98,.97,.99][co]*[1,.96][se];
+   const ret=96*[.9,1,.97,.88][an]*[.92,.98,1,.95][ni]*[.75,.95,.9,1][co]*[1,.8][se];
+   if(se===1)n.push("硫化物が 4.7 V で 酸化分解");
+   if(co===0)n.push("高電位で 界面に 抵抗層");
+   if(an===3)n.push("急冷で 酸素欠損・Mn³⁺ が 増加");
+   if(ni===3)n.push("Ni 過剰で 岩塩型 不純物");
+   return {v:[cap,ret],n};
+  }},
  {id:"si",col:"#d82800",kind:"an",icon:"🟤",name:"全固体用 シリコン負極",short:"Si負極",sub:"体積膨張を抑えて 高容量と寿命を両立",
   skills:["gosei","hyoka"],cost:30,
   intro:"負極はシリコンでいく。黒鉛の 10 倍近い容量があるが、充電で 体積が 約 3 倍に ふくらむ。全固体では 液が すき間を 埋めてくれないから、膨張で 粒子が 孤立すると 一気に 劣化する。可逆容量 1500 mAh/g と 100 サイクル 85 % を 両立してくれ。",
@@ -302,6 +322,47 @@ const PROJ = [
    if(ra===0)n.push("イオンパス不足で 利用率が 低い");
    if(ra===3)n.push("SE が多すぎて 容量が 目減り");
    return {v:[cap,ret],n};
+  }},
+ {id:"limet",col:"#bcbcbc",kind:"an",icon:"⚪",name:"Li 金属負極 界面設計",short:"Li金属",sub:"デンドライトを 抑えて 高電流で 動かす",
+  skills:["denki","hyoka"],cost:30,
+  intro:"究極の 負極は Li 金属や。ただ 電流を 上げると Li が 粒界を 伝って 伸び、短絡する。界面層・拘束圧・温度で 臨界電流密度 1.5 mA/cm² と 対称セル寿命 500 時間を 両立してくれ。",
+  params:[
+   {l:"界面層",o:["なし","Au 蒸着","LiF 被膜","Li₃N 被膜","Ag–C 複合層"],comp:"DFT 界面エネルギー・Li 核生成"},
+   {l:"拘束圧",o:["1 MPa","3 MPa","5 MPa","10 MPa","30 MPa"]},
+   {l:"運転温度",o:["25℃","45℃","60℃"]},
+   {l:"接する 電解質",o:["Li₆PS₅Cl","LLZO","Li₃InCl₆"]}
+  ],
+  metrics:[{l:"臨界電流密度",u:"mA/cm²",t:1.5,d:2},{l:"対称セル寿命",u:"時間",t:500,d:0}],
+  calc(c){
+   const [il,pr,tp,el]=c,n=[];
+   const ccd=1.85*[.3,.7,.8,.75,1][il]*[.6,.85,1,.95,.7][pr]*[.8,1,1.15][tp]*[1,.9,.4][el];
+   const life=600*[.3,.75,.8,.85,1][il]*[.7,.9,1,.85,.5][pr]*[1,.95,.75][tp]*[1,1.1,.3][el];
+   if(il===0)n.push("Li が 粒界を 伝って デンドライト成長");
+   if(pr===0)n.push("剥離で 界面に ボイド");
+   if(pr===4)n.push("Li クリープで 短絡");
+   if(tp===2)n.push("高温で 界面反応が 進む");
+   if(el===2)n.push("ハライドが Li で 還元される");
+   return {v:[ccd,life],n};
+  }},
+ {id:"sheet",col:"#fcbcb0",kind:"sheet",icon:"📄",name:"固体電解質 シート薄膜化",short:"SEシート",sub:"バインダーで 薄く 自立する 電解質膜を つくる",
+  skills:["gosei","hyoka"],cost:25,
+  intro:"セルの エネルギー密度を 上げるには、電解質層を 薄くせなあかん。バインダーを 入れると 強くなるが、イオンの 通り道を ふさぐ。伝導度 保持率 85 % と 膜強度 8 MPa を 両立してくれ。セル試作にも 効くで。",
+  params:[
+   {l:"バインダー",o:["なし","SEBS","NBR","PTFE（乾式）"],comp:"MD バインダー被覆率 解析"},
+   {l:"バインダー量",o:["1 wt%","3 wt%","5 wt%","10 wt%"]},
+   {l:"支持体",o:["なし","不織布","多孔 PI 膜"]},
+   {l:"膜厚",o:["20 µm","30 µm","50 µm","80 µm"]}
+  ],
+  metrics:[{l:"伝導度 保持率",u:"%",t:85,d:1,max:100},{l:"膜強度",u:"MPa",t:8,d:1}],
+  calc(c){
+   const [b,q,s,t]=c,n=[];
+   const K=115*[1,.9,.92,.95][b]*[.97,.93,.87,.7][q]*[1,.9,.85][s]*[.85,.95,1,.9][t];
+   const St=14*[.1,.8,.85,1][b]*[.4,.75,1,1.2][q]*[.6,1,1.3][s]*[.5,.75,1,1.4][t];
+   if(b===0)n.push("バインダーなしでは 膜が 自立しない");
+   if(q===3)n.push("バインダーが 粒子を 覆い イオンパスを 遮断");
+   if(t===0)n.push("薄すぎて ピンホール");
+   if(t===3)n.push("厚すぎて セルの エネルギー密度が 下がる");
+   return {v:[Math.min(100,K),St],n};
   }},
  {id:"cell",col:"#00e8d8",kind:"cell",icon:"🔋",name:"全固体電池セル試作",short:"セル",sub:"エネルギー密度と寿命の両立",
   skills:["denki","hyoka"],cost:40,
@@ -330,6 +391,8 @@ const PROJ = [
    if(!S.P[se.idx].done){E*=.92;R*=.85;n.push(`${se.short} は まだ 開発途中`);}
    if(!S.P[PB.ncm.idx].done){E*=.95;R*=.9;n.push("正極が まだ 開発途中");}
    if(ng===2&&!sd)n.push("Si 負極が まだ 開発途中");
+   if(S.P[PB.sheet.idx].done){E*=1.04;n.push("薄い 電解質シートで エネルギー密度 UP");}
+   if(ng===3&&S.P[PB.limet.idx].done){R*=1.12;n.push("Li 金属の 界面設計が 効いている");}
    return {v:[E,R],n};
   }},
  {id:"equip",col:"#a4e4fc",kind:"equip",icon:"🏗",name:"電極プロト用 設備導入",short:"電極設備",sub:"目標クリアした材料を プロト用設備で 特性検証",
@@ -664,7 +727,7 @@ const EVENTS = [
 
 // ===================== 状態 =====================
 let S=null;
-const SAVEKEY="battery_lab_save_v9";
+const SAVEKEY="battery_lab_save_v10";
 const TASK_BASE=1000;
 const EQUIP_COST=3000, CEQUIP_COST=2500, HAKEN_COST=300, HAKEN_MAX=3, EXT_MAX=2;
 // 設備 → 導入フラグ・費用・プロトテーマ
@@ -687,7 +750,7 @@ function newGame(bgi){
   Object.assign(sk,BG[bgi].sk);
   S={bg:bgi,w:1,TW:YEARS*48,soc:100,stress:10,favor:30,ready:15,budget:5000,rep:0,sk,cur:0,equipOpen:false,equipIn:false,cEquipIn:false,ext:[],noRest:0,hakens:0,tasks:[],taskSeq:0,taskNext:3,issueNext:0,protoPen:0,choreMiss:0,issueOK:0,issueNG:0,
      team:[],eg:50,egNext:5,gone:[],quits:0,hires:0,rookies:0,prio:[],kTheme:null,kNext:10,kDone:0,lastAuto:[],slowUntil:0,
-     P:PROJ.map(()=>({log:[],hits:0,done:false,doneW:0,pubs:0,comp:{},lit:{},acts:0,pat:0,patW:0,patP:0})),
+     P:PROJ.map(()=>({log:[],hits:0,done:false,doneW:0,pubs:0,comp:{},lit:{},acts:0,pat:0,patW:0,patP:0,ex:{},inv:[]})),
      cellSE:[],flags:{},seen:{},grantCd:0,hist:[],over:false,clear:false,lastRank:0,mon:freshMon(),
      deptNext:5,deptI:0,costUntil:0,rewards:{},oui:{talk:0,ignore:0},tantrum:0};
   const sps=["gosei","gosei","gosei","gosei","gosei","hyoka","hyoka","hyoka","hyoka","denki","denki","denki","keisan","keisan"];
@@ -733,7 +796,7 @@ function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();r
 function rnd(a){return a[Math.floor(Math.random()*a.length)];}
 function fmt(v,d){return v.toFixed(d);}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
-function doneMaterials(){return [...SE_IDS,"ncm","si"].filter(id=>S.P[PB[id].idx].done);}
+function doneMaterials(){return [...SE_IDS,"ncm","lnmo","si","sheet"].filter(id=>S.P[PB[id].idx].done);}
 function params(p){
   if(p.kind==="cell")return p.params.map((x,i)=>i===3?{...x,o:SE_IDS.map(id=>PB[id].short+(S.P[PB[id].idx].done?"★":""))}:x);
   if(p.id==="equip")return p.params.map((x,i)=>i===0?{...x,o:doneMaterials().map(id=>PB[id].short)}:x);
@@ -762,7 +825,7 @@ function failProb(ms){
   return clamp(pf,.02,.9);
 }
 // テーマごとの 必要な 知見（ノウハウ）。たまるほど 性能が 出るようになる
-const XP_NEED={se:100,cat:160,an:160,cell:260,equip:140,proto:280};
+const XP_NEED={se:100,cat:160,an:160,sheet:140,cell:260,equip:140,proto:280};
 function know(pi){return Math.min(1,(S.P[pi].xp||0)/XP_NEED[PROJ[pi].kind]);}
 function measure(pi,c,ms){
   const p=PROJ[pi], r=p.calc(c), s=ms?ms.s:skillAvg(p), kn=know(pi);
@@ -931,7 +994,7 @@ function render(){
   bgmApply(bgmKey());
   if(S.over){endScreen();return;}
   const pi=S.cur, p=pi===null?null:PROJ[pi], P=pi===null?null:S.P[pi];
-  const patOK=S.P.some((x,i)=>x.pat===0&&ratio(i)>=.8);
+  const patOK=S.P.some((x,i)=>patSlots(i).length>0);
   const active=p&&!P.done;
   const can={
     exp:active&&runnable(pi)&&S.soc>=20&&S.budget>=costOf(p)&&!S.flags.delay,
@@ -1218,10 +1281,11 @@ function hintCard(pi){
   return`<div class="win"><div class="wt">ヒント</div>${items.join("")}</div>`;
 }
 function patCard(){
-  const L=S.P.map((x,i)=>({x,i})).filter(o=>o.x.pat);
+  const L=[];S.P.forEach((x,i)=>{if(x.pat)L.push({i,lb:"基本",st:x.pat,w:x.patW});Object.keys(x.ex||{}).forEach(s=>L.push({i,lb:SK[s].n,st:x.ex[s].st,w:x.ex[s].w}));});
   if(!L.length)return"";
-  return`<div class="win"><div class="wt">とっきょ</div>${L.map(o=>`<div class="hint"><span class="sq" style="background:${PROJ[o.i].col}"></span> ${PROJ[o.i].short} <span class="badge ${o.x.pat===2?"y":o.x.pat<0?"r":"b"}">${o.x.pat===1?`審査中 あと${Math.max(0,PATENT_WAIT-(S.w-o.x.patW))}週`:o.x.pat===2?"登録":"拒絶"}</span></div>`).join("")}</div>`;
+  return`<div class="win"><div class="wt">とっきょ（登録 ${patCount()} 件）</div>${L.map(o=>`<div class="hint"><span class="sq" style="background:${PROJ[o.i].col}"></span> ${PROJ[o.i].short}・${o.lb} <span class="badge ${o.st===2?"y":o.st<0?"r":"b"}">${o.st===1?`審査中 あと${Math.max(0,PATENT_WAIT-(S.w-o.w))}週`:o.st===2?"登録":"拒絶"}</span></div>`).join("")}</div>`;
 }
+function patCount(){return S.P.reduce((a,x)=>a+(x.pat===2?1:0)+Object.values(x.ex||{}).filter(e=>e.st===2).length,0);}
 function histCard(){
   if(!S.hist.length)return"";
   return`<div class="win"><div class="wt">できごと</div>${S.hist.slice(-6).reverse().map(h=>`<div class="hint"><span class="dim small">${h.m}</span><br>${h.t}</div>`).join("")}</div>`;
@@ -1296,6 +1360,10 @@ function completeProj(pi){
   if(pi===S.kTheme){S.kTheme=null;S.kDone++;addFavor(12);S.rep+=5;msg+=`<br><b class="p">わしが 言うた テーマや。ようやった！</b>（こうかんど +12・ひょうか +5）`;}
   if(P.pat===0&&p.kind!=="proto")msg+=`<br>発表の前に 特許出願も 忘れずにな。`;
   const was=themeMembers(pi).length;
+  // 目標達成時の 担当メンバーの 得意分野ごとに 特許の 種が できる
+  const inv={};themeMembers(pi).filter(m=>!m.rookie).forEach(m=>{(inv[m.sp]=inv[m.sp]||[]).push(m.n);});
+  P.inv=Object.keys(inv).map(sp=>({sp,n:inv[sp].join("・")}));
+  if(P.inv.length)msg+=`<br>担当の ${P.inv.map(v=>`${v.n}（${SK[v.sp].n}）`).join("・")}の 知見で、<b>分野別の 特許</b>も 出せるぞ。`;
   if(p.kind!=="equip"&&p.kind!=="cell"&&p.kind!=="proto")msg+=`<br>この 材料は 電極プロト用設備での 検証にも 使えるで。`;
   if(p.kind==="cell")msg+=`<br>次は <b>セルプロト用 設備</b>の 検証や。`;
   if(p.kind==="equip")msg+=`<br><br>設備での 特性検証に 合格や！ あとは <b>${EQ[p.id].n}の 導入（${EQ[p.id].cost} 万円）</b>や。予算を 確保しとけよ。`;
@@ -1453,21 +1521,31 @@ function doPub(i){
   endWeek();
 }
 // ---------- 特許 ----------
+// 出願できる 枠：O西の 基本特許（到達 80% 以上）＋ 目標達成時の 担当メンバーの 得意分野ごと
+function patSlots(i){const P=S.P[i],s=[];if(P.pat===0&&ratio(i)>=.8)s.push("main");(P.inv||[]).forEach(v=>{if(!(P.ex||{})[v.sp])s.push(v.sp);});return s;}
+const PAT_FIELD={gosei:"製造方法",keisan:"材料設計方法",hyoka:"評価・検査方法",denki:"電池構成"};
+function claimOf(p,s){
+  const base=p.kind==="se"?`${p.sub.split(" ")[0]}を含む固体電解質`:p.kind==="cat"?"全固体電池用正極活物質":p.kind==="an"?"全固体電池用負極":p.kind==="sheet"?"固体電解質シート":p.kind==="cell"?"全固体電池":p.kind==="equip"?"全固体電池用材料の製造装置":"全固体電池の連続製造ライン";
+  if(s==="main")return p.kind==="se"?`${base}およびその製造方法`:p.kind==="cat"?"被覆層を有する"+base:p.kind==="an"?`${base}およびその製造方法`:p.kind==="cell"?`${base}およびその製造方法`:p.kind==="proto"?"全固体電池用電極の連続製造方法":base;
+  return {gosei:`${base}の製造方法`,keisan:`${base}の設計方法および計算スクリーニング方法`,hyoka:`${base}の評価方法および検査装置`,denki:`${base}を備えた全固体電池およびその充放電制御方法`}[s];
+}
+function patProbS(i,s){let p=patProb(i);if(s!=="main")p=Math.min(.9,p*.75+S.sk[s]/600);return p;}
 function patProb(i){const P=S.P[i];let p=.3+.45*Math.min(1,ratio(i))+(S.sk.denki+S.sk.gosei)/800;if(P.disclosed)p*=.35;return Math.min(.95,p);}
 function openPat(){
-  const list=S.P.map((x,i)=>({x,i})).filter(o=>o.x.pat===0&&ratio(o.i)>=.8);
-  modal(`<div class="wt">とっきょ しゅつがん</div><div class="small dim" style="margin-bottom:8px">目標の 80% 以上の テーマを 出願できる（1 テーマ 1 件）。弁理士費用 30 万円。${PATENT_WAIT} 週後に 審査けっか。</div>
-   ${list.map(o=>`<button class="qopt" data-i="${o.i}"><span class="sq" style="background:${PROJ[o.i].col}"></span> <b>${PROJ[o.i].name}</b>${o.x.disclosed?' <span class="badge r">発表済</span>':""}<br><span class="small dim">到達度 ${(ratio(o.i)*100).toFixed(0)}% ・ 登録みこみ ${Math.round(patProb(o.i)*100)}%</span></button>`).join("")}
+  const list=[];S.P.forEach((x,i)=>patSlots(i).forEach(s=>list.push({x,i,s})));
+  modal(`<div class="wt">とっきょ しゅつがん</div><div class="small dim" style="margin-bottom:8px">目標の 80% 以上で O西の 基本特許、目標達成時に 担当していた メンバーの 得意分野ごとに 分野別の 特許を 出願できる。弁理士費用 30 万円。${PATENT_WAIT} 週後に 審査けっか。</div>
+   ${list.map(o=>{const v=(o.x.inv||[]).find(x=>x.sp===o.s);return`<button class="qopt" data-i="${o.i}" data-s="${o.s}"><span class="sq" style="background:${PROJ[o.i].col}"></span> <b>${PROJ[o.i].short}</b>：${o.s==="main"?"基本特許（O西）":`<span style="color:${SK[o.s].c}">${SK[o.s].n}</span>の 特許（${esc(v.n)}）`}${o.x.disclosed?' <span class="badge r">発表済</span>':""}<br><span class="small dim">${esc(claimOf(PROJ[o.i],o.s))} ・ 登録みこみ ${Math.round(patProbS(o.i,o.s)*100)}%</span></button>`;}).join("")}
    <div class="btnrow"><button id="cx">▶ やめる</button></div>`,sh=>{
     sh.querySelector("#cx").onclick=closeModal;
-    sh.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>doPat(+b.dataset.i));
+    sh.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>doPat(+b.dataset.i,b.dataset.s));
   });
 }
-function doPat(i){
-  const P=S.P[i],p=PROJ[i];
-  P.pat=1;P.patW=S.w;P.patP=patProb(i);S.soc-=20;S.budget-=30;S.mon.pat++;S.rep+=2;gain("denki",1);gain("gosei",1);addStress(3);
-  const claim=p.kind==="se"?`${p.sub.split(" ")[0]}を含む固体電解質およびその製造方法`:p.kind==="cat"?"被覆層を有する全固体電池用正極活物質":p.kind==="an"?"全固体電池用シリコン複合負極およびその製造方法":p.kind==="cell"?"全固体電池およびその製造方法":"全固体電池用電極の連続製造方法";
-  log(`とっきょ出願：${p.short}`);
+function doPat(i,s){
+  const P=S.P[i],p=PROJ[i];s=s||"main";
+  if(s==="main"){P.pat=1;P.patW=S.w;P.patP=patProb(i);}else{P.ex=P.ex||{};P.ex[s]={st:1,w:S.w,p:patProbS(i,s)};}
+  S.soc-=20;S.budget-=30;S.mon.pat++;S.rep+=2;gain("denki",1);gain("gosei",1);addStress(3);
+  const claim=claimOf(p,s);
+  log(`とっきょ出願：${p.short}${s==="main"?"":"（"+SK[s].n+"）"}`);
   pushQ(okModal(`<div class="wt">しゅつがん した</div><div class="res">発明の名称：<b>${esc(claim)}</b><div class="small dim" style="margin-top:4px">${PATENT_WAIT} 週後に 審査けっか。ひょうか +2</div></div>`,"つぎの しゅうへ"));
   endWeek();
 }
@@ -1750,6 +1828,11 @@ function endWeek(){
   if(S.stress<50)addMot(2);else if(S.stress>=80)addMot(-2);
   if(S.stress>=90){S.soc=Math.max(0,S.soc-8);}
   if(wkOf(S.w)===1){S.budget+=monthlyBudget();addFavor(-1);addEg(-1);if(S.favor<15){S.budget=Math.max(0,S.budget-20);log("K口役員の 機嫌が わるい（予算 −20 万）");}}
+  S.P.forEach((P,i)=>Object.keys(P.ex||{}).forEach(s=>{const e=P.ex[s];if(e.st===1&&S.w-e.w>=PATENT_WAIT){
+    const ok=Math.random()<e.p;e.st=ok?2:-1;
+    if(ok){S.rep+=4;S.budget+=50;log(`とっきょ登録：${PROJ[i].short}（${SK[s].n}）`);}else log(`とっきょ拒絶：${PROJ[i].short}（${SK[s].n}）`);
+    pushQ(next=>{(ok?SFX.fan:SFX.bad)();okModal(`<div class="wt">とっきょ 審査けっか</div><div class="res"><span class="sq" style="background:${PROJ[i].col}"></span> ${PROJ[i].short}：${esc(claimOf(PROJ[i],s))}<div class="big ${ok?"g":"r"}" style="margin-top:6px">${ok?"とうろく さてい！":"きょぜつ さてい…"}</div><div class="small dim">${ok?"ひょうか +4・発明報奨金 +50 万円":P.disclosed?"先に学会発表していたことが響いた。":"先行文献との差が認められなかった。"}</div></div>`)(next);});
+  }}));
   S.P.forEach((P,i)=>{if(P.pat===1&&S.w-P.patW>=PATENT_WAIT){
     const ok=Math.random()<P.patP;P.pat=ok?2:-1;
     if(ok){S.rep+=10;S.budget+=150;log(`とっきょ登録：${PROJ[i].short}`);}else log(`とっきょ拒絶：${PROJ[i].short}`);
@@ -1804,7 +1887,7 @@ function endScreen(){
   closeModal();
   bgmApply("opening");
   const done=S.P.filter(x=>x.done).length, r=rankIdx();
-  const pats=S.P.filter(x=>x.pat===2).length;
+  const pats=patCount();
   const skillSum=SKK.reduce((a,k)=>a+S.sk[k],0);
   const score=Math.round(S.rep*10+skillSum*2+done*120+pats*80+(S.clear?2000:0)+S.favor*5+S.eg*3+S.kDone*100-S.tantrum*30-S.quits*40);
   let ending;
