@@ -279,6 +279,26 @@ const PROJ = [
    if(co===4)n.push("被膜が厚く Li 輸送を阻害");
    return {v:[cap,ret],n};
   }},
+ {id:"lnmo",col:"#58d854",kind:"cat",icon:"🟢",name:"高電位 LNMO スピネル正極",short:"LNMO",sub:"LiNi₀.₅Mn₁.₅O₄ で 4.7 V 級の 高電圧化",
+  skills:["gosei","denki"],cost:30,
+  intro:"高 Ni とは 別に、Co を 使わない 高電位正極 LNMO も 検討するで。4.7 V と 電圧は 高いが、硫化物電解質は その電位で 酸化分解する。ハライド電解質や 界面コートで しのげるか 確かめてくれ。容量 130 mAh/g、100 サイクル 88 % が 目標や。",
+  params:[
+   {l:"Ni/Mn 規則化 アニール",o:["なし","600℃ 徐冷","700℃ 徐冷","800℃ 急冷"]},
+   {l:"Ni 量 x",o:["0.40","0.45","0.50","0.55"]},
+   {l:"表面コート",o:["なし","Li₃PO₄","LiNbO₃","Li₃BO₃"],comp:"DFT 高電位 界面安定性"},
+   {l:"合材の 電解質",o:["ハライド","硫化物"]}
+  ],
+  metrics:[{l:"放電容量 (0.1C)",u:"mAh/g",t:130,d:0},{l:"100 サイクル維持率",u:"%",t:88,d:1,max:100}],
+  calc(c){
+   const [an,ni,co,se]=c,n=[];
+   const cap=140*[.95,1,.98,.9][an]*[.9,.97,1,.94][ni]*[1,.98,.97,.99][co]*[1,.96][se];
+   const ret=96*[.9,1,.97,.88][an]*[.92,.98,1,.95][ni]*[.75,.95,.9,1][co]*[1,.8][se];
+   if(se===1)n.push("硫化物が 4.7 V で 酸化分解");
+   if(co===0)n.push("高電位で 界面に 抵抗層");
+   if(an===3)n.push("急冷で 酸素欠損・Mn³⁺ が 増加");
+   if(ni===3)n.push("Ni 過剰で 岩塩型 不純物");
+   return {v:[cap,ret],n};
+  }},
  {id:"si",col:"#d82800",kind:"an",icon:"🟤",name:"全固体用 シリコン負極",short:"Si負極",sub:"体積膨張を抑えて 高容量と寿命を両立",
   skills:["gosei","hyoka"],cost:30,
   intro:"負極はシリコンでいく。黒鉛の 10 倍近い容量があるが、充電で 体積が 約 3 倍に ふくらむ。全固体では 液が すき間を 埋めてくれないから、膨張で 粒子が 孤立すると 一気に 劣化する。可逆容量 1500 mAh/g と 100 サイクル 85 % を 両立してくれ。",
@@ -303,13 +323,54 @@ const PROJ = [
    if(ra===3)n.push("SE が多すぎて 容量が 目減り");
    return {v:[cap,ret],n};
   }},
+ {id:"limet",col:"#bcbcbc",kind:"an",icon:"⚪",name:"Li 金属負極 界面設計",short:"Li金属",sub:"デンドライトを 抑えて 高電流で 動かす",
+  skills:["denki","hyoka"],cost:30,
+  intro:"究極の 負極は Li 金属や。ただ 電流を 上げると Li が 粒界を 伝って 伸び、短絡する。界面層・拘束圧・温度で 臨界電流密度 1.5 mA/cm² と 対称セル寿命 500 時間を 両立してくれ。",
+  params:[
+   {l:"界面層",o:["なし","Au 蒸着","LiF 被膜","Li₃N 被膜","Ag–C 複合層"],comp:"DFT 界面エネルギー・Li 核生成"},
+   {l:"拘束圧",o:["1 MPa","3 MPa","5 MPa","10 MPa","30 MPa"]},
+   {l:"運転温度",o:["25℃","45℃","60℃"]},
+   {l:"接する 電解質",o:["Li₆PS₅Cl","LLZO","Li₃InCl₆"]}
+  ],
+  metrics:[{l:"臨界電流密度",u:"mA/cm²",t:1.5,d:2},{l:"対称セル寿命",u:"時間",t:500,d:0}],
+  calc(c){
+   const [il,pr,tp,el]=c,n=[];
+   const ccd=1.85*[.3,.7,.8,.75,1][il]*[.6,.85,1,.95,.7][pr]*[.8,1,1.15][tp]*[1,.9,.4][el];
+   const life=600*[.3,.75,.8,.85,1][il]*[.7,.9,1,.85,.5][pr]*[1,.95,.75][tp]*[1,1.1,.3][el];
+   if(il===0)n.push("Li が 粒界を 伝って デンドライト成長");
+   if(pr===0)n.push("剥離で 界面に ボイド");
+   if(pr===4)n.push("Li クリープで 短絡");
+   if(tp===2)n.push("高温で 界面反応が 進む");
+   if(el===2)n.push("ハライドが Li で 還元される");
+   return {v:[ccd,life],n};
+  }},
+ {id:"sheet",col:"#fcbcb0",kind:"sheet",icon:"📄",name:"固体電解質 シート薄膜化",short:"SEシート",sub:"バインダーで 薄く 自立する 電解質膜を つくる",
+  skills:["gosei","hyoka"],cost:25,
+  intro:"セルの エネルギー密度を 上げるには、電解質層を 薄くせなあかん。バインダーを 入れると 強くなるが、イオンの 通り道を ふさぐ。伝導度 保持率 85 % と 膜強度 8 MPa を 両立してくれ。セル試作にも 効くで。",
+  params:[
+   {l:"バインダー",o:["なし","SEBS","NBR","PTFE（乾式）"],comp:"MD バインダー被覆率 解析"},
+   {l:"バインダー量",o:["1 wt%","3 wt%","5 wt%","10 wt%"]},
+   {l:"支持体",o:["なし","不織布","多孔 PI 膜"]},
+   {l:"膜厚",o:["20 µm","30 µm","50 µm","80 µm"]}
+  ],
+  metrics:[{l:"伝導度 保持率",u:"%",t:85,d:1,max:100},{l:"膜強度",u:"MPa",t:8,d:1}],
+  calc(c){
+   const [b,q,s,t]=c,n=[];
+   const K=115*[1,.9,.92,.95][b]*[.97,.93,.87,.7][q]*[1,.9,.85][s]*[.85,.95,1,.9][t];
+   const St=14*[.1,.8,.85,1][b]*[.4,.75,1,1.2][q]*[.6,1,1.3][s]*[.5,.75,1,1.4][t];
+   if(b===0)n.push("バインダーなしでは 膜が 自立しない");
+   if(q===3)n.push("バインダーが 粒子を 覆い イオンパスを 遮断");
+   if(t===0)n.push("薄すぎて ピンホール");
+   if(t===3)n.push("厚すぎて セルの エネルギー密度が 下がる");
+   return {v:[Math.min(100,K),St],n};
+  }},
  {id:"cell",col:"#00e8d8",kind:"cell",icon:"🔋",name:"全固体電池セル試作",short:"セル",sub:"エネルギー密度と寿命の両立",
   skills:["denki","hyoka"],cost:40,
   intro:"セル試作も 並行して 進めるんや。電解質・正極・Si 負極の 開発が 進むほど 性能が 上がる。事業部が求める 350 Wh/kg・300 サイクル 80 % を達成してほしい。Li 金属負極はエネルギーでは最強だが、電解質によっては還元されるし、拘束圧をかけすぎるとクリープで短絡するぞ。",
   params:[
    {l:"負極",o:["In–Li 合金","黒鉛","Si（自社開発）","Li 金属"]},
    {l:"正極合材比（活物質:SE）",o:["60:40","70:30","75:25","80:20","85:15"]},
-   {l:"拘束圧",o:["1 MPa","5 MPa","10 MPa","50 MPa","100 MPa"]},
+   {l:"拘束圧",o:["1 MPa","5 MPa","10 MPa","50 MPa","100 MPa"],comp:"FEM 拘束圧・応力解析"},
    {l:"固体電解質（★＝開発済み）",o:[]}
   ],
   metrics:[{l:"エネルギー密度",u:"Wh/kg",t:350,d:0},{l:"300 サイクル維持率",u:"%",t:80,d:1,max:100}],
@@ -330,6 +391,8 @@ const PROJ = [
    if(!S.P[se.idx].done){E*=.92;R*=.85;n.push(`${se.short} は まだ 開発途中`);}
    if(!S.P[PB.ncm.idx].done){E*=.95;R*=.9;n.push("正極が まだ 開発途中");}
    if(ng===2&&!sd)n.push("Si 負極が まだ 開発途中");
+   if(S.P[PB.sheet.idx].done){E*=1.04;n.push("薄い 電解質シートで エネルギー密度 UP");}
+   if(ng===3&&S.P[PB.limet.idx].done){R*=1.12;n.push("Li 金属の 界面設計が 効いている");}
    return {v:[E,R],n};
   }},
  {id:"equip",col:"#a4e4fc",kind:"equip",icon:"🏗",name:"電極プロト用 設備導入",short:"電極設備",sub:"目標クリアした材料を プロト用設備で 特性検証",
@@ -337,7 +400,7 @@ const PROJ = [
   intro:"生技部との 連携が 進んで、プロト用 設備の 導入検討が 始まったで。目標を クリアした 材料を 設備で 作って、ラボと 同じ 特性が 出るか 検証せえ。合格したら 設備導入や。ただし 導入には 3000 万円 かかるで。設備が 入ったら すぐ 電極プロト量産を 始められる。",
   params:[
    {l:"検証する材料（目標クリア済み）",o:[]},
-   {l:"設備方式",o:["バッチ式混練機","連続式二軸混練機","ロール to ロール塗工機"]},
+   {l:"設備方式",o:["バッチ式混練機","連続式二軸混練機","ロール to ロール塗工機"],comp:"CAE 混練・塗工シミュレーション"},
    {l:"雰囲気管理",o:["ドライルーム（露点 −40℃）","ドライルーム（露点 −60℃）","グローブボックス連結"]},
    {l:"スケール",o:["1 kg/日","10 kg/日","50 kg/日"]}
   ],
@@ -361,8 +424,8 @@ const PROJ = [
   intro:"設備が 入ったな。ここからは 電極の プロト量産試作や。ラボで作れても、ラインで毎日同じものが作れなければ製品にならない。生技部との連携度が歩留まりに直結するぞ。歩留まり 85 %、生産能力 450 セル/日ぶんが合格ラインだ。",
   params:[
    {l:"電極作製プロセス",o:["湿式スラリー塗工","乾式（ドライ）電極","転写プレス"]},
-   {l:"ライン速度",o:["1 m/min","3 m/min","5 m/min","10 m/min","20 m/min"]},
-   {l:"加圧方式",o:["一軸プレス","ロールプレス","WIP（温間静水圧）"]},
+   {l:"ライン速度",o:["1 m/min","3 m/min","5 m/min","10 m/min","20 m/min"],comp:"工程シミュレーション（歩留まり・能力予測）"},
+   {l:"加圧方式",o:["一軸プレス","ロールプレス","WIP（温間静水圧）"],comp:"FEM プレス圧分布解析"},
    {l:"検査方式",o:["抜き取り検査","全数インライン検査"]}
   ],
   metrics:[{l:"歩留まり",u:"%",t:85,d:1,max:100},{l:"生産能力",u:"セル/日",t:450,d:0}],
@@ -386,7 +449,7 @@ const PROJ = [
   params:[
    {l:"積層方式",o:["枚葉スタック","Z 折り積層","連続ロール積層"]},
    {l:"雰囲気管理",o:["ドライルーム（露点 −40℃）","ドライルーム（露点 −60℃）","グローブボックス連結"]},
-   {l:"拘束治具",o:["ボルト締結","油圧拘束","一体型 拘束ケース"]},
+   {l:"拘束治具",o:["ボルト締結","油圧拘束","一体型 拘束ケース"],comp:"FEM 治具 面圧解析"},
    {l:"スケール",o:["10 セル/日","50 セル/日","200 セル/日"]}
   ],
   metrics:[{l:"ラボ比 特性",u:"%",t:95,d:1,max:120},{l:"設備稼働率",u:"%",t:80,d:1,max:100}],
@@ -406,8 +469,8 @@ const PROJ = [
   intro:"セル組立設備が 入ったな。最後の 山、セルの プロト量産や。電極が ラボ品のままやと 歩留まりが 出んぞ。電極プロト量産と あわせて 両方 合格したら プロジェクト 達成や。歩留まり 85 %、生産能力 300 セル/日が 合格ラインや。",
   params:[
    {l:"積層方式",o:["枚葉スタック","Z 折り積層","連続ロール積層"]},
-   {l:"ライン タクト",o:["30 秒/セル","15 秒/セル","8 秒/セル","4 秒/セル","2 秒/セル"]},
-   {l:"拘束方式",o:["ボルト締結","油圧拘束","一体型 拘束ケース"]},
+   {l:"ライン タクト",o:["30 秒/セル","15 秒/セル","8 秒/セル","4 秒/セル","2 秒/セル"],comp:"ライン シミュレーション（歩留まり・能力予測）"},
+   {l:"拘束方式",o:["ボルト締結","油圧拘束","一体型 拘束ケース"],comp:"FEM 拘束圧分布 解析"},
    {l:"検査方式",o:["抜き取り検査","全数 X 線 CT 検査"]}
   ],
   metrics:[{l:"歩留まり",u:"%",t:85,d:1,max:100},{l:"生産能力",u:"セル/日",t:300,d:0}],
@@ -511,7 +574,92 @@ const QZ = [
  {f:"hyoka",q:"TG-DSC で分かることは？",c:["加熱時の重量変化と吸発熱（分解・相転移）","Li 伝導度","バンドギャップ","粒子の結晶方位"],a:0,e:"脱水・分解・融解・結晶化の温度を調べられる。正極の熱安定性評価にも使う。"},
  {f:"hyoka",t:"tf",q:"Li は X 線の散乱能が小さいため、Li の占有率の決定には中性子回折が有効である。",a:true,e:"Li の中性子散乱長は負で、X 線より Li の位置を捉えやすい。⁶Li は吸収が大きいので ⁷Li 濃縮試料が好まれる。"},
  {f:"hyoka",t:"tf",q:"ナイキストプロットに半円が 1 つしか見えなければ、粒界抵抗は必ずゼロである。",a:false,e:"時定数が近いと半円が重なる。周波数範囲や温度を変える、DRT 解析をするなどで分離する。"},
- {f:"hyoka",t:"tf",q:"インピーダンス測定で得た全抵抗からの伝導度は、ペレットの相対密度が低いと実際より低く見積もられる。",a:true,e:"空隙は伝導経路を減らし、見かけの伝導度を下げる。比較するときは密度も報告する。"}
+ {f:"hyoka",t:"tf",q:"インピーダンス測定で得た全抵抗からの伝導度は、ペレットの相対密度が低いと実際より低く見積もられる。",a:true,e:"空隙は伝導経路を減らし、見かけの伝導度を下げる。比較するときは密度も報告する。"},
+ // ---- 追加問題（v9） ----
+ // 電気化学
+ {f:"denki",q:"ファラデー定数の値に最も近いのは？",c:["96485 C/mol","8.314 C/mol","6.02×10²³ C/mol","1.602×10⁻¹⁹ C/mol"],a:0,e:"電子 1 mol あたりの電荷。F = N_A × e ≈ 96485 C/mol。"},
+ {f:"denki",q:"1 C レートとは？",c:["1 時間で 満充電／満放電する 電流","1 分で 満充電する 電流","1 A の 電流","1 V/s の 掃引"],a:0,e:"容量 Q の電池なら 1 C = Q/1 h の電流。2 C は 30 分、0.1 C は 10 時間。"},
+ {f:"denki",q:"Nernst 式が表すのは？",c:["電極電位と 活量（濃度）の 関係","電流と 過電圧の 関係","拡散係数と 温度の 関係","容量と サイクル数の 関係"],a:0,e:"E = E° − (RT/nF) ln Q。濃度が変わると平衡電位がずれる。"},
+ {f:"denki",q:"エネルギー密度 Wh/kg を 上げる 方法として 誤っているのは？",c:["集電箔を 厚くする","正極の 作動電圧を 上げる","活物質の 比率を 上げる","高容量の 負極を 使う"],a:0,e:"厚い集電箔は 容量に寄与しない重さが増えるので 逆効果。"},
+ {f:"denki",q:"高 Ni 正極（NCM811 など）の 主な 劣化要因は？",c:["高電位での 酸素放出と 表面の 岩塩相化","Li の 析出","S の 溶出","集電箔の 溶解"],a:0,e:"脱 Li 状態で Ni⁴⁺ が不安定になり、表面から酸素が抜けて NiO 様の岩塩相ができ、抵抗が増える。"},
+ {f:"denki",q:"全固体電池で 正極活物質に コートする 主な 目的は？",c:["硫化物電解質との 界面反応・空間電荷層を 抑える","電子伝導度を 下げる","粒子を 大きくする","Li を 抜けにくくする"],a:0,e:"酸化物正極と硫化物電解質が直接触れると 反応層ができ、界面抵抗が増える。LiNbO₃ などを薄く被覆する。"},
+ {f:"denki",q:"全固体電池に 拘束圧を かける 主な 理由は？",c:["充放電の 体積変化で 粒子間の 接触が 切れるのを 防ぐ","電解質を 液化させる","ガスを 逃がす","電圧を 上げる"],a:0,e:"固体どうしは 自然には 濡れないので、圧力で 接触を保つ。かけすぎは Li クリープ短絡の原因。"},
+ {f:"denki",q:"Li デンドライトが 問題に なる 主な 理由は？",c:["電解質を 貫いて 内部短絡を 起こす","容量が 増えすぎる","電圧が 上がりすぎる","電解質が 結晶化する"],a:0,e:"Li が 樹枝状に成長し、正極まで届くと 短絡・発熱につながる。固体電解質でも 粒界を伝って成長することがある。"},
+ {f:"denki",q:"電池の 「SOC」とは？",c:["充電状態（残量の 割合）","劣化状態","安全性指標","内部抵抗"],a:0,e:"State of Charge。満充電を 100 % とした 残量。劣化状態は SOH（State of Health）。"},
+ {f:"denki",q:"N/P 比とは？",c:["負極と 正極の 容量比","Ni と P の 元素比","窒素と リンの 比","電子と 正孔の 比"],a:0,e:"負極容量／正極容量。1 より少し大きくして、負極側での Li 析出を防ぐ。"},
+ {f:"denki",q:"Peukert 効果に 関係する 現象は？",c:["放電電流が 大きいほど 取り出せる 容量が 減る","温度が 上がると 電圧が 上がる","サイクルで 容量が 増える","自己放電が ゼロに なる"],a:0,e:"大電流では 過電圧が大きく、カットオフ電圧に 早く達するので 実効容量が減る。"},
+ {f:"denki",q:"硫化物固体電解質 Li₃PS₄ の 電位窓が 狭い 理由として 適切なのは？",c:["高電位で S²⁻ が 酸化、低電位で P⁵⁺ が 還元される","Li が 含まれない","結晶構造が 立方晶","電子伝導体である"],a:0,e:"熱力学的な安定窓は およそ 1.7〜2.3 V と狭い。実際には 分解層が 不動態として 働くことで 動作する。"},
+ {f:"denki",q:"全固体電池で 「空間電荷層」が 問題になるのは どの 界面？",c:["酸化物正極 ／ 硫化物電解質","Li 金属 ／ 集電箔","集電箔 ／ 外装","セパレータ ／ 電解液"],a:0,e:"Li の 化学ポテンシャル差で 硫化物側の Li が 正極側へ 移り、Li 欠乏層ができて 抵抗が増えると 考えられている。"},
+ {f:"denki",q:"高電位正極 LiNi₀.₅Mn₁.₅O₄ の 作動電位は？",c:["約 4.7 V","約 3.4 V","約 2.0 V","約 1.5 V"],a:0,e:"Ni²⁺/Ni⁴⁺ の 酸化還元で 約 4.7 V。電解質の 酸化安定性が 課題。"},
+ {f:"denki",q:"Si 負極の 初回 不可逆容量が 大きい 主な 原因は？",c:["表面での 界面相形成と Li の 捕捉","集電箔の 酸化","正極の 溶解","電圧の 低さ"],a:0,e:"体積変化で 新しい表面が出るたびに 界面相ができ、Li が 消費される。SiOx は Li₂O・ケイ酸 Li の生成でも Li を失う。"},
+ {f:"denki",t:"tf",q:"直列に つないだ セルの 電圧は 足し算、容量（Ah）は 1 セルと 同じである。",a:true,e:"直列は 電圧が加算、容量は 同じ。並列は 容量が加算、電圧は 同じ。"},
+ {f:"denki",t:"tf",q:"Wh は 電荷量の 単位である。",a:false,e:"Wh は エネルギーの単位。電荷量は Ah（または C）。Wh ≈ Ah × 平均電圧。"},
+ {f:"denki",t:"tf",q:"低温では 一般に イオン伝導度が 下がり、出力が 低下する。",a:true,e:"イオン伝導は 熱活性化過程なので、温度が下がると 伝導度・反応速度が 落ちる。"},
+ {f:"denki",t:"tf",q:"Li 金属負極を 使うと、黒鉛負極より セルの エネルギー密度を 上げられる 可能性がある。",a:true,e:"Li 金属の 理論容量は 約 3860 mAh/g で 黒鉛の 約 10 倍。全固体化の 大きな 動機の 一つ。"},
+ {f:"denki",t:"tf",q:"自己放電は 電池を 使わずに 置いておいても 容量が 減っていく 現象である。",a:true,e:"副反応や 微小短絡で 少しずつ 放電が進む。"},
+ // 合成・プロセス
+ {f:"gosei",q:"Li₃PS₄ ガラスを 熱処理して 得られる 高伝導相は？",c:["β-Li₃PS₄","γ-Li₃PS₄","Li₂S","P₂S₅"],a:0,e:"液相法や ボールミルで 作った 前駆体を 熱処理すると β 相が 得られ、室温で 約 10⁻⁴ S/cm。"},
+ {f:"gosei",q:"硫化物電解質の 液相合成で よく 使われる 溶媒は？",c:["THF・アセトニトリル・エタノールなど","水","濃硫酸","液体窒素"],a:0,e:"溶媒の 選択で 中間体の 構造や 粒径が 変わる。水は 加水分解して H₂S が出るので 使えない。"},
+ {f:"gosei",q:"湿式スラリー塗工で 硫化物電解質を 使うときの 制約は？",c:["極性の 高い 溶媒・バインダーが 使いにくい","温度を 上げられない","アルミ箔が 使えない","乾燥が 不要"],a:0,e:"硫化物は 極性溶媒と 反応しやすい。トルエン・キシレンなど 低極性溶媒と、それに 溶けるバインダーを 選ぶ。"},
+ {f:"gosei",q:"乾式（ドライ）電極プロセスの 主な 利点は？",c:["溶媒の 乾燥工程が 不要で 省エネ・省スペース","膜厚ムラが ゼロに なる","バインダーが 一切 不要","真空が 不要"],a:0,e:"PTFE の フィブリル化などで 結着する。乾燥炉が 要らず、溶媒との 反応も 避けられる。"},
+ {f:"gosei",q:"固相反応で 粉末を 粉砕・混合する 主な 目的は？",c:["反応界面を 増やし 拡散距離を 短くする","色を そろえる","重さを 減らす","結晶を 大きくする"],a:0,e:"固相反応は 拡散律速なので、粒子を 細かくし よく混ぜるほど 低温・短時間で 反応が進む。"},
+ {f:"gosei",q:"LLZO の 焼結で Li が 揮発すると 生じやすい 相は？",c:["La₂Zr₂O₇（パイロクロア）","Li₂CO₃","LiCl","Li₂S"],a:0,e:"Li 不足で パイロクロア相が 出て 伝導度が 落ちる。Li 過剰仕込みや マザーパウダーで 防ぐ。"},
+ {f:"gosei",q:"ホットプレスで 焼結する 利点は？",c:["加圧で 低温でも 高密度に できる","真空が いらない","原料が いらない","結晶が 溶ける"],a:0,e:"加熱と 加圧を 同時に かけて 緻密化を 促す。SPS（放電プラズマ焼結）も 同じ 狙い。"},
+ {f:"gosei",q:"ボールミルの 回転数を 上げすぎると 起きやすいのは？",c:["発熱・ポットや ボールからの 不純物混入","反応が まったく 進まない","粉が 大きくなる","Li が 増える"],a:0,e:"エネルギーが 大きすぎると 温度上昇で 分解したり、ZrO₂ などが 摩耗して 混入する。"},
+ {f:"gosei",q:"NCM 前駆体の 共沈法で 主に 制御する 条件は？",c:["pH・アンモニア濃度・撹拌","磁場","光の 波長","気圧だけ"],a:0,e:"水酸化物の 共沈で 組成の 均一な 球状 二次粒子を 作る。pH と 錯化剤濃度で 粒径・密度が 決まる。"},
+ {f:"gosei",q:"Si ナノ粒子を 炭素で 被覆する 主な 目的は？",c:["電子伝導性の 付与と 体積膨張の 緩和","容量を 下げる","Li を 通さなくする","融点を 下げる"],a:0,e:"炭素層が 導電パスを 保ち、膨張時の 応力や 新生面の 露出を 抑える。"},
+ {f:"gosei",q:"SiOx（一酸化ケイ素）負極の 特徴は？",c:["Si より 膨張が 小さいが 初回効率が 低い","Si より 容量が 大きい","Li と 反応しない","作動電圧が 3 V 以上"],a:0,e:"不均化で ナノ Si が SiO₂ マトリクスに 分散し 膨張を 緩和。一方、Li ケイ酸塩の 生成で 初回効率が 下がる。"},
+ {f:"gosei",q:"電極の カレンダー（ロールプレス）工程の 目的は？",c:["電極を 圧密して 密度と 接触を 上げる","電極を 乾燥させる","電極を 切断する","電極に 電解液を 入れる"],a:0,e:"空隙を 減らして 体積エネルギー密度と 粒子間接触を 上げる。押しすぎると 粒子割れの 原因。"},
+ {f:"gosei",q:"全固体電池の 積層工程で 注意すべき 不良は？",c:["電極の 位置ずれ・端部の 欠け・異物混入","電解液の 液漏れ","ガス発生による 膨れだけ","集電箔の 溶解"],a:0,e:"位置ずれや 端部の 欠けは 短絡の 起点になる。異物は 固体電解質層を 突き破って 短絡を 起こす。"},
+ {f:"gosei",q:"量産ラインの 「タクトタイム」とは？",c:["1 個を 生産するのに 割り当てられる 時間","設備の 寿命","材料の 保管期間","検査の 回数"],a:0,e:"需要に 合わせて 何秒に 1 個 作るか。最も遅い 工程（ボトルネック）が ライン全体を 律速する。"},
+ {f:"gosei",q:"歩留まり 90 % の 工程を 3 つ 直列に 通すと、全体の 歩留まりは？",c:["約 73 %","90 %","約 81 %","270 %"],a:0,e:"0.9 × 0.9 × 0.9 ≈ 0.729。工程が 増えるほど 各工程の 歩留まりが 効いてくる。"},
+ {f:"gosei",t:"tf",q:"硫化物固体電解質は ドライルームでも 取り扱いに 注意が いる。",a:true,e:"露点 −40 ℃ 程度でも わずかに H₂S が出る。より 低露点や 不活性雰囲気が 望ましい。"},
+ {f:"gosei",t:"tf",q:"焼成温度は 高ければ 高いほど 良い 材料が できる。",a:false,e:"高すぎると Li の 揮発、粒成長、分解、異相生成が 起きる。最適温度が ある。"},
+ {f:"gosei",t:"tf",q:"PTFE は 乾式電極で フィブリル化して バインダーとして 働く。",a:true,e:"せん断で 繊維状に 伸び、粒子を 絡めとって 結着する。"},
+ {f:"gosei",t:"tf",q:"ラボで 1 g 作れた 材料は、同じ 条件で そのまま 100 kg 作れる。",a:false,e:"スケールアップでは 熱・物質移動、混合の 均一性、雰囲気管理が 変わるので、条件の 最適化が 必要。"},
+ {f:"gosei",t:"tf",q:"SPS（放電プラズマ焼結）は 短時間で 緻密な 焼結体を 得やすい。",a:true,e:"パルス通電と 加圧で 急速に 加熱し、粒成長を 抑えつつ 緻密化できる。"},
+ // 計算科学
+ {f:"keisan",q:"DFT の 基礎と なる 定理は？",c:["Hohenberg–Kohn 定理","Nernst の 式","Bragg の 法則","Fick の 法則"],a:0,e:"基底状態の 性質は 電子密度で 決まる という 定理。Kohn–Sham 方程式で 実際に 計算する。"},
+ {f:"keisan",q:"平面波 DFT で 「カットオフエネルギー」を 上げると？",c:["精度が 上がるが 計算が 重くなる","精度が 下がる","原子が 減る","温度が 上がる"],a:0,e:"基底関数（平面波）の 数が 増える。収束を 確認して 十分な 値を 選ぶ。"},
+ {f:"keisan",q:"k 点 サンプリングを 粗くしすぎると？",c:["全エネルギーや 物性が 収束しない","計算が 必ず 止まる","原子が 動かない","温度が 下がる"],a:0,e:"Brillouin ゾーンの 積分が 不正確になる。特に 金属では 細かい メッシュが 必要。"},
+ {f:"keisan",q:"MD で 温度を 一定に 保つ 仕組みは？",c:["サーモスタット（Nosé–Hoover など）","バロスタットのみ","k 点","擬ポテンシャル"],a:0,e:"NVT アンサンブルでは サーモスタットで 温度を 制御する。圧力制御は バロスタット。"},
+ {f:"keisan",q:"MSD（平均二乗変位）の 時間変化の 傾きから 得られるのは？",c:["拡散係数","バンドギャップ","格子定数","生成熱"],a:0,e:"3 次元では MSD = 6Dt。D から Nernst–Einstein の 式で 伝導度を 見積もる。"},
+ {f:"keisan",q:"Nernst–Einstein の 式で 伝導度を 求めるとき 無視されがちな 効果は？",c:["イオン間の 相関（協奏的な 動き）","温度","電荷","濃度"],a:0,e:"トレーサー拡散から 求めた 値は 相関を 含まない。Haven 比で 補正する ことがある。"},
+ {f:"keisan",q:"機械学習で 材料を 探索する とき 「能動学習」とは？",c:["不確かな 候補を 優先して 計算・実験し モデルを 更新する","データを 全部 消す","人が すべて 手で 選ぶ","乱数だけで 選ぶ"],a:0,e:"予測の 不確かさが 大きい 点を 狙って 追加データを 取ると、少ない 試行で モデルが 賢くなる。"},
+ {f:"keisan",q:"ベイズ最適化で 次の 実験条件を 選ぶ ときに 使う 関数は？",c:["獲得関数（期待改善量など）","損失関数のみ","波動関数","分配関数"],a:0,e:"予測平均と 不確かさの バランスで 「次に 試す 価値」を 評価する。EI・UCB などが 代表的。"},
+ {f:"keisan",q:"工程の ボトルネックを 調べる シミュレーションとして 適切なのは？",c:["離散事象シミュレーション","DFT","NEB","XRD 解析"],a:0,e:"ライン上の 部品の 流れ・待ち・設備停止を モデル化し、タクトや 稼働率を 予測する。"},
+ {f:"keisan",q:"FEM（有限要素法）で 電池の 拘束治具を 解析すると 分かるのは？",c:["セル面内の 応力・圧力分布","バンドギャップ","イオン伝導度の 温度依存性","結晶構造"],a:0,e:"治具の 剛性や ボルト配置で 面圧に ムラが出る。ムラは 接触不良や 短絡の 原因。"},
+ {f:"keisan",q:"「工程能力指数 Cpk」が 示すのは？",c:["規格幅に 対して ばらつきが どれだけ 小さいか","設備の 価格","作業者の 人数","材料の 純度"],a:0,e:"Cpk = min(上限−平均, 平均−下限)/(3σ)。1.33 以上が 目安と されることが 多い。"},
+ {f:"keisan",q:"実験計画法（DOE）の 直交表を 使う 利点は？",c:["少ない 実験数で 複数因子の 効果を 評価できる","実験が 不要になる","必ず 最適解が 出る","誤差が ゼロになる"],a:0,e:"因子の 組み合わせを バランスよく 割り付け、主効果を 効率よく 推定する。"},
+ {f:"keisan",q:"Li 金属に 対する 電解質の 還元安定性を 計算で 調べる 方法は？",c:["Li と 電解質の 反応エネルギー（相図）を 計算する","XRD を 測る","温度を 下げる","密度を 測る"],a:0,e:"Li と 電解質を 混ぜた ときの 生成物と 反応エネルギーを 相図から 求める。生成物が 電子伝導体なら 分解が 続く。"},
+ {f:"keisan",q:"van der Waals 補正（DFT-D など）が 重要な 系は？",c:["層状物質や 分子結晶","単体金属","イオン結晶だけ","気体の 単原子"],a:0,e:"通常の GGA は 分散力を うまく 表せない。黒鉛の 層間距離などで 補正が 効く。"},
+ {f:"keisan",q:"計算で 得た 拡散障壁 0.2 eV と 0.4 eV、室温での 跳躍頻度の 比は おおよそ？",c:["約 2400 倍","2 倍","約 10 倍","同じ"],a:0,e:"exp(0.2/0.0257) ≈ 2400。障壁 0.2 eV の 差で 桁違いに 変わる。"},
+ {f:"keisan",t:"tf",q:"擬ポテンシャルは 内殻電子の 効果を まとめて 扱い、計算を 軽くする。",a:true,e:"化学結合に 関わる 価電子だけを 明示的に 扱う。PAW 法も 同じ 考え方。"},
+ {f:"keisan",t:"tf",q:"シミュレーションの 予測は 実験で 検証しなくても よい。",a:false,e:"モデルには 近似や 前提が ある。予測は 実験で 確かめ、ずれを モデルに フィードバックする。"},
+ {f:"keisan",t:"tf",q:"MD の 時間刻みを 大きくしすぎると、エネルギーが 保存されず 計算が 破綻しやすい。",a:true,e:"最も 速い 振動（軽い 原子）を 解像できる 刻みが 必要。Li を 含む 系では 1〜2 fs 程度が 一般的。"},
+ {f:"keisan",t:"tf",q:"機械学習モデルは 学習データが 多ければ、偏りが あっても 正しく 外挿できる。",a:false,e:"偏った データで 学習すると 未知の 領域で 予測が 大きく 外れる。外挿には 特に 注意。"},
+ {f:"keisan",t:"tf",q:"スーパーセルを 大きくすると、周期境界条件による 欠陥どうしの 相互作用を 減らせる。",a:true,e:"欠陥計算や 拡散計算では、セルサイズの 収束も 確認する。"},
+ // 評価・分析
+ {f:"hyoka",q:"イオン伝導度 σ を ペレットの 抵抗 R から 求める 式は？",c:["σ = L/(R·A)","σ = R·A/L","σ = R/L","σ = A/R"],a:0,e:"L は 厚さ、A は 電極面積。厚いほど、面積が 小さいほど 抵抗は 大きくなる。"},
+ {f:"hyoka",q:"定電流充放電で 縦軸 電圧、横軸 容量の グラフから 分かることは？",c:["容量・平均電圧・過電圧（ヒステリシス）","結晶構造","元素組成","粒径分布"],a:0,e:"充電と 放電の 曲線の 差は 内部抵抗や 反応の 遅さを 反映する。"},
+ {f:"hyoka",q:"dQ/dV 解析で 分かることは？",c:["相転移や 反応が 起きる 電位と その 変化","粒径","密度","熱伝導率"],a:0,e:"電圧プラトーが ピークとして 現れ、劣化による ピークの 移動・減少を 追える。"},
+ {f:"hyoka",q:"GITT（定電流間欠滴定法）で 主に 求めるのは？",c:["拡散係数と 平衡電位","バンドギャップ","粒径","結晶子サイズ"],a:0,e:"短い パルスと 休止を 繰り返し、電圧の 緩和から 化学拡散係数を 見積もる。"},
+ {f:"hyoka",q:"レーザー回折式 粒度分布計で 得られる 代表値 D50 とは？",c:["体積基準で 累積 50 % の 粒径","最大粒径","最小粒径","平均密度"],a:0,e:"メジアン径。凝集体を 測ってしまう ことが あるので 分散条件に 注意。"},
+ {f:"hyoka",q:"BET 法で 測るのは？",c:["比表面積","イオン伝導度","結晶構造","電子状態"],a:0,e:"窒素などの ガス吸着量から 表面積を 求める。比表面積が 大きいほど 副反応も 増えやすい。"},
+ {f:"hyoka",q:"断面 SEM を 作るときに よく 使う 加工法は？",c:["イオンミリング（CP 加工）","手で 割る だけ","水で 洗う","焼成"],a:0,e:"Ar イオンで 削ると 機械研磨より ダメージの 少ない 断面が 得られる。硫化物は 大気非暴露で 搬送する。"},
+ {f:"hyoka",q:"量産ラインで 全数検査に X 線 CT を 使う 主な 目的は？",c:["内部の 位置ずれ・異物・空隙を 非破壊で 見つける","重さを 測る","電圧を 測る","色を 見る"],a:0,e:"積層の ずれや 異物は 短絡の 原因。抜き取りでは 見逃しが 出る。"},
+ {f:"hyoka",q:"管理図（X̄–R 管理図）で 「異常」と 判断する 典型例は？",c:["管理限界の 外に 点が 出る、または 同じ 側に 点が 連続する","点が 中心線の 上下に ばらつく","点が 毎回 同じ 値","点が 1 個 しかない"],a:0,e:"偶然の ばらつきでは 起こりにくい パターンを 検出し、工程の 変化に 早く 気づく。"},
+ {f:"hyoka",q:"セルの 内部抵抗を 短時間で 測る 一般的な 方法は？",c:["1 kHz 交流抵抗 または 直流パルス法","XRD","BET","TG"],a:0,e:"1 kHz ACR は 主に オーム抵抗、パルス法は 反応抵抗も 含む。出荷検査で よく 使う。"},
+ {f:"hyoka",q:"サイクル試験で 容量維持率 80 % 到達を 寿命と する ことが 多いのは なぜ？",c:["それ以下では 実用上 使える 容量・出力が 不足する ため","80 は 縁起が いい","測定器の 限界","法律で 決まっている"],a:0,e:"EV では 航続距離の 低下が 体感される 目安。用途によって 基準は 変わる。"},
+ {f:"hyoka",q:"ARC（加速速度熱量計）で 評価するのは？",c:["自己発熱・熱暴走の 開始温度","イオン伝導度","粒径","色"],a:0,e:"断熱条件で 発熱を 追い、熱暴走に 至る 温度や 発熱速度を 評価する 安全性試験。"},
+ {f:"hyoka",q:"ICP 発光分析で 分かることは？",c:["元素の 定量組成","結晶構造","表面形状","粒子の 硬さ"],a:0,e:"試料を 溶かして プラズマで 励起し、元素ごとの 発光から 濃度を 求める。Li の 定量にも 使える。"},
+ {f:"hyoka",q:"ToF-SIMS の 特徴は？",c:["表面の 極微量成分を 高感度に 分析・マッピングできる","バルクの 結晶構造を 精密化する","熱容量を 測る","粒度分布を 測る"],a:0,e:"Li を 含む 軽元素や 分解生成物の 分布を 深さ方向にも 追える。"},
+ {f:"hyoka",q:"放射光 XAS（X 線吸収分光）で 分かることは？",c:["特定元素の 価数と 局所構造","粒径","比表面積","重さ"],a:0,e:"吸収端の 位置で 価数、EXAFS で 周りの 原子との 距離が 分かる。充放電中の その場測定も できる。"},
+ {f:"hyoka",t:"tf",q:"直流分極法で 測れる 定常電流は、ブロッキング電極なら 主に 電子伝導による ものである。",a:true,e:"イオンは ブロッキング電極で 止まるので、分極後に 残る 電流が 電子伝導の 寄与。"},
+ {f:"hyoka",t:"tf",q:"抜き取り検査は 全数検査より 不良の 見逃しが 起きにくい。",a:false,e:"抜き取りは 一部しか 見ないので 見逃しが 起きうる。コストと 品質リスクの 兼ね合いで 選ぶ。"},
+ {f:"hyoka",t:"tf",q:"サイクル試験では 温度を 一定に 管理する 必要が ある。",a:true,e:"温度で 劣化速度も 抵抗も 大きく 変わる。恒温槽で 管理しないと 比較できない。"},
+ {f:"hyoka",t:"tf",q:"再現性を 確認するには、同じ 条件で 複数の 試料を 作って 測る 必要が ある。",a:true,e:"1 試料だけでは 偶然の 結果かも しれない。ばらつきも 含めて 評価する。"},
+ {f:"hyoka",t:"tf",q:"XRD に ピークが 出ていなければ、その 試料には 不純物が まったく 含まれていない。",a:false,e:"非晶質や 数 % 以下の 微量相は XRD では 見えにくい。Raman・NMR・XPS などと 組み合わせる。"}
 ];
 
 // ===================== クイズ（計算問題の自動生成） =====================
@@ -579,7 +727,7 @@ const EVENTS = [
 
 // ===================== 状態 =====================
 let S=null;
-const SAVEKEY="battery_lab_save_v8";
+const SAVEKEY="battery_lab_save_v10";
 const TASK_BASE=1000;
 const EQUIP_COST=3000, CEQUIP_COST=2500, HAKEN_COST=300, HAKEN_MAX=3, EXT_MAX=2;
 // 設備 → 導入フラグ・費用・プロトテーマ
@@ -602,7 +750,7 @@ function newGame(bgi){
   Object.assign(sk,BG[bgi].sk);
   S={bg:bgi,w:1,TW:YEARS*48,soc:100,stress:10,favor:30,ready:15,budget:5000,rep:0,sk,cur:0,equipOpen:false,equipIn:false,cEquipIn:false,ext:[],noRest:0,hakens:0,tasks:[],taskSeq:0,taskNext:3,issueNext:0,protoPen:0,choreMiss:0,issueOK:0,issueNG:0,
      team:[],eg:50,egNext:5,gone:[],quits:0,hires:0,rookies:0,prio:[],kTheme:null,kNext:10,kDone:0,lastAuto:[],slowUntil:0,
-     P:PROJ.map(()=>({log:[],hits:0,done:false,doneW:0,pubs:0,comp:{},lit:{},acts:0,pat:0,patW:0,patP:0})),
+     P:PROJ.map(()=>({log:[],hits:0,done:false,doneW:0,pubs:0,comp:{},lit:{},acts:0,pat:0,patW:0,patP:0,ex:{},inv:[]})),
      cellSE:[],flags:{},seen:{},grantCd:0,hist:[],over:false,clear:false,lastRank:0,mon:freshMon(),
      deptNext:5,deptI:0,costUntil:0,rewards:{},oui:{talk:0,ignore:0},tantrum:0};
   const sps=["gosei","gosei","gosei","gosei","gosei","hyoka","hyoka","hyoka","hyoka","denki","denki","denki","keisan","keisan"];
@@ -648,7 +796,7 @@ function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();r
 function rnd(a){return a[Math.floor(Math.random()*a.length)];}
 function fmt(v,d){return v.toFixed(d);}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
-function doneMaterials(){return [...SE_IDS,"ncm","si"].filter(id=>S.P[PB[id].idx].done);}
+function doneMaterials(){return [...SE_IDS,"ncm","lnmo","si","sheet"].filter(id=>S.P[PB[id].idx].done);}
 function params(p){
   if(p.kind==="cell")return p.params.map((x,i)=>i===3?{...x,o:SE_IDS.map(id=>PB[id].short+(S.P[PB[id].idx].done?"★":""))}:x);
   if(p.id==="equip")return p.params.map((x,i)=>i===0?{...x,o:doneMaterials().map(id=>PB[id].short)}:x);
@@ -677,7 +825,7 @@ function failProb(ms){
   return clamp(pf,.02,.9);
 }
 // テーマごとの 必要な 知見（ノウハウ）。たまるほど 性能が 出るようになる
-const XP_NEED={se:100,cat:160,an:160,cell:260,equip:140,proto:280};
+const XP_NEED={se:100,cat:160,an:160,sheet:140,cell:260,equip:140,proto:280};
 function know(pi){return Math.min(1,(S.P[pi].xp||0)/XP_NEED[PROJ[pi].kind]);}
 function measure(pi,c,ms){
   const p=PROJ[pi], r=p.calc(c), s=ms?ms.s:skillAvg(p), kn=know(pi);
@@ -846,7 +994,7 @@ function render(){
   bgmApply(bgmKey());
   if(S.over){endScreen();return;}
   const pi=S.cur, p=pi===null?null:PROJ[pi], P=pi===null?null:S.P[pi];
-  const patOK=S.P.some((x,i)=>x.pat===0&&ratio(i)>=.8);
+  const patOK=S.P.some((x,i)=>patSlots(i).length>0);
   const active=p&&!P.done;
   const can={
     exp:active&&runnable(pi)&&S.soc>=20&&S.budget>=costOf(p)&&!S.flags.delay,
@@ -855,8 +1003,8 @@ function render(){
     pub:S.soc>=20&&S.P.some(x=>x.log.length),
     pat:S.soc>=20&&S.budget>=30&&patOK,
     grant:S.soc>=15&&S.grantCd<=0,
-    care:S.budget>=30,
-    eg:S.soc>=10,
+    care:true,
+    eg:S.soc>=10||S.eg>=40,
     rest:true
   };
   // K口に 呼ばれた 直後の 週は 休めない（ほかに 何も できない ときだけ 例外）
@@ -882,8 +1030,8 @@ function render(){
     ${cmd("pub","がっかい","ひょうか UP",can.pub)}
     ${cmd("pat","とっきょ","30万",can.pat)}
     ${cmd("grant","よさん",S.grantCd>0?`あと${S.grantCd}週`:"しんせい",can.grant)}
-    ${cmd("care","チームケア","モチベUP 30万",can.care)}
-    ${cmd("eg","E口とそうだん","かんけいUP",can.eg)}
+    ${cmd("care","チームケア","部下の モチベ",can.care)}
+    ${cmd("eg","E口とそうだん","室の 運営",can.eg)}
     ${cmd("rest","やすむ",can.rest?"ストレス−20":"K口の件で 休めない",can.rest)}
    </div><div class="small dim" style="margin-top:6px">こんげつの成果：試料${S.mon.samples}・更新${S.mon.up}・特許${S.mon.pat}・発表${S.mon.pub} → みこみ <b class="y">${grade(monScore()).g}</b></div></div>
    ${active?chartCard(pi)+hintCard(pi)+logCard(pi):""}
@@ -1133,10 +1281,11 @@ function hintCard(pi){
   return`<div class="win"><div class="wt">ヒント</div>${items.join("")}</div>`;
 }
 function patCard(){
-  const L=S.P.map((x,i)=>({x,i})).filter(o=>o.x.pat);
+  const L=[];S.P.forEach((x,i)=>{if(x.pat)L.push({i,lb:"基本",st:x.pat,w:x.patW});Object.keys(x.ex||{}).forEach(s=>L.push({i,lb:SK[s].n,st:x.ex[s].st,w:x.ex[s].w}));});
   if(!L.length)return"";
-  return`<div class="win"><div class="wt">とっきょ</div>${L.map(o=>`<div class="hint"><span class="sq" style="background:${PROJ[o.i].col}"></span> ${PROJ[o.i].short} <span class="badge ${o.x.pat===2?"y":o.x.pat<0?"r":"b"}">${o.x.pat===1?`審査中 あと${Math.max(0,PATENT_WAIT-(S.w-o.x.patW))}週`:o.x.pat===2?"登録":"拒絶"}</span></div>`).join("")}</div>`;
+  return`<div class="win"><div class="wt">とっきょ（登録 ${patCount()} 件）</div>${L.map(o=>`<div class="hint"><span class="sq" style="background:${PROJ[o.i].col}"></span> ${PROJ[o.i].short}・${o.lb} <span class="badge ${o.st===2?"y":o.st<0?"r":"b"}">${o.st===1?`審査中 あと${Math.max(0,PATENT_WAIT-(S.w-o.w))}週`:o.st===2?"登録":"拒絶"}</span></div>`).join("")}</div>`;
 }
+function patCount(){return S.P.reduce((a,x)=>a+(x.pat===2?1:0)+Object.values(x.ex||{}).filter(e=>e.st===2).length,0);}
 function histCard(){
   if(!S.hist.length)return"";
   return`<div class="win"><div class="wt">できごと</div>${S.hist.slice(-6).reverse().map(h=>`<div class="hint"><span class="dim small">${h.m}</span><br>${h.t}</div>`).join("")}</div>`;
@@ -1211,6 +1360,10 @@ function completeProj(pi){
   if(pi===S.kTheme){S.kTheme=null;S.kDone++;addFavor(12);S.rep+=5;msg+=`<br><b class="p">わしが 言うた テーマや。ようやった！</b>（こうかんど +12・ひょうか +5）`;}
   if(P.pat===0&&p.kind!=="proto")msg+=`<br>発表の前に 特許出願も 忘れずにな。`;
   const was=themeMembers(pi).length;
+  // 目標達成時の 担当メンバーの 得意分野ごとに 特許の 種が できる
+  const inv={};themeMembers(pi).filter(m=>!m.rookie).forEach(m=>{(inv[m.sp]=inv[m.sp]||[]).push(m.n);});
+  P.inv=Object.keys(inv).map(sp=>({sp,n:inv[sp].join("・")}));
+  if(P.inv.length)msg+=`<br>担当の ${P.inv.map(v=>`${v.n}（${SK[v.sp].n}）`).join("・")}の 知見で、<b>分野別の 特許</b>も 出せるぞ。`;
   if(p.kind!=="equip"&&p.kind!=="cell"&&p.kind!=="proto")msg+=`<br>この 材料は 電極プロト用設備での 検証にも 使えるで。`;
   if(p.kind==="cell")msg+=`<br>次は <b>セルプロト用 設備</b>の 検証や。`;
   if(p.kind==="equip")msg+=`<br><br>設備での 特性検証に 合格や！ あとは <b>${EQ[p.id].n}の 導入（${EQ[p.id].cost} 万円）</b>や。予算を 確保しとけよ。`;
@@ -1251,8 +1404,11 @@ function runComp(k){
   S.soc-=12; P.acts++; S.mon.comp++; gain("keisan",2); addStress(1);
   log(`けいさん：${pr.comp}`);
   const arr=P.comp[k],m2=Math.max(...arr);
+  // 量産・設備・セルは 歩留まりなどの 予測値も 出す（知見が たまるほど 実機に 近づく）
+  const fc=["proto","equip","cell"].includes(p.kind)?pr.o.map((_,i)=>{const c=best.slice();c[k]=i;const kn=know(pi);return p.calc(c).v.map((x,j)=>{let y=x*(j===0?.7+.3*kn:.85+.15*kn)*(1+gauss()*sd*.6);const mx=p.metrics[j].max;return Math.max(0,mx?Math.min(mx,y):y);});}):null;
   pushQ(okModal(`<div class="wt">${pr.comp}</div><div class="small dim">${prev?"前回と 平均した。":""}相対スコア（高いほど 有望）</div>
    ${arr.map((v,i)=>`<div class="hbar"><span class="hn">${esc(pr.o[i])}</span><span class="ht"><i style="width:${Math.max(3,v/m2*100)}%"></i></span><span class="hv">${(v*100).toFixed(0)}</span></div>`).join("")}
+   ${fc?`<div class="small" style="margin-top:6px"><b>よそく値</b>（ほかの 条件は 最適と 仮定）</div>${fc.map((f,i)=>`<div class="small dim">${esc(pr.o[i])}：${f.map((x,j)=>`${p.metrics[j].l} <b class="${x>=p.metrics[j].t?"g":""}">${fmt(x,p.metrics[j].d)}</b>${p.metrics[j].u}`).join(" ・ ")}</div>`).join("")}`:""}
    <div class="expl">${compComment(p.id,k)}</div>`,"つぎの しゅうへ"));
   endWeek();
 }
@@ -1266,6 +1422,13 @@ function compComment(id,k){
    "llzo:0":"Ga³⁺ は立方晶を強く安定化しつつ、Al³⁺ ほど Li の伝導経路を塞がない。",
    "latp:0":"Al³⁺ 置換で格子が縮み、Li 過剰分が隙間サイトを占めて伝導度が上がる。x ≈ 0.3 を超えると AlPO₄ が出やすい。",
    "ncm:2":"LiNbO₃ は硫化物と反応しにくく Li 伝導もあるが、厚すぎると抵抗になる。",
+   "cell:2":"FEM で 拘束圧を 振った。圧が 低いと 界面が 離れ、高すぎると Li 金属が クリープする。Si は 膨張を 押さえる 圧が 要る。",
+   "equip:1":"混練の せん断と 滞留時間を 解析。連続式は 均一だが 立ち上げが 難しい。バッチ式は 止まりやすい。",
+   "proto:1":"工程シミュレーションで 乾燥・プレスの 律速を 見た。速すぎると 後工程が 追いつかず 不良が 増える。",
+   "proto:2":"プレス圧の 面内分布を 解析。一軸は ムラが 出やすく、WIP は 均一だが 遅い。",
+   "cequip:2":"治具の 面圧分布を 解析。ボルト締結は 角に 圧が 集中し、一体ケースが 最も 均一。",
+   "cproto:1":"ライン シミュレーションで 積層精度と タクトの 関係を 見た。速すぎると 位置ずれ不良が 急に 増える。",
+   "cproto:2":"拘束方式ごとの 面圧ばらつきを 解析。ばらつきが 大きいと 内部短絡の 起点に なる。",
    "si:0":"マイクロ Si は 膨張応力で 割れる。炭素と 複合化すると 応力が 緩和され、SiOx は 膨張自体が 小さい。容量と 寿命の 落としどころを 探ろう。"
   })[id+":"+k]||"計算結果を 実験計画に 活かそう。";
 }
@@ -1333,38 +1496,56 @@ function quizEnd(title,qs,correct){
 function openPub(){
   const list=S.P.map((x,i)=>({x,i})).filter(o=>o.x.log.length);
   modal(`<div class="wt">がっかい はっぴょう</div><div class="small dim" style="margin-bottom:8px">目標に ちかいほど ひょうかUP。同じテーマを くりかえすと 反響は へる。<span class="o">特許出願の 前に 発表すると 新規性を うしなう。</span></div>
-   ${list.map(o=>{const r=ratio(o.i),g=pubGain(o.i);return`<button class="qopt" data-i="${o.i}"><span class="sq" style="background:${PROJ[o.i].col}"></span> <b>${PROJ[o.i].name}</b>${o.x.pat===0&&r>=.8?' <span class="badge r">未出願</span>':""}<br><span class="small dim">到達度 ${(r*100).toFixed(0)}% ・ 発表 ${o.x.pubs}回 ・ みこみ +${g}</span></button>`;}).join("")}
+   ${list.map(o=>{const r=ratio(o.i),g=pubGain(o.i);return`<button class="qopt" data-i="${o.i}"><span class="sq" style="background:${PROJ[o.i].col}"></span> <b>${PROJ[o.i].name}</b>${o.x.pat===0&&r>=.8?' <span class="badge r">未出願</span>':""}<br><span class="small dim">到達度 ${(r*100).toFixed(0)}% ・ 発表 ${o.x.pubs}回 ・ みこみ +${g}</span>${pubBonus(o.i).map(t=>`<br><span class="small g">${t}</span>`).join("")}</button>`;}).join("")}
    <div class="btnrow"><button id="cx">▶ やめる</button></div>`,sh=>{
     sh.querySelector("#cx").onclick=closeModal;
     sh.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>doPub(+b.dataset.i));
   });
 }
-function pubGain(i){const r=Math.min(1.3,ratio(i));return Math.max(1,Math.round((3+12*r*r)*Math.pow(.55,S.P[i].pubs)*(S.P[i].done?1.2:1)));}
+// 後半ほど 知名度で 反響が 大きい。くりかえしの 目減りも ゆるめ
+function pubGain(i){const r=Math.min(1.3,ratio(i));return Math.max(1,Math.round((3+12*r*r)*Math.pow(.7,S.P[i].pubs)*(S.P[i].done?1.2:1)*(1+Math.min(.6,S.w/240))));}
+function pubBonus(i){const p=PROJ[i],P=S.P[i],b=[];
+  if(P.done&&!P.offer)b.push("共同研究の 申し出 +300万");
+  if(p.kind==="proto"||p.kind==="equip")b.push("顧客の 関心：生技れんけい +6・こうかんど +3");
+  return b;}
 function doPub(i){
-  const P=S.P[i],g=pubGain(i);S.rep+=g;P.pubs++;S.soc-=20;S.mon.pub++;gain("denki",1);gain("hyoka",.5);addStress(4);
+  const P=S.P[i],g=pubGain(i),bon=pubBonus(i);
+  if(P.done&&!P.offer){P.offer=1;S.budget+=300;}
+  if(PROJ[i].kind==="proto"||PROJ[i].kind==="equip"){S.ready=clamp(S.ready+6,0,100);addFavor(3);}
+  S.rep+=g;P.pubs++;S.soc-=20;S.mon.pub++;gain("denki",1);gain("hyoka",.5);addStress(4);
   let warn="";
   if(P.pat===0&&!P.disclosed){P.disclosed=1;warn=`<div class="expl"><span class="o">未出願のまま 発表したので、このテーマの 特許は 通りにくく なった。</span></div>`;}
   const q=rnd(["「その伝導度、粒界の寄与は分離していますか？」","「電子伝導度は測りましたか？」","「再現性は何回確認しましたか？」","「計算と実験のずれはどう解釈していますか？」","「大気安定性はどうですか？」","「スケールアップの見通しは？」","「電位窓はどの方法で評価しましたか？」"]);
   log(`がっかい：${PROJ[i].short} ひょうか +${g}`);
-  pushQ(okModal(`<div class="wt">がっかい はっぴょう</div><div class="res">しつぎ：${q}<div class="big" style="margin-top:6px">ひょうか +${g}</div></div>${warn}`,"つぎの しゅうへ"));
+  pushQ(okModal(`<div class="wt">がっかい はっぴょう</div><div class="res">しつぎ：${q}<div class="big" style="margin-top:6px">ひょうか +${g}</div>${bon.map(t=>`<div class="small g">${t}</div>`).join("")}</div>${warn}`,"つぎの しゅうへ"));
   endWeek();
 }
 // ---------- 特許 ----------
+// 出願できる 枠：O西の 基本特許（到達 80% 以上）＋ 目標達成時の 担当メンバーの 得意分野ごと
+function patSlots(i){const P=S.P[i],s=[];if(P.pat===0&&ratio(i)>=.8)s.push("main");(P.inv||[]).forEach(v=>{if(!(P.ex||{})[v.sp])s.push(v.sp);});return s;}
+const PAT_FIELD={gosei:"製造方法",keisan:"材料設計方法",hyoka:"評価・検査方法",denki:"電池構成"};
+function claimOf(p,s){
+  const base=p.kind==="se"?`${p.sub.split(" ")[0]}を含む固体電解質`:p.kind==="cat"?"全固体電池用正極活物質":p.kind==="an"?"全固体電池用負極":p.kind==="sheet"?"固体電解質シート":p.kind==="cell"?"全固体電池":p.kind==="equip"?"全固体電池用材料の製造装置":"全固体電池の連続製造ライン";
+  if(s==="main")return p.kind==="se"?`${base}およびその製造方法`:p.kind==="cat"?"被覆層を有する"+base:p.kind==="an"?`${base}およびその製造方法`:p.kind==="cell"?`${base}およびその製造方法`:p.kind==="proto"?"全固体電池用電極の連続製造方法":base;
+  return {gosei:`${base}の製造方法`,keisan:`${base}の設計方法および計算スクリーニング方法`,hyoka:`${base}の評価方法および検査装置`,denki:`${base}を備えた全固体電池およびその充放電制御方法`}[s];
+}
+function patProbS(i,s){let p=patProb(i);if(s!=="main")p=Math.min(.9,p*.75+S.sk[s]/600);return p;}
 function patProb(i){const P=S.P[i];let p=.3+.45*Math.min(1,ratio(i))+(S.sk.denki+S.sk.gosei)/800;if(P.disclosed)p*=.35;return Math.min(.95,p);}
 function openPat(){
-  const list=S.P.map((x,i)=>({x,i})).filter(o=>o.x.pat===0&&ratio(o.i)>=.8);
-  modal(`<div class="wt">とっきょ しゅつがん</div><div class="small dim" style="margin-bottom:8px">目標の 80% 以上の テーマを 出願できる（1 テーマ 1 件）。弁理士費用 30 万円。${PATENT_WAIT} 週後に 審査けっか。</div>
-   ${list.map(o=>`<button class="qopt" data-i="${o.i}"><span class="sq" style="background:${PROJ[o.i].col}"></span> <b>${PROJ[o.i].name}</b>${o.x.disclosed?' <span class="badge r">発表済</span>':""}<br><span class="small dim">到達度 ${(ratio(o.i)*100).toFixed(0)}% ・ 登録みこみ ${Math.round(patProb(o.i)*100)}%</span></button>`).join("")}
+  const list=[];S.P.forEach((x,i)=>patSlots(i).forEach(s=>list.push({x,i,s})));
+  modal(`<div class="wt">とっきょ しゅつがん</div><div class="small dim" style="margin-bottom:8px">目標の 80% 以上で O西の 基本特許、目標達成時に 担当していた メンバーの 得意分野ごとに 分野別の 特許を 出願できる。弁理士費用 30 万円。${PATENT_WAIT} 週後に 審査けっか。</div>
+   ${list.map(o=>{const v=(o.x.inv||[]).find(x=>x.sp===o.s);return`<button class="qopt" data-i="${o.i}" data-s="${o.s}"><span class="sq" style="background:${PROJ[o.i].col}"></span> <b>${PROJ[o.i].short}</b>：${o.s==="main"?"基本特許（O西）":`<span style="color:${SK[o.s].c}">${SK[o.s].n}</span>の 特許（${esc(v.n)}）`}${o.x.disclosed?' <span class="badge r">発表済</span>':""}<br><span class="small dim">${esc(claimOf(PROJ[o.i],o.s))} ・ 登録みこみ ${Math.round(patProbS(o.i,o.s)*100)}%</span></button>`;}).join("")}
    <div class="btnrow"><button id="cx">▶ やめる</button></div>`,sh=>{
     sh.querySelector("#cx").onclick=closeModal;
-    sh.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>doPat(+b.dataset.i));
+    sh.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>doPat(+b.dataset.i,b.dataset.s));
   });
 }
-function doPat(i){
-  const P=S.P[i],p=PROJ[i];
-  P.pat=1;P.patW=S.w;P.patP=patProb(i);S.soc-=20;S.budget-=30;S.mon.pat++;S.rep+=2;gain("denki",1);gain("gosei",1);addStress(3);
-  const claim=p.kind==="se"?`${p.sub.split(" ")[0]}を含む固体電解質およびその製造方法`:p.kind==="cat"?"被覆層を有する全固体電池用正極活物質":p.kind==="an"?"全固体電池用シリコン複合負極およびその製造方法":p.kind==="cell"?"全固体電池およびその製造方法":"全固体電池用電極の連続製造方法";
-  log(`とっきょ出願：${p.short}`);
+function doPat(i,s){
+  const P=S.P[i],p=PROJ[i];s=s||"main";
+  if(s==="main"){P.pat=1;P.patW=S.w;P.patP=patProb(i);}else{P.ex=P.ex||{};P.ex[s]={st:1,w:S.w,p:patProbS(i,s)};}
+  S.soc-=20;S.budget-=30;S.mon.pat++;S.rep+=2;gain("denki",1);gain("gosei",1);addStress(3);
+  const claim=claimOf(p,s);
+  log(`とっきょ出願：${p.short}${s==="main"?"":"（"+SK[s].n+"）"}`);
   pushQ(okModal(`<div class="wt">しゅつがん した</div><div class="res">発明の名称：<b>${esc(claim)}</b><div class="small dim" style="margin-top:4px">${PATENT_WAIT} 週後に 審査けっか。ひょうか +2</div></div>`,"つぎの しゅうへ"));
   endWeek();
 }
@@ -1380,6 +1561,25 @@ function doGrant(){
   endWeek();
 }
 function doCare(){
+  modal(`<div class="wt">チームケア</div><div class="small dim" style="margin-bottom:8px">部下の やる気を 上げる。E口室長との 関係とは べつ。</div>
+   <button class="qopt" id="party"><b>みんなで 食事会</b>（30万）<br><span class="small dim">全員の モチベ +15・ストレス −8</span></button>
+   <div class="small dim" style="margin:8px 0 4px">1on1 面談（無料・1 人の モチベを 85 まで 回復、12 週は 転職しない）</div>
+   ${S.team.filter(m=>!m.haken).map(m=>`<button class="qopt" data-n="${esc(m.n)}" ${m.mot>=85&&(m.keep||0)>S.w?"disabled":""}>${m.rookie?"🔰":""}${m.n} <span class="small ${m.mot<50?"r":""}">モチベ ${m.mot}</span>${(m.keep||0)>S.w?' <span class="small g">面談ずみ</span>':""}</button>`).join("")}
+   <div class="btnrow"><button id="cx">▶ やめる</button></div>`,sh=>{
+    sh.querySelector("#cx").onclick=closeModal;
+    const pb=sh.querySelector("#party");pb.disabled=S.budget<30;pb.onclick=careParty;
+    sh.querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>care1on1(b.dataset.n));
+  });
+}
+function care1on1(n){
+  const m=S.team.find(x=>x.n===n);if(!m)return;
+  m.mot=Math.max(m.mot,85);m.keep=S.w+12;S.soc=Math.max(0,S.soc-5);addStress(-3);
+  const line=rnd(["キャリアの 悩みを じっくり 聞いた。","テーマの おもしろさを 一緒に 語った。","がんばりを 具体的に ほめた。","困っている ことを 一緒に 片づけた。"]);
+  log(`1on1：${m.n}`);
+  pushQ(say("onishi",`${m.n}さんと 1on1。${line}<br><span class="g">${m.n} の モチベ ${m.mot}</span>・12 週は 転職しない`));
+  endWeek();
+}
+function careParty(){
   S.budget-=30;S.soc=Math.max(0,S.soc-5);addMot(15);addStress(-8);
   const line=rnd(["焼き肉で 部下と 語り合った。","1on1 で 部下の 悩みを 聞いた。","みんなで 昼休みに キャッチボールをした。","部下の 実験の 工夫を みんなの前で ほめた。"]);
   log(`チームケア：${line}`);
@@ -1387,10 +1587,24 @@ function doCare(){
   endWeek();
 }
 function doEg(){
-  S.soc-=10;addStress(4);const g=S.eg>=80?4:10;addEg(g);addMot(3);
+  const ch=S.tasks.filter(t=>t.kind==="chore").sort((a,b)=>a.due-b.due)[0];
+  const opt=(id,t,d,en,why)=>`<button class="qopt" id="${id}" ${en?"":"disabled"}><b>${t}</b><br><span class="small dim">${d}${en?"":`（${why}）`}</span></button>`;
+  modal(`<div class="wt">E口と そうだん</div><div class="small dim" style="margin-bottom:8px">室の 運営は E口室長の 仕事。関係が よいほど 頼める ことが ふえる（いま ${S.eg}）。</div>
+   ${opt("e1","関係づくり","E口かんけい +10・ストレス +4",S.soc>=10,"たいりょく不足")}
+   ${opt("e2","雑務を 引き取ってもらう",ch?`📋 ${ch.n}を E口室長が 片づける・かんけい −6`:"いま 雑務は ない",!!ch&&S.eg>=40,ch?"かんけい 40 以上":"雑務なし")}
+   ${opt("e3","人の 引き止めを たのむ","8 週の あいだ 誰も 転職しない・かんけい −4",S.eg>=60&&(S.graceUntil||0)<=S.w,(S.graceUntil||0)>S.w?"たのんだばかり":"かんけい 60 以上")}
+   <div class="btnrow"><button id="cx">▶ やめる</button></div>`,sh=>{
+    sh.querySelector("#cx").onclick=closeModal;
+    sh.querySelector("#e1").onclick=egTalk;
+    sh.querySelector("#e2").onclick=()=>{ch.done=ch.need;addEg(-6);S.soc=Math.max(0,S.soc-5);log(`E口に 雑務を たのんだ：${ch.n}`);pushQ(say("boss",`しゃあないな、<b>${ch.n}</b>は こっちで 片づけとくわ。<br><span class="o">E口かんけい −6</span>`));endWeek();};
+    sh.querySelector("#e3").onclick=()=>{S.graceUntil=S.w+8;addEg(-4);S.soc=Math.max(0,S.soc-5);log("E口に 引き止めを たのんだ");pushQ(say("boss",`わかった、ぐらついとる やつには 声 かけとく。<br><span class="g">8 週は 誰も 辞めさせへん</span>・<span class="o">E口かんけい −4</span>`));endWeek();};
+  });
+}
+function egTalk(){
+  S.soc-=10;addStress(4);const g=S.eg>=80?4:10;addEg(g);
   const line=rnd(["E口室長と 部下の 育成方針を すりあわせた。","E口室長と 来月の 工数配分を 相談した。","E口室長の 武勇伝を 聞きながら 飲みに いった。","E口室長に テーマの 進捗を ていねいに 説明した。"]);
   log(`E口とそうだん：${line}`);
-  pushQ(say("boss",`${line}<br><span class="g">E口かんけい +${g}</span>・モチベ +3・<span class="r">ストレス +4</span>`));
+  pushQ(say("boss",`${line}<br><span class="g">E口かんけい +${g}</span>・<span class="r">ストレス +4</span>`));
   endWeek();
 }
 function doRest(){S.soc=Math.min(100,S.soc+40);addStress(-20);log("やすんだ");toast("リフレッシュ！ たいりょく+40 ストレス−20");endWeek();}
@@ -1517,7 +1731,7 @@ function egEvent(){
     });
   };
 }
-function quitProb(m){if(S.graceUntil>S.w)return 0;return Math.min(.35,Math.max(0,(45-S.eg)/150)+Math.max(0,(50-m.mot)/200));}
+function quitProb(m){if(S.graceUntil>S.w||(m.keep||0)>S.w)return 0;return Math.min(.35,Math.max(0,(45-S.eg)/150)+Math.max(0,(50-m.mot)/200));}
 function quitCheck(){
   const q=S.team.filter(m=>!m.haken&&Math.random()<quitProb(m));
   if(!q.length)return null;
@@ -1614,6 +1828,11 @@ function endWeek(){
   if(S.stress<50)addMot(2);else if(S.stress>=80)addMot(-2);
   if(S.stress>=90){S.soc=Math.max(0,S.soc-8);}
   if(wkOf(S.w)===1){S.budget+=monthlyBudget();addFavor(-1);addEg(-1);if(S.favor<15){S.budget=Math.max(0,S.budget-20);log("K口役員の 機嫌が わるい（予算 −20 万）");}}
+  S.P.forEach((P,i)=>Object.keys(P.ex||{}).forEach(s=>{const e=P.ex[s];if(e.st===1&&S.w-e.w>=PATENT_WAIT){
+    const ok=Math.random()<e.p;e.st=ok?2:-1;
+    if(ok){S.rep+=4;S.budget+=50;log(`とっきょ登録：${PROJ[i].short}（${SK[s].n}）`);}else log(`とっきょ拒絶：${PROJ[i].short}（${SK[s].n}）`);
+    pushQ(next=>{(ok?SFX.fan:SFX.bad)();okModal(`<div class="wt">とっきょ 審査けっか</div><div class="res"><span class="sq" style="background:${PROJ[i].col}"></span> ${PROJ[i].short}：${esc(claimOf(PROJ[i],s))}<div class="big ${ok?"g":"r"}" style="margin-top:6px">${ok?"とうろく さてい！":"きょぜつ さてい…"}</div><div class="small dim">${ok?"ひょうか +4・発明報奨金 +50 万円":P.disclosed?"先に学会発表していたことが響いた。":"先行文献との差が認められなかった。"}</div></div>`)(next);});
+  }}));
   S.P.forEach((P,i)=>{if(P.pat===1&&S.w-P.patW>=PATENT_WAIT){
     const ok=Math.random()<P.patP;P.pat=ok?2:-1;
     if(ok){S.rep+=10;S.budget+=150;log(`とっきょ登録：${PROJ[i].short}`);}else log(`とっきょ拒絶：${PROJ[i].short}`);
@@ -1668,7 +1887,7 @@ function endScreen(){
   closeModal();
   bgmApply("opening");
   const done=S.P.filter(x=>x.done).length, r=rankIdx();
-  const pats=S.P.filter(x=>x.pat===2).length;
+  const pats=patCount();
   const skillSum=SKK.reduce((a,k)=>a+S.sk[k],0);
   const score=Math.round(S.rep*10+skillSum*2+done*120+pats*80+(S.clear?2000:0)+S.favor*5+S.eg*3+S.kDone*100-S.tantrum*30-S.quits*40);
   let ending;
