@@ -305,7 +305,7 @@ function genSquad(tid,rep){
 function genFreeAgents(n){for(let i=0;i<n;i++){const age=ri(22,34);genPlayer(pick(SQUAD_ROLES),rnd(52,70)-(age>31?2:0),age,0).con=0;}}
 
 function effOvr(p,role){return p.ovr-posPenalty(p.pos,role);}
-const avail=p=>p&&p.inj===0&&p.susp===0;
+const avail=p=>p&&p.inj===0&&p.susp===0&&!p.cv;
 function autoPick(tid,form){
  const roles=FORMS[form].map(f=>f[0]);const av=teamPlayers(tid).filter(avail);const lim=T(tid)&&T(tid).lg==='jp';let fc=0;
  const pairs=[];roles.forEach((r,i)=>av.forEach(p=>pairs.push([effOvr(p,r)*(.85+.15*p.fit/100),i,p.id])));
@@ -327,7 +327,7 @@ function makeFixtures(ids){const n=ids.length;const arr=shuffle(ids.slice());con
  return rounds.concat(rounds.map(m=>m.map(([h,a])=>[a,h])));}
 
 function newGame(tid,mgr){
- S={v:4,coaches:{},wcHist:[],nextId:1,season:1,md:0,phase:'season',team:tid,mgr:{name:mgr||'監督',w:0,d:0,l:0,trophies:0,clubs:[tid]},players:{},teams:[],L:{},youth:{lvl:1,scout:null,reports:[]},inbox:[],offers:[],neg:{},hist:[],board:60,obj:null,fin:null,endInfo:null,msgId:1};
+ S={v:5,coaches:{},scout:null,wcHist:[],nextId:1,season:1,md:0,phase:'season',team:tid,mgr:{name:mgr||'監督',w:0,d:0,l:0,trophies:0,clubs:[tid]},players:{},teams:[],L:{},youth:{lvl:1,scout:null,reports:[]},inbox:[],offers:[],neg:{},hist:[],board:60,obj:null,fin:null,endInfo:null,msgId:1};
  const forms=Object.keys(FORMS);
  TEAMS.forEach((d,i)=>{const id=i+1;const rep=d[5];
   S.teams.push(mkTeam(id,'jp',d[0],d[1],d[2],d[3],d[4],rep,i));
@@ -360,7 +360,7 @@ function startSeasonCommon(){
  S.obj={exp:er,target,text:target===1?'リーグ優勝':target===11?'最下位回避（11位以内）':target+'位以内'};
 }
 
-function migrate(){const v0=S.v||1;if(v0<3)migrate3(v0);if(S.v<4)migrate4();}
+function migrate(){const v0=S.v||1;if(v0<3)migrate3(v0);if(S.v<4)migrate4();if(S.v<5){(S.cpool||[]).forEach(fillCand);Object.values(S.coaches||{}).forEach(c=>c&&fillCand(c));S.scout=S.scout||null;S.v=5;inbox('🆕 アップデート','ポジションコンバート（選手画面）とチーフスカウト（クラブ画面）が追加されました。コーチ・スカウト候補は全員が特殊能力を持つようになりました。');save();}}
 function migrate4(){S.coaches={};S.wcHist=[];genCoachPool();Object.values(S.players).forEach(p=>{if(p.nat==='jp'&&p.tid>0&&T(p.tid).lg!=='jp')p.ab=1;p.pk=p.ovr;});if(wcYear()&&S.phase==='season'&&S.md<WC_MD[0])S.wc={season:S.season,r:0,nats:null,sq:{},res:[],gs:{}};S.v=4;
  inbox('🆕 アップデート',`コーチ制度（クラブ画面）、4年に一度の${WC_NAME}（リーグ画面の「代表」）、海外移籍した日本人選手の活躍で古巣の若手が覚醒する仕組みが追加されました。`);save();}
 function migrate3(v0){if(v0<2)migrate2();
@@ -412,7 +412,7 @@ function foreignBlocked(newId,outId){if(!fLim())return false;const np=P(newId),o
  if(!isF(np)||tc.lineup.includes(newId)||tc.bench.includes(newId))return false;if(op&&isF(op))return false;
  if(foreignCount()>=FOREIGN_MAX){toast('日本リーグの外国籍選手は試合登録'+FOREIGN_MAX+'人までです');return true;}return false;}
 function lineupIssues(){const tc=S.tactics,out=[];
- tc.lineup.forEach(id=>{const p=P(id);if(!p||p.tid!==S.team)out.push('先発に空きがあります');else if(p.inj)out.push(`${p.name} は負傷中（残り${p.inj}試合）`);else if(p.susp)out.push(`${p.name} は出場停止（残り${p.susp}試合）`);else if(p.fit<55)out.push(`${p.name} の体力が低下（${Math.round(p.fit)}%）`);});
+ tc.lineup.forEach(id=>{const p=P(id);if(!p||p.tid!==S.team)out.push('先発に空きがあります');else if(p.inj)out.push(`${p.name} は負傷中（残り${p.inj}試合）`);else if(p.susp)out.push(`${p.name} は出場停止（残り${p.susp}試合）`);else if(p.cv)out.push(`${p.name} はコンバート練習中（残り${p.cv}節）`);else if(p.fit<55)out.push(`${p.name} の体力が低下（${Math.round(p.fit)}%）`);});
  if(fLim()&&foreignCount()>FOREIGN_MAX)out.push(`外国籍選手が登録枠（${FOREIGN_MAX}人）を超えています（${foreignCount()}人）`);
  return[...new Set(out)];}
 function hardIssues(){return S.tactics.lineup.some(id=>{const p=P(id);return!p||p.tid!==S.team||!avail(p);})||(fLim()&&foreignCount()>FOREIGN_MAX);}
@@ -440,8 +440,8 @@ function sideStr(s){let sa=0,sm=0,sd=0,wa=0,wm=0,wd=0,miss=0;
   const e=effOvr(p,sl.role)*(.8+.2*clamp(s.energy[sl.pid],0,100)/100)*moraleF(p);
   sa+=e*w[0];wa+=w[0];sm+=e*w[1];wm+=w[1];sd+=e*w[2];wd+=w[2];}
  const f=(x,w,r)=>w>0?x/w+12*(w/r-1):40;
- const eb=s.isU&&coachSp('euro')?1.5:0;
- return{a:f(sa,wa,REF[0])-miss*4+eb,m:f(sm,wm,REF[1])-miss*4+eb,d:f(sd,wd,REF[2])-miss*4+eb};}
+ const eb=s.isU&&coachSp('euro')?1.5:0,ea=s.isU&&coachHas('set')?.8:0,ed=s.isU&&coachHas('wall')?.8:0;
+ return{a:f(sa,wa,REF[0])-miss*4+eb+ea,m:f(sm,wm,REF[1])-miss*4+eb,d:f(sd,wd,REF[2])-miss*4+eb+ed};}
 function dispMin(M){return M.half===1?(M.min<=45?M.min+"'":"45+"+(M.min-45)+"'"):(M.min<=90?M.min+"'":"90+"+(M.min-90)+"'");}
 function lg(M,side,txt,cls){M.log.push({t:M.min?dispMin(M):'',s:side,txt,cls:cls||''});}
 const nm=pid=>{const p=P(pid);return p?p.short:'?';};
@@ -513,7 +513,7 @@ function processMatchday(userM){
  if(cupDue())evOut.push(playCupRound(null));
  if(intlDue())evOut.push(playIntlRound(null));
  wcTick();
- Object.values(S.players).forEach(p=>{if(p.susp>0)p.susp--;if(p.inj>0)p.inj--;});
+ Object.values(S.players).forEach(p=>{if(p.susp>0)p.susp--;if(p.inj>0)p.inj--;if(p.cv>0){p.cv--;if(!p.cv)finishConv(p);}});
  let myRes=null;
  for(const lg of LG_ORDER){const res=[];
   for(const[h,a]of S.L[lg].fx[md]){let M;if(h===S.team||a===S.team){M=userM||newMatch(h,a,true);if(!M.done)simFull(M);}else{M=newMatch(h,a,true);simFull(M);}
@@ -626,10 +626,10 @@ function weekly(){
   if(p.tid===0||p.tid===-2){p.fit=100;return;}
   if(p.tid===-1){grow(p,yMult()*(S.tactics.train==='ハード'?1.15:1)*(coachSp('academy')?1.3:1));return;}
   const isU=p.tid===S.team;
-  const rec=isU?tr.rec*(1+coachLv('phy')*.05):22;p.fit=clamp(p.fit+rec*rnd(.8,1.2),0,100);
+  const rec=isU?tr.rec*(1+coachLv('phy')*.05)*(coachHas('care')?1.1:1):22;p.fit=clamp(p.fit+rec*rnd(.8,1.2),0,100);
   let mult=(p.lp===S.md?1.25:.8);if(isU){mult*=tr.g*coachMult(p);if(p.focus)mult*=1.5;if(coachSp('mental')&&p.mor<60)p.mor=60;}
-  grow(p,mult);
-  if(isU&&tr.inj&&p.inj===0&&Math.random()<tr.inj*(1-coachLv('phy')*.08)){p.inj=ri(1,3);inbox('練習中の負傷',p.name+'が練習中に負傷しました（全治'+p.inj+'試合）。');}
+  const o1=p.ovr;grow(p,mult);if(isU&&p.ovr<o1&&p.age>=30&&coachHas('vet'))p.ovr=o1-(o1-p.ovr)*.5;
+  if(isU&&tr.inj&&p.inj===0&&Math.random()<tr.inj*(1-coachLv('phy')*.08)*(coachHas('care')?.5:1)){p.inj=ri(1,3);inbox('練習中の負傷',p.name+'が練習中に負傷しました（全治'+p.inj+'試合）。');}
  });
  awaken();scoutTick();
  const me=myTeam();
@@ -754,10 +754,16 @@ function natSquadUI(c){const W=S.wc;const sq=(W.sq[c]||[]).map(P).filter(Boolean
 const COACH_ROLES={att:'攻撃コーチ',def:'守備コーチ',gk:'GKコーチ',phy:'フィジカルコーチ'};
 const COACH_DESC={att:'FW・MFの成長を促進',def:'DF・MFの成長を促進',gk:'GKの成長を促進',phy:'体力回復を早め、練習中の負傷を減らす'};
 const COACH_SP={euro:['欧州式戦術','試合でのチーム力が常に少し上がる'],net:['海外ネットワーク','海外クラブの選手の移籍金が約12%安くなる'],mental:['海外流メンタル','選手の士気が60を下回らない'],academy:['育成メソッド','ユースの成長+30%・若手の覚醒率2倍']};
+const COACH_GEN={conv:['コンバート名人','コンバート後に能力が上がりやすい'],young:['若手育成','23歳以下の成長+20%'],vet:['ベテラン管理','30歳以上の能力低下を半減'],set:['セットプレー職人','試合での攻撃力が少し上がる'],wall:['守備組織','試合での守備力が少し上がる'],care:['コンディション管理','体力回復+10%・練習中の負傷半減']};
+const SCOUT_SP={nego:['交渉上手','移籍交渉でスカウト能力+1として扱う'],eye:['目利き','スカウト報告の潜在能力が正確に分かる'],gem:['原石発見','見つける若手の潜在能力がさらに高い'],wide:['顔が広い','ユース探索の費用半額・報告が早い'],ovs:['海外ルート','海外クラブとの移籍交渉でさらに有利']};
 const cStars=pk=>pk>=86?5:pk>=80?4:pk>=74?3:pk>=68?2:1;
-const cWage=c=>cStars(c.pk)*cStars(c.pk)*400+(c.sp?2000:0);
+const cWage=c=>cStars(c.pk)*cStars(c.pk)*400+(c.sp?2000:0)+(c.cs||[]).length*500;
+const sWage=c=>c.sl*c.sl*400+(c.ss||[]).length*500;
+function fillCand(c){if(!c.cs){const k=shuffle(Object.keys(COACH_GEN));c.cs=k.slice(0,Math.random()<.25?2:1);}
+ if(!c.ss){const k=shuffle(['nego','eye','gem','wide']);c.ss=k.slice(0,Math.random()<.25?2:1);if(c.ab&&c.nat==='jp')c.ss.push('ovs');}
+ if(!c.sl)c.sl=clamp(Math.round(cStars(c.pk)+rnd(-1.6,1.6)),1,5);return c;}
 function mkCand(name,nat,pos,pk,ab,club){const g=POS_GROUP[pos]||pos;let role=g==='GK'?'gk':g==='DF'?'def':g==='FW'?'att':pick(['att','def']);if(g!=='GK'&&Math.random()<.2)role='phy';
- const c={id:'c'+(S.nextId++),name,nat,pos:g,pk:Math.round(pk),role,club:club||''};if(ab&&nat==='jp'){c.ab=1;c.sp=pick(Object.keys(COACH_SP));}return c;}
+ const c={id:'c'+(S.nextId++),name,nat,pos:g,pk:Math.round(pk),role,club:club||''};if(ab&&nat==='jp'){c.ab=1;c.sp=pick(Object.keys(COACH_SP));}return fillCand(c);}
 function addCand(p){if(!((p.pk||p.ovr)>=66||p.ab))return;S.cpool=S.cpool||[];const club=p.tid>0&&T(p.tid)?T(p.tid).name:'';
  S.cpool.unshift(mkCand(p.name,p.nat,p.pos,Math.max(p.pk||0,p.ovr),p.ab,club));
  while(S.cpool.length>30){let i=S.cpool.length-1;while(i>0&&S.cpool[i].sp)i--;S.cpool.splice(i,1);}}
@@ -766,20 +772,49 @@ function genCoachPool(){S.cpool=[];for(let i=0;i<7;i++){const[name,,nat]=genName
 const coachOf=r=>S.coaches&&S.coaches[r];
 const coachLv=r=>{const c=coachOf(r);return c?cStars(c.pk):0;};
 function coachSp(k){if(!S||!S.coaches||ULG()!=='jp')return false;return Object.values(S.coaches).some(c=>c&&c.sp===k);}
-function coachMult(p){const g=POS_GROUP[p.pos];const a=coachLv('att'),d=coachLv('def'),k=coachLv('gk');const b=g==='FW'?a:g==='DF'?d:g==='GK'?k:(a+d)/2;return 1+b*.06;}
-const coachWages=()=>S.coaches?Object.values(S.coaches).filter(Boolean).reduce((s,c)=>s+cWage(c),0):0;
-function coachRow(c,btn){return`<div class="row" style="gap:8px;padding:8px 0;border-top:1px solid var(--line)"><div style="flex:1;min-width:0"><b>${esc(c.name)}</b> <small class="muted">${NATN[c.nat]?NATN[c.nat][1]:''} 元${c.pos}${c.club?' · '+esc(c.club):''}</small><div style="font-size:12px"><span class="stars">${'★'.repeat(cStars(c.pk))}${'☆'.repeat(5-cStars(c.pk))}</span> ${COACH_ROLES[c.role]} · 年俸 ${fmtM(cWage(c))}</div>${c.sp?`<div style="font-size:12px" class="gold">🌟 特殊能力「${COACH_SP[c.sp][0]}」${COACH_SP[c.sp][1]}${ULG()==='jp'?'':'（日本リーグのクラブでのみ発動）'}</div>`:''}</div>${btn}</div>`;}
-function coachCard(){S.coaches=S.coaches||{};let h=`<div class="card"><h3>🧑‍🏫 コーチ陣</h3>`;
+function coachHas(k){return!!(S&&S.coaches&&Object.values(S.coaches).some(c=>c&&c.cs&&c.cs.includes(k)));}
+function coachMult(p){const g=POS_GROUP[p.pos];const a=coachLv('att'),d=coachLv('def'),k=coachLv('gk');const b=g==='FW'?a:g==='DF'?d:g==='GK'?k:(a+d)/2;return(1+b*.06)*(p.age<=23&&coachHas('young')?1.2:1);}
+const groupCoachLv=g=>g==='FW'?coachLv('att'):g==='DF'?coachLv('def'):g==='GK'?coachLv('gk'):(coachLv('att')+coachLv('def'))/2;
+const coachWages=()=>(S.coaches?Object.values(S.coaches).filter(Boolean).reduce((s,c)=>s+cWage(c),0):0)+(S.scout?sWage(S.scout):0);
+// scouts
+const scoutHas=k=>!!(S.scout&&S.scout.ss&&S.scout.ss.includes(k));
+const scoutLv=()=>S.scout?S.scout.sl+(scoutHas('nego')?1:0):0;
+const oppScoutLv=t=>1+t.rep/25;
+function negoEdge(t){if(!S.scout||!t)return 0;return clamp(scoutLv()+(scoutHas('ovs')&&t.lg!==ULG()?1.5:0)-oppScoutLv(t),-3,3);}
+const spTags=(list,DEF,cls)=>(list||[]).map(k=>`<div style="font-size:12px" class="${cls||'green'}">✦ ${DEF[k][0]}：${DEF[k][1]}</div>`).join('');
+const starStr=n=>`<span class="stars">${'★'.repeat(n)}${'☆'.repeat(5-n)}</span>`;
+function candHead(c){return`<b>${esc(c.name)}</b> <small class="muted">${NATN[c.nat]?NATN[c.nat][1]:''} 元${c.pos}${c.club?' · '+esc(c.club):''}${c.ab&&c.nat==='jp'?' · 海外経験':''}</small>`;}
+function coachRow(c,btn){fillCand(c);return`<div class="row" style="gap:8px;padding:8px 0;border-top:1px solid var(--line)"><div style="flex:1;min-width:0">${candHead(c)}<div style="font-size:12px">${starStr(cStars(c.pk))} ${COACH_ROLES[c.role]} · 年俸 ${fmtM(cWage(c))}</div>${spTags(c.cs,COACH_GEN)}${c.sp?`<div style="font-size:12px" class="gold">🌟 追加能力「${COACH_SP[c.sp][0]}」${COACH_SP[c.sp][1]}${ULG()==='jp'?'':'（日本リーグのクラブでのみ発動）'}</div>`:''}</div>${btn}</div>`;}
+function scoutRow(c,btn){fillCand(c);return`<div class="row" style="gap:8px;padding:8px 0;border-top:1px solid var(--line)"><div style="flex:1;min-width:0">${candHead(c)}<div style="font-size:12px">${starStr(c.sl)} チーフスカウト · 年俸 ${fmtM(sWage(c))}</div>${spTags(c.ss,SCOUT_SP)}</div>${btn}</div>`;}
+function coachCard(){S.coaches=S.coaches||{};let h=`<div class="card"><h3>🧑‍🏫 スタッフ</h3>`;
  for(const r in COACH_ROLES){const c=S.coaches[r];h+=c?coachRow(c,`<button class="sm" onclick="fireCoach('${r}')">解任</button>`):`<div class="row between" style="padding:8px 0;border-top:1px solid var(--line)"><span>${COACH_ROLES[r]} <small class="muted">${COACH_DESC[r]}</small></span><span class="muted">空き</span></div>`;}
- h+=`<p class="muted" style="font-size:11px">引退した選手がコーチ候補になります。海外リーグでプレーした日本人選手は、日本リーグのクラブで特殊能力を発揮します。</p><button style="width:100%" onclick="coachMarket()">コーチ候補を見る（${(S.cpool||[]).length}人）</button></div>`;return h;}
-function coachMarket(){const L=(S.cpool||[]).slice().sort((a,b)=>(b.sp?1:0)-(a.sp?1:0)||b.pk-a.pk);
- openModal(`<button class="x" onclick="closeModal()">×</button><h2>コーチ候補</h2><p class="muted" style="font-size:12px">同じ担当のコーチがいる場合は入れ替わります。年俸は毎節の人件費に含まれます。</p>${L.map(c=>coachRow(c,`<button class="sm pri" onclick="hireCoach('${c.id}')">招聘</button>`)).join('')||'<p class="muted">候補がいません。選手が引退すると候補に加わります。</p>'}`);}
+ h+=S.scout?scoutRow(S.scout,`<button class="sm" onclick="fireScout()">解任</button>`):`<div class="row between" style="padding:8px 0;border-top:1px solid var(--line)"><span>チーフスカウト <small class="muted">移籍交渉とユース探索に効果</small></span><span class="muted">空き</span></div>`;
+ h+=`<p class="muted" style="font-size:11px">引退した選手がコーチ・スカウト候補になります。全員が特殊能力を1つ以上持ち、海外でプレーした日本人の元選手はさらに追加能力を持ちます。スカウトの能力が相手クラブのスカウトより高いほど移籍交渉が有利になります。</p><div class="row" style="gap:6px"><button style="flex:1" onclick="coachMarket('coach')">コーチ候補</button><button style="flex:1" onclick="coachMarket('scout')">スカウト候補</button></div></div>`;return h;}
+function coachMarket(mode){mode=mode||'coach';const L=(S.cpool||[]).map(fillCand).slice().sort(mode==='coach'?(a,b)=>(b.sp?1:0)-(a.sp?1:0)||b.pk-a.pk:(a,b)=>b.sl-a.sl||b.ss.length-a.ss.length);
+ openModal(`<button class="x" onclick="closeModal()">×</button><h2>${mode==='coach'?'コーチ':'スカウト'}候補（${L.length}人）</h2><div class="seg" style="margin-bottom:8px"><button class="${mode==='coach'?'on':''}" onclick="coachMarket('coach')">コーチ</button><button class="${mode==='scout'?'on':''}" onclick="coachMarket('scout')">スカウト</button></div><p class="muted" style="font-size:12px">${mode==='coach'?'同じ担当のコーチがいる場合は入れ替わります。':'チーフスカウトは1人です。相手クラブのスカウト（評価が高いクラブほど優秀）より能力が高いほど交渉が有利になります。'}年俸は毎節の人件費に含まれます。</p>${L.map(c=>mode==='coach'?coachRow(c,`<button class="sm pri" onclick="hireCoach('${c.id}')">招聘</button>`):scoutRow(c,`<button class="sm pri" onclick="hireScout('${c.id}')">招聘</button>`)).join('')||'<p class="muted">候補がいません。選手が引退すると候補に加わります。</p>'}`);}
 function hireCoach(id){const i=S.cpool.findIndex(c=>c.id===id);if(i<0)return;const c=S.cpool[i];S.cpool.splice(i,1);const old=S.coaches[c.role];if(old)S.cpool.push(old);S.coaches[c.role]=c;
- inbox('コーチ就任: '+c.name,`${c.name}が${COACH_ROLES[c.role]}に就任しました。${c.sp?'\n特殊能力「'+COACH_SP[c.sp][0]+'」：'+COACH_SP[c.sp][1]:''}`);save();closeModal();toast(c.name+'が'+COACH_ROLES[c.role]+'に就任しました');render();}
+ inbox('コーチ就任: '+c.name,`${c.name}が${COACH_ROLES[c.role]}に就任しました。\n特殊能力: ${c.cs.map(k=>COACH_GEN[k][0]).join('、')}${c.sp?'\n追加能力「'+COACH_SP[c.sp][0]+'」：'+COACH_SP[c.sp][1]:''}`);save();closeModal();toast(c.name+'が'+COACH_ROLES[c.role]+'に就任しました');render();}
 function fireCoach(r){const c=S.coaches[r];if(!c||!confirm(c.name+'を解任しますか？'))return;S.cpool.push(c);S.coaches[r]=null;save();render();}
+function hireScout(id){const i=S.cpool.findIndex(c=>c.id===id);if(i<0)return;const c=S.cpool[i];S.cpool.splice(i,1);if(S.scout)S.cpool.push(S.scout);S.scout=c;
+ inbox('スカウト就任: '+c.name,`${c.name}がチーフスカウトに就任しました（${'★'.repeat(c.sl)}）。\n特殊能力: ${c.ss.map(k=>SCOUT_SP[k][0]).join('、')}`);save();closeModal();toast(c.name+'がチーフスカウトに就任しました');render();}
+function fireScout(){const c=S.scout;if(!c||!confirm(c.name+'を解任しますか？'))return;S.cpool.push(c);S.scout=null;save();render();}
+// position conversion
+const CONV_MD=4;
+function convUI(id){const p=P(id);const g=POS_GROUP[p.pos];
+ $('#pact').innerHTML=`<div class="card" style="margin-top:10px"><div class="lbl">コンバート先のポジション</div><p class="muted" style="font-size:12px">練習のため${CONV_MD}節（約1ヶ月）メンバー外になります。担当コーチの能力が高いほど、コンバート後に能力が上がることもあります。GKとフィールドの転向は大きく能力が下がります。</p><div class="chips">${Object.keys(POS_GROUP).filter(r=>r!==p.pos).map(r=>`<button onclick="startConv(${id},'${r}')">${r} <small class="muted">${convHint(p,r)}</small></button>`).join('')}</div></div>`;}
+function convHint(p,r){const pen=posPenalty(p.pos,r),lv=groupCoachLv(POS_GROUP[r]);const e=-pen*.5+lv*.7+(coachHas('conv')?2:0);return e>=1?'↑':e>-2?'→':e>-6?'↘':'↓';}
+function startConv(id,r){const p=P(id);if(!confirm(`${p.name}を${p.pos}から${r}へコンバートしますか？\n${CONV_MD}節の間メンバー外になります。`))return;
+ p.cv=CONV_MD;p.cvTo=r;p.list=false;S.tactics.lineup=S.tactics.lineup.map(x=>x===id?null:x);S.tactics.bench=S.tactics.bench.filter(x=>x!==id);fixUserLineup();
+ inbox('コンバート開始: '+p.name,`${p.name}を${p.pos}から${r}へコンバートします。${CONV_MD}節の間、練習に専念します。`);save();closeModal();toast(p.name+'のコンバート練習が始まりました');render();}
+function finishConv(p){const from=p.pos,to=p.cvTo;if(!to){delete p.cv;return;}const pen=posPenalty(from,to),lv=groupCoachLv(POS_GROUP[to]);
+ let d=-pen*.5+lv*rnd(0,1.4)+(coachHas('conv')?rnd(1,3):0)+gauss()*1.5;if(pen>=40)d=Math.min(d,-8);d=Math.round(d*10)/10;
+ const o0=Math.round(p.ovr);p.pos=to;p.ovr=clamp(p.ovr+d,35,94);p.pot=Math.max(Math.round(p.ovr),Math.round(p.pot+d));p.pl=Math.min(p.pl+Math.round(d),p.pot);p.ph=Math.max(p.ph+Math.round(d),p.pot);delete p.cvTo;delete p.cv;
+ const n=Math.round(p.ovr);const up=n>o0;p.cnote=up?`${from}→${to}へのコンバートが大成功！ 本来のポジションより能力が上がった（${o0}→${n}）`:`${from}→${to}へコンバート（${o0}→${n}）`;
+ if(p.tid===S.team){S.events=S.events||[];S.events.push((up?'🎉 ':'🔄 ')+p.name+'：'+p.cnote);
+  inbox((up?'🎉 コンバート大成功: ':'コンバート完了: ')+p.name,p.cnote+(up?'\nコーチの指導で新たな才能が開花しました。':''));if(up)toast('🎉 '+p.name+'のコンバートが大成功！');}}
 
 /* ================= transfers ================= */
-function askPrice(p){if(p.tid===0)return 0;const t=T(p.tid);const top=autoPick(p.tid,t.form).lineup.includes(p.id);let a=valueOf(p)*(top?1.3:1.05);if(p.con<=1)a*=.8;if(coachSp('net')&&T(p.tid).lg!=='jp')a*=.88;return Math.round(a/100)*100;}
+function askPrice(p){if(p.tid===0)return 0;const t=T(p.tid);const top=autoPick(p.tid,t.form).lineup.includes(p.id);let a=valueOf(p)*(top?1.3:1.05);if(p.con<=1)a*=.8;if(coachSp('net')&&T(p.tid).lg!=='jp')a*=.88;a*=1-.03*negoEdge(t);return Math.round(a/100)*100;}
 function wageDemand(p){return Math.round(Math.max(p.wage*1.15,calcWage(p)*1.1)/10)*10;}
 function buyPlayer(p,fee){const me=myTeam();
  if(me.budget<fee)return'資金が足りません';if(teamPlayers(S.team).length>=32)return'スカッドが満員です（最大32人）';
@@ -836,7 +871,7 @@ function newSeason(){
   p.pk=Math.max(p.pk||0,p.ovr);
   if(Math.random()<rc){if(p.tid===S.team)retired.push(p.name);addCand(p);delete S.players[p.id];return;}
   if(p.tid>0){p.con--;if(p.con<=0){if(p.tid===S.team){inbox('契約満了',p.name+'は契約満了でクラブを去りました。');p.tid=0;p.list=false;p.focus=false;}else if(Math.random()<.75){p.con=ri(1,3);p.wage=calcWage(p);}else p.tid=0;}}
-  p.st={a:0,g:0,as:0,r:0};p.yc=0;p.susp=0;p.fit=100;p.mor=clamp(p.mor*.5+33,30,90);
+  p.st={a:0,g:0,as:0,r:0};p.yc=0;p.susp=0;p.fit=100;delete p.cnote;p.mor=clamp(p.mor*.5+33,30,90);
  });
  if(retired.length)inbox('現役引退',retired.join('、')+' が現役を引退しました。コーチ候補に加わりました。');
  goAbroad();
@@ -877,10 +912,12 @@ function promoteYouth(id,silent){const p=P(id);if(!silent&&teamPlayers(S.team).l
 function releaseYouth(id){const p=P(id);if(!confirm(p.name+'をアカデミーから放出しますか？'))return;delete S.players[id];save();closeModal();render();}
 function upgradeYouth(){const l=S.youth.lvl;if(l>=5)return;const c=upCost(l);const me=myTeam();if(me.budget<c){toast('資金が足りません');return;}
  if(!confirm(`ユース施設をLv${l+1}に改修しますか？（${fmtM(c)}）`))return;me.budget-=c;S.fin.tout+=c;S.youth.lvl++;save();toast('ユース施設をLv'+S.youth.lvl+'に改修しました');render();}
-function sendScout(k){const r=SCOUT_REG[k];const me=myTeam();if(S.youth.scout){toast('スカウトはすでに派遣中です');return;}if(me.budget<r.cost){toast('資金が足りません');return;}
- me.budget-=r.cost;S.fin.tout+=r.cost;S.youth.scout={k,back:S.md+3,season:S.season};save();toast(r.n+'へスカウトを派遣しました（3節後に報告）');render();}
+function sendScout(k){const r=SCOUT_REG[k];const me=myTeam();if(S.youth.scout){toast('スカウトはすでに派遣中です');return;}if(me.budget<(scoutHas('wide')?r.cost/2:r.cost)){toast('資金が足りません');return;}
+ const cost=scoutHas('wide')?r.cost/2:r.cost,wk=scoutHas('wide')?2:3;me.budget-=cost;S.fin.tout+=cost;S.youth.scout={k,back:S.md+wk,season:S.season};save();toast(r.n+'へスカウトを派遣しました（'+wk+'節後に報告）');render();}
 function scoutTick(){const sc=S.youth&&S.youth.scout;if(!sc)return;if(sc.season===S.season&&S.md+1<sc.back)return;
- const r=SCOUT_REG[sc.k];const n=ri(2,3);const reps=[];for(let i=0;i<n;i++){const p=genYouth(pick(r.nat),S.youth.lvl*2+rnd(0,10));p.tid=-2;reps.push(p.id);}
+ const r=SCOUT_REG[sc.k];const sl=scoutLv();const n=ri(2,3)+(sl>=4?1:0);const reps=[];for(let i=0;i<n;i++){const p=genYouth(pick(r.nat),S.youth.lvl*2+rnd(0,10)+sl*2.5);p.tid=-2;
+  if(sl){const b=Math.round(sl*rnd(.6,1.4)+(scoutHas('gem')?4:0));p.pot=Math.min(95,p.pot+b);p.pl=Math.min(p.pl+b,p.pot);p.ph=Math.min(99,p.ph+b);}
+  if(scoutHas('eye')){p.pl=p.ph=p.pot;}reps.push(p.id);}
  S.youth.reports=reps;S.youth.scout=null;inbox('🔍 スカウト報告（'+r.n+'）',reps.map(id=>{const p=P(id);return`${p.name}（${POS_JP[p.pos]}・${p.age}歳・総合${R(p.ovr)}・潜在${p.pl}-${p.ph}）`;}).join('\n')+'\nクラブ画面の「ユース」から契約できます。');}
 function signProspect(id){const p=P(id);if(teamPlayers(-1).length>=YOUTH_MAX){toast('ユースは最大'+YOUTH_MAX+'人です');return;}const fee=500;const me=myTeam();if(me.budget<fee){toast('資金が足りません');return;}
  me.budget-=fee;S.fin.tout+=fee;p.tid=-1;S.youth.reports=S.youth.reports.filter(x=>x!==id);inbox('ユース加入: '+p.name,`${p.name}（${p.age}歳）がアカデミーに加入しました。`);save();toast(p.name+'がユースに加入しました');render();}
@@ -895,7 +932,7 @@ const R=o=>Math.round(o);
 const stars=r=>{const n=clamp(Math.round((r-35)/11),1,5);return'★'.repeat(n)+'<span style="opacity:.25">'+'★'.repeat(5-n)+'</span>';};
 function fitColor(f){return f>=80?'var(--acc)':f>=60?'var(--gold)':'var(--red)';}
 function morIcon(m){return m>=80?'😄':m>=60?'🙂':m>=40?'😐':'😟';}
-function statusIc(p){let s='';if(p.inj)s+='🚑'+p.inj+' ';if(p.susp)s+='🟥'+p.susp+' ';if(p.list)s+='💰';if(p.focus)s+='📈';if(p.loan)s+='🔁';if(p.awk&&p.tid===S.team)s+='✨';if(p.tid===S.team&&p.con<=1)s+='📝';return s;}
+function statusIc(p){let s='';if(p.inj)s+='🚑'+p.inj+' ';if(p.susp)s+='🟥'+p.susp+' ';if(p.list)s+='💰';if(p.focus)s+='📈';if(p.loan)s+='🔁';if(p.cv)s+='🔄'+p.cv+' ';if(p.awk&&p.tid===S.team)s+='✨';if(p.tid===S.team&&p.con<=1)s+='📝';return s;}
 function formHTML(tid,n){const r=table(T(tid).lg).find(x=>x.id===tid);return'<span class="form">'+r.form.slice(-(n||5)).map(f=>`<i class="f${f}">${({W:'勝',D:'分',L:'負'})[f]}</i>`).join('')+'</span>';}
 function rankOf(tid){return table(T(tid).lg).findIndex(r=>r.id===tid)+1;}
 const flag=p=>p.nat==='jp'?'🇯🇵':(p.nat&&NAT[p.nat]?NAT[p.nat].f:'');
@@ -1090,7 +1127,8 @@ function showHelp(){openModal(`<button class="x" onclick="closeModal()">×</butt
  <p><b>▶ 試合</b>：実況つきで試合が進みます。一時停止して戦術変更や選手交代（最大5人）ができます。疲れた選手は能力が落ちるので交代で活性化しましょう。</p>
  <p><b>🔁 移籍</b>：他クラブの選手にオファーを出して獲得。相手の要求額は主力ほど高くなります。売却リストに登録するとオファーが届きます。先方の希望額や届いたオファーには、金額を返答して最大3回まで交渉できます。レンタルは買取オプション付きにすると、期間中に決まった金額で完全移籍へ切り替えられます。</p>
  <p><b>🌐 代表戦</b>：4年に一度、${WC_NAME}が開催されます（リーグ画面の「代表」）。操作はできませんが、各国代表はその時点で能力が高く負傷していない選手から選ばれ、代表戦で疲労や負傷を負うことも。優勝国のリーグの全クラブに賞金が入ります。</p>
- <p><b>🧑‍🏫 コーチ</b>：クラブ画面でコーチを招聘できます。候補は引退した選手で、現役時代の実力が高いほど育成効果が大きくなります。海外リーグでプレーした日本人選手は、日本リーグのクラブで特殊能力を発揮します。</p>
+ <p><b>🧑‍🏫 コーチ・スカウト</b>：クラブ画面で、引退した選手をコーチやチーフスカウトとして招聘できます。全員が特殊能力を1つ以上持ち、海外でプレーした日本人の元選手はさらに追加能力を持ちます（コーチの追加能力は日本リーグのクラブで発動）。スカウトの能力が相手クラブのスカウトより高いほど移籍交渉がうまくいきやすく、ユース探索では潜在能力の高い選手が見つかりやすくなります。</p>
+ <p><b>🔄 コンバート</b>：選手画面から好きなポジションへコンバートできます。${CONV_MD}節（約1ヶ月）メンバー外になり、担当コーチの能力次第では元のポジションより能力が上がることもあります。</p>
  <p><b>🌏 海外組</b>：日本人選手が日本のクラブから海外へ移籍して活躍すると、その古巣の若手が刺激を受けて必ず覚醒します。</p>
  <p><b>💴 資金と能力</b>：海外クラブは日本より資金が潤沢です。日本リーグの選手は能力75前後が上限で、80に届く選手はごく稀です（若手の覚醒は例外）。</p>
  <p><b>📈 育成</b>：若手は試合に出るほど成長。潜在能力が高い選手を「重点育成」に指定すると伸びが速くなります。30歳を過ぎると衰えます。</p>
@@ -1103,6 +1141,8 @@ function openPlayer(id){const p=P(id);if(!p)return;const own=p.tid===S.team;cons
  <div class="kv"><div><small>潜在能力</small><b>${own?p.pot:p.pl+'-'+p.ph}</b></div><div><small>市場価値</small><b>${fmtM(v)}</b></div><div><small>年俸</small><b>${fmtM(p.wage)}</b></div><div><small>契約残り</small><b>${p.tid?p.con+'年':'-'}</b></div><div><small>体力</small><b style="color:${fitColor(p.fit)}">${R(p.fit)}%</b></div><div><small>士気</small><b>${morIcon(p.mor)} ${R(p.mor)}</b></div>
  <div><small>今季 出場/得点/A</small><b>${st.a} / ${st.g} / ${st.as}</b></div><div><small>平均評価</small><b>${st.a?(st.r/st.a).toFixed(2):'-'}</b></div></div>
  ${p.inj?`<div class="warn">🚑 負傷中：残り${p.inj}試合</div>`:''}${p.susp?`<div class="warn">🟥 出場停止：残り${p.susp}試合</div>`:''}`;
+ if(p.cv)h+=`<div class="warn">🔄 ${p.cvTo}へコンバート練習中（残り${p.cv}節）</div>`;
+ if(p.cnote&&own)h+=`<div class="warn" style="background:#123b25;border-color:var(--acc);color:#c9ffe0">${esc(p.cnote)}</div>`;
  if(p.loan){h+=`<div class="warn" style="background:#10283a;border-color:#1f5a7a;color:#bfe6ff">🔁 ${p.loan.from===S.team?T(p.tid).name+'へレンタル中（シーズン終了後に復帰）':T(p.loan.from).name+'からレンタル'+(own?'加入':'')+'中（シーズン終了まで）'}${p.loan.opt?'<br>買取オプション: '+fmtM(p.loan.opt):''}</div>`;}
  if(own&&p.loan){h+=`<div class="row wrap" style="gap:6px">${p.loan.opt?`<button class="gold" onclick="exerciseOpt(${id})">💴 買取オプション行使（${fmtM(p.loan.opt)}）</button>`:''}${p.age<=23?`<button onclick="toggleFocus(${id})">${p.focus?'重点育成を解除':'📈 重点育成に指定'}</button>`:''}</div>`;}
  else if(p.loan){}
@@ -1110,6 +1150,7 @@ function openPlayer(id){const p=P(id);if(!p)return;const own=p.tid===S.team;cons
   <button onclick="toggleList(${id})">${p.list?'売却リストから外す':'💰 売却リストに登録'}</button>
   ${p.age<=23?`<button onclick="toggleFocus(${id})">${p.focus?'重点育成を解除':'📈 重点育成に指定'}</button>`:''}
   <button onclick="renewUI(${id})">📝 契約延長</button>
+  ${p.cv?'':`<button onclick="convUI(${id})">🔄 コンバート</button>`}
   ${S.phase==='season'?`<button onclick="loanOutUI(${id})">🔁 レンタルに出す</button>`:''}
   <button class="danger" onclick="releaseP(${id})">即時放出（${fmtM(Math.round(v*.6/100)*100)}）</button></div><div id="pact"></div>`;}
  else{const blocked=S.neg[id]===S.md;h+=`<div id="pact">${blocked?'<div class="warn">この節は交渉を拒否されています。次節以降に再挑戦しましょう。</div>':`<button class="pri" style="width:100%;padding:12px" onclick="offerUI(${id})">${p.tid?'💼 移籍オファーを出す':'✍️ 契約を提示する'}</button>${p.tid&&S.phase==='season'?`<button style="width:100%;padding:11px;margin-top:6px" onclick="loanInUI(${id})">🔁 レンタル移籍を打診</button>`:''}`}</div>`;}
@@ -1151,12 +1192,12 @@ function offerUI(id){const p=P(id);const v=valueOf(p);const wd=wageDemand(p);con
  const mx=Math.max(v*2.5,100);U.offer=Math.round(v/100)*100;
  $('#pact').innerHTML=`<div class="card"><div class="lbl">提示する移籍金</div><div style="font-family:var(--display);font-size:24px;text-align:center" id="ofv">${fmtM(U.offer)}</div>
  <input type="range" min="${Math.round(v*.4/100)*100}" max="${Math.round(mx/100)*100}" step="100" value="${U.offer}" oninput="U.offer=+this.value;$('#ofv').textContent=fmtM(U.offer)">
- <p class="muted" style="font-size:12px">市場価値 ${fmtM(v)} · 予算 ${fmtM(me.budget)} · 獲得後の年俸 ${fmtM(wd)}</p><button class="pri" style="width:100%" onclick="sendOffer(${id})">オファー送信</button><div id="ores"></div></div>`;}
+ <p class="muted" style="font-size:12px">市場価値 ${fmtM(v)} · 予算 ${fmtM(me.budget)} · 獲得後の年俸 ${fmtM(wd)}${S.scout?'<br>スカウト力: '+(negoEdge(T(p.tid))>0.5?'<span class="green">こちらが優勢</span>':negoEdge(T(p.tid))<-0.5?'<span class="redt">相手が優勢</span>':'互角'):'<br>チーフスカウトを雇うと交渉が有利になることがあります'}</p><button class="pri" style="width:100%" onclick="sendOffer(${id})">オファー送信</button><div id="ores"></div></div>`;}
 function sendOffer(id){const p=P(id);const fee=U.offer;const me=myTeam();if(me.budget<fee){$('#ores').innerHTML='<div class="warn">資金が足りません</div>';return;}
  if(teamPlayers(p.tid).length<=18){$('#ores').innerHTML='<div class="warn">'+esc(T(p.tid).name)+'は選手層が薄いため放出を拒否しました。</div>';S.neg[id]=S.md;save();return;}
  const ask=askPrice(p);
  if(fee>=ask){$('#ores').innerHTML=`<div class="warn" style="background:#123b25;border-color:var(--acc);color:#c9ffe0">${esc(T(p.tid).name)}がオファーを受諾！ 選手も個人合意しました。</div><button class="pri" style="width:100%" onclick="doBuy(${id},${fee})">契約を完了する</button>`;}
- else if(fee>=ask*.82){U.ng={id,ask,last:fee,r:0};negUI(`${esc(T(p.tid).name)}からカウンターオファー：<b>${fmtM(ask)}</b> なら応じるとのこと。`);}
+ else if(fee>=ask*(.82-.02*negoEdge(T(p.tid)))){U.ng={id,ask,last:fee,r:0};negUI(`${esc(T(p.tid).name)}からカウンターオファー：<b>${fmtM(ask)}</b> なら応じるとのこと。`);}
  else{S.neg[id]=S.md;save();$('#ores').innerHTML=`<div class="warn" style="background:#3a1519;border-color:#7a2630;color:#ffc2c8">${esc(T(p.tid).name)}はオファーを一蹴しました。この節はもう交渉できません。</div>`;}}
 function negUI(msg){const n=U.ng;U.offer2=Math.round((n.last+n.ask)/2/100)*100;
  $('#ores').innerHTML=`<div class="warn">${msg}</div><button class="gold" style="width:100%;margin-bottom:8px" onclick="doBuy(${n.id},${n.ask})">${fmtM(n.ask)}で合意する</button>
@@ -1165,9 +1206,9 @@ function negUI(msg){const n=U.ng;U.offer2=Math.round((n.last+n.ask)/2/100)*100;
  <button style="width:100%" onclick="replyOffer()">この金額で返答</button></div>`;}
 function replyOffer(){const n=U.ng;if(!n)return;const p=P(n.id);const v=U.offer2;const me=myTeam();const tn=esc(T(p.tid).name);
  if(me.budget<v){toast('資金が足りません');return;}
- n.r++;const gap=(n.ask-v)/n.ask;
- if(v>=n.ask||gap<=.03||(gap<=.06&&Math.random()<.5)){$('#ores').innerHTML=`<div class="warn" style="background:#123b25;border-color:var(--acc);color:#c9ffe0">${tn}が ${fmtM(v)} で合意！ 選手も個人合意しました。</div><button class="pri" style="width:100%" onclick="doBuy(${n.id},${v})">契約を完了する</button>`;U.ng=null;return;}
- if(n.r>=3||gap>.18){S.neg[n.id]=S.md;save();U.ng=null;$('#ores').innerHTML=`<div class="warn" style="background:#3a1519;border-color:#7a2630;color:#ffc2c8">${tn}「これ以上は話にならない」交渉は決裂しました。この節はもう交渉できません。</div>`;return;}
+ n.r++;const gap=(n.ask-v)/n.ask;const ed=negoEdge(T(p.tid));
+ if(v>=n.ask||gap<=.03+.01*ed||(gap<=.06+.015*ed&&Math.random()<.5)){$('#ores').innerHTML=`<div class="warn" style="background:#123b25;border-color:var(--acc);color:#c9ffe0">${tn}が ${fmtM(v)} で合意！ 選手も個人合意しました。</div><button class="pri" style="width:100%" onclick="doBuy(${n.id},${v})">契約を完了する</button>`;U.ng=null;return;}
+ if(n.r>=3||gap>.18+.02*ed){S.neg[n.id]=S.md;save();U.ng=null;$('#ores').innerHTML=`<div class="warn" style="background:#3a1519;border-color:#7a2630;color:#ffc2c8">${tn}「これ以上は話にならない」交渉は決裂しました。この節はもう交渉できません。</div>`;return;}
  n.ask=Math.max(v+100,Math.round((n.ask-(n.ask-v)*rnd(.3,.55))/100)*100);n.last=v;
  negUI(`${tn}「${fmtM(v)}では足りない。${fmtM(n.ask)}までなら下げよう」`);}
 function sellNegUI(oid){const o=S.offers.find(x=>x.id===oid);if(!o)return;const p=P(o.pid);U.sv=Math.round(o.fee*1.15/100)*100;
@@ -1176,7 +1217,7 @@ function sellNegUI(oid){const o=S.offers.find(x=>x.id===oid);if(!o)return;const 
  <input type="range" min="${o.fee+100}" max="${Math.round(o.fee*1.8/100)*100}" step="100" value="${U.sv}" oninput="U.sv=+this.value;$('#svv').textContent=fmtM(U.sv)">
  <button class="pri" style="width:100%" onclick="sellReply(${oid})">この金額で返答</button><div id="sres"></div>`);}
 function sellReply(oid){const o=S.offers.find(x=>x.id===oid);if(!o)return;const p=P(o.pid);const t=T(o.tid);const v=U.sv;const m=S.inbox.find(x=>x.offer===oid);
- if(!o.max)o.max=Math.round(Math.min(t.budget,o.fee*rnd(1.05,1.35))/100)*100;o.r=(o.r||0)+1;
+ if(!o.max)o.max=Math.round(Math.min(t.budget,o.fee*rnd(1.05,1.35)*(1+.03*negoEdge(t)))/100)*100;o.r=(o.r||0)+1;
  if(v<=o.max){if(teamPlayers(S.team).length<=16){toast('スカッドが16人を下回るため売却できません');return;}sellPlayer(p,o.tid,v);if(m)m.done='受諾（'+fmtM(v)+'）';closeModal();toast(t.name+'が'+fmtM(v)+'で合意しました');render();return;}
  if(o.r>=3||v>o.max*1.3){S.offers=S.offers.filter(x=>x.id!==oid);if(m)m.done='決裂';save();closeModal();toast(t.name+'はオファーを取り下げました');render();return;}
  const nf=Math.round(Math.min(o.max,o.fee+(v-o.fee)*rnd(.3,.6))/100)*100;const up=nf>o.fee;o.fee=Math.max(o.fee,nf);save();
