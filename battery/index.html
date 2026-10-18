@@ -116,6 +116,7 @@ svg text{font-family:var(--font)}
 .trow .up{padding:2px 10px}
 .seg button.fit{border-color:#f8b800}
 .seg button.fit.on{background:#f8b800;color:#000}
+.seg button.task{border-color:#888;border-style:dashed}
 </style>
 </head><body><div id="app"></div>
 <script>
@@ -368,7 +369,7 @@ const PROJ = [
   calc(c){
    const [pr,sp,ps,ins]=c,n=[];
    const f=.85+.15*(S.ready||0)/100;
-   const Y=110*[.9,.8,.95][pr]*[1,.98,.95,.88,.65][sp]*[.85,.97,1][ps]*[.9,1][ins]*f;
+   const Y=110*[.9,.8,.95][pr]*[1,.98,.95,.88,.65][sp]*[.85,.97,1][ps]*[.9,1][ins]*f*(1-(S.protoPen||0));
    const C=900*[1,1.2,.8][pr]*[.15,.4,.65,1,1.6][sp]*[.6,1,.7][ps]*[1,.85][ins];
    if(pr===1)n.push("溶媒レスで速いが膜厚ムラが出やすい");
    if(pr===2)n.push("転写時の剥離で不良が出る");
@@ -376,6 +377,7 @@ const PROJ = [
    if(ps===0)n.push("一軸プレスはバッチ式で律速");
    if(ins===0)n.push("不良の流出でロット全体が NG に");
    if((S.ready||0)<40)n.push("生技部との条件すり合わせ不足");
+   if((S.protoPen||0)>0)n.push(`未解決の 量産課題で 歩留まり −${Math.round(S.protoPen*100)}%`);
    return {v:[Math.min(100,Y),C],n};
   }}
 ];
@@ -508,8 +510,11 @@ const EVENTS = [
  {w:3,t:"先輩から実験ノウハウを教わった",e:"🧑‍🔬",f:()=>{gain("gosei",4);return"材料合成 +4";}},
  {w:2,t:"計算機クラスタが更新された",e:"🖥️",f:()=>{gain("keisan",3);return"計算科学 +3";}},
  {w:3,t:"グローブボックスの露点が −40℃ まで悪化した",e:"💧",f:()=>{S.flags.wet=1;return"次の実験は失敗しやすい";}},
- {w:2,t:"インピーダンスアナライザが故障…",e:"🔧",f:()=>{S.budget-=50;return"修理費 −50 万円";}},
- {w:2,t:"共同研究先から原料を提供してもらえた",e:"🤝",f:()=>{S.budget+=80;return"予算 +80 万円";}},
+ {w:2,t:"インピーダンスアナライザが故障…",e:"🔧",f:()=>{S.budget-=250;return"修理費 −250 万円";}},
+ {w:2,t:"全社の 経費削減で 予算が カットされた",e:"✂️",f:()=>{S.budget-=400;return"予算 −400 万円";}},
+ {w:1,t:"グローブボックスの 大規模修理が 必要に…",e:"🧤",f:()=>{S.budget-=500;return"修理費 −500 万円";}},
+ {w:2,t:"事業部から 追加予算が おりた",e:"💴",f:()=>{S.budget+=400;return"予算 +400 万円";}},
+ {w:2,t:"共同研究先から原料を提供してもらえた",e:"🤝",f:()=>{S.budget+=250;return"予算 +250 万円";}},
  {w:2,t:"競合グループが近い成果を発表した",e:"📰",f:()=>{S.rep=Math.max(0,S.rep-4);return"評価 −4（急ごう）";}},
  {w:2,t:"過去の発表が被引用され話題に",e:"✨",f:()=>{S.rep+=4;return"評価 +4";}},
  {w:2,t:"風邪で寝込んだ",e:"🤧",f:()=>{S.soc=Math.max(5,S.soc-30);return"たいりょく −30 %";}},
@@ -520,7 +525,7 @@ const EVENTS = [
  {w:2,t:"放射光施設のビームタイムが当たった",e:"🌈",f:()=>{gain("hyoka",5);return"評価解析 +5";}},
  {w:2,t:"知財部から「出願できそうな成果はない？」と聞かれた",e:"⚖️",f:()=>{gain("denki",1);return"特許申請コマンドを活用しよう";}},
  {w:2,t:"国家プロジェクトの公募が出た",e:"📑",choice:[
-   {l:"応募する（たいりょく −20 %）",f:()=>{S.soc=Math.max(5,S.soc-20);if(Math.random()<.35+S.rep/300){S.budget+=300;return"採択！予算 +300 万円";}return"不採択…";}},
+   {l:"応募する（たいりょく −20 %）",f:()=>{S.soc=Math.max(5,S.soc-20);if(Math.random()<.35+S.rep/300){S.budget+=1000;return"採択！予算 +1000 万円";}return"不採択…";}},
    {l:"今回は見送る",f:()=>"見送った"}]},
  {w:2,t:"他部署から測定を頼まれた",e:"📦",choice:[
    {l:"引き受ける（たいりょく −15 %）",f:()=>{S.soc=Math.max(5,S.soc-15);S.rep+=3;gain("hyoka",2);return"評価 +3・評価解析 +2";}},
@@ -529,7 +534,8 @@ const EVENTS = [
 
 // ===================== 状態 =====================
 let S=null;
-const SAVEKEY="battery_lab_save_v6";
+const SAVEKEY="battery_lab_save_v7";
+const TASK_BASE=1000;
 const EQUIP_COST=3000, HAKEN_COST=300, HAKEN_MAX=3, EXT_MAX=2, PROTO_W=97;
 const NAME_POOL=["N村","Y田","H野","M本","K藤","A部","I川","U野","F田","W田","G藤","R木","Z間","O野","T井","H田","M川","K田","S田","Y本","I藤","N田","O川","K野","T村","A木","M田","S井","H本","Y川"];
 function pickName(){return NAME_POOL.find(n=>!S.team.some(m=>m.n===n)&&!(S.gone||[]).includes(n))||("新人"+(S.team.length+1));}
@@ -547,12 +553,12 @@ function freshMon(){return {samples:0,up:0,done:0,pat:0,pub:0,comp:0,study:0};}
 function newGame(bgi){
   const sk={denki:10,gosei:10,keisan:10,hyoka:10};
   Object.assign(sk,BG[bgi].sk);
-  S={bg:bgi,w:1,TW:YEARS*48,soc:100,stress:10,favor:30,ready:15,budget:5000,rep:0,sk,cur:0,equipOpen:false,equipIn:false,ext:[],noRest:0,hakens:0,
+  S={bg:bgi,w:1,TW:YEARS*48,soc:100,stress:10,favor:30,ready:15,budget:5000,rep:0,sk,cur:0,equipOpen:false,equipIn:false,ext:[],noRest:0,hakens:0,tasks:[],taskSeq:0,taskNext:3,issueNext:0,protoPen:0,choreMiss:0,issueOK:0,issueNG:0,
      team:[],eg:50,egNext:5,gone:[],quits:0,hires:0,rookies:0,prio:[],kTheme:null,kNext:10,kDone:0,lastAuto:[],slowUntil:0,
      P:PROJ.map(()=>({log:[],hits:0,done:false,doneW:0,pubs:0,comp:{},lit:{},acts:0,pat:0,patW:0,patP:0})),
      cellSE:[],flags:{},seen:{},grantCd:0,hist:[],over:false,clear:false,lastRank:0,mon:freshMon(),
      deptNext:5,deptI:0,costUntil:0,rewards:{},oui:{talk:0,ignore:0},tantrum:0};
-  const sps=["gosei","gosei","gosei","gosei","hyoka","hyoka","hyoka","denki","denki","denki","keisan","keisan"];
+  const sps=["gosei","gosei","gosei","gosei","gosei","hyoka","hyoka","hyoka","hyoka","denki","denki","denki","keisan","keisan"];
   sps.forEach((sp,i)=>S.team.push(mkMember(i===0?"T中":i===1?"S木":null,sp)));
   PROJ.forEach(p=>{if(unlocked(p))S.P[p.idx].started=1;});
   normPrio();
@@ -586,7 +592,7 @@ function normPrio(){
   live.forEach(i=>{if(!S.prio.includes(i))S.prio.push(i);});
   if(S.kTheme!==null&&!live.includes(S.kTheme))S.kTheme=null;
   if(S.kTheme!==null)S.prio=[S.kTheme,...S.prio.filter(i=>i!==S.kTheme)];
-  S.team.forEach(m=>{if(m.th>=0&&!live.includes(m.th))m.th=-1;});
+  S.team.forEach(m=>{if(m.th>=0&&m.th<TASK_BASE&&!live.includes(m.th))m.th=-1;if(m.th>=TASK_BASE&&!S.tasks.some(t=>t.id===m.th))m.th=-1;});
 }
 function addEg(v){S.eg=clamp(Math.round(S.eg+v),0,100);}
 function costOf(p){return Math.round(p.cost*(S.w<S.costUntil?.85:1));}
@@ -711,16 +717,17 @@ function titleScreen(){
     <button class="pri wide" id="start">▶ はじめから</button>
    </div>
    <div class="win small" style="text-align:left;line-height:1.85">
-   ◆ O西の 下で 室長 E口が 室を 指揮。室の メンバー 12 人を テーマに 配置して、いくつもの テーマを 同時に すすめる。<br>
+   ◆ O西の 下で 室長 E口が 室を 指揮。室の メンバー 14 人を テーマに 配置して、いくつもの テーマを 同時に すすめる。<br>
    ◆ テーマの ゆうせんどは 自分で きめられるが、<span class="p">K口役員に 指示された テーマ👑</span>は かならず 最優先。<br>
    ◆ まいしゅう O西は 1 つ コマンドを えらぶ。<br>
    ◆ 電解質・正極・Si 負極・セル試作は 最初から 同時並行。3 年目から <span class="y">プロト量産試作</span>が 解放され、クリアで ゲームクリア。<br>
    ◆ 報告会で 生技れんけいが 30 以上だと <b>設備導入テーマ</b>が 解放。目標クリアした 材料で 特性検証に 合格し、${EQUIP_COST} 万円で 設備を 入れないと プロト量産試作は できない。<br>
    ◆ 予算で 派遣社員（半年）を やとったり、外部に 実験を 依頼（納期 2 週）できる。<br>
+   ◆ 部下には 雑務も くる。期限までに 終わらせないと 評価が さがる。設備導入後は プロトラインの 量産課題も 発生。<br>
    ◆ 資料作成週は ストレスが 20 たまる。K口役員に 呼ばれた 直後の 週は 休めない。<br>
    ◆ 月末は 社内報告会。前の週は 資料作成で 実験は 1 水準まで。<br>
    ◆ <span class="p">K口役員</span>に「オウイ」と よばれたら… 話せば こうかんどUP（予算・人員）、でも <span class="r">ストレス</span>も たまる。<br>
-   ◆ ストレスが 高いと 部下に あたって モチベが さがり、ミスが ふえる。他部署や 社外との やりとりも うまくいかない。<br>
+   ◆ ストレスが 高すぎると E口室長に あたって 関係が ゼロに なる（すぐ あやまれば 少し もどる）。他部署や 社外との やりとりも うまくいかない。<br>
    ◆ 部下を まとめるのは <span class="o">E口室長</span>。E口と うまく やらないと 部下が <span class="r">転職</span> してしまう。<br>
    ◆ 半年ごとに キャリア入社、毎年 4 月に 新人🔰。新人は 戦力にならず、指導役の 工数が 半分になる。
    </div>
@@ -734,7 +741,7 @@ function titleScreen(){
     pushQ(say("kawaguchi","O西、今日から 君が 全固体電池プロジェクトの リーダーや。<br>期限は 5 年。プロト量産まで こぎつけてくれ。<br>電解質・正極・Si 負極・セルは 同時に 進めえ。3 年目からは プロト量産試作も 始めるで。"));
     pushQ(say("kawaguchi","オウイ！ O西！<br>期待しとるぞ。わしが呼んだら、すぐ来いよ。"));
     pushQ(say("onishi","（K口役員に呼ばれると話が長いんだよな…）<br>はい！ がんばります！"));
-    pushQ(say("boss","室長の E口です。O西さん、よろしく お願いします。<br>室の メンバーは 12 人。それぞれ 得意分野が ちがうので、どの テーマに 配置するかは お任せします。"));
+    pushQ(say("boss","室長の E口です。O西さん、よろしく お願いします。<br>室の メンバーは 14 人。それぞれ 得意分野が ちがうので、どの テーマに 配置するかは お任せします。"));
     pushQ(say("boss","メンバーの 面倒は 私が 見ていますが、私に 相談なしに 無理を させると 辞めてしまいますので…。"));
     pushQ(next=>openAssign(next));
     render();runQ();
@@ -836,6 +843,7 @@ function roomCard(){
   return`<div class="win"><div class="wt">室の テーマ（ゆうせんど順）</div>
    <div class="small dim" style="margin-bottom:4px">${S.equipOpen?"":`生技れんけい 30 以上で 報告会のとき 設備導入テーマ 解放。`}到達は もくひょうへの 到達度、メンバーは 得意分野の 頭文字（黄色＝テーマに 合う）。知見は 実験で たまる ノウハウ（たまるほど 性能が 出る）。上ほど 予算を 先に 使う。資料作成週は 1 位の テーマだけ 動く。${S.kTheme!==null?'<span class="p">👑 K口指示の テーマは つねに 1 位。</span>':""}テーマ名を おすと O西が 担当（じっけん・けいさん）。</div>
    ${rows||'<div class="small dim">すすめる テーマが ない。</div>'}${la}
+   ${taskCard()}
    ${S.ext.length?`<div class="small" style="margin-top:6px">外部依頼中：${S.ext.map(e=>`${PROJ[e.pi].short}（あと${Math.max(0,e.due-S.w)}週）`).join("・")}</div>`:""}
    ${S.P[PB.equip.idx].done&&!S.equipIn?`<button class="pri wide" id="eqbuy" style="margin-top:8px" ${S.budget>=EQUIP_COST?"":"disabled"}>▶ プロト用設備を 導入する（${EQUIP_COST}万）</button>`:""}
    ${S.equipIn?'<div class="small g" style="margin-top:6px">🏗 プロト用設備 導入済み</div>':""}
@@ -845,8 +853,13 @@ function roomCard(){
 function autoAssign(){
   normPrio();const top=S.prio.filter(runnable).slice(0,8),cnt={};top.forEach(t=>cnt[t]=0);
   S.team.forEach(m=>{if(!m.rookie)m.th=-1;});
+  // 雑務・量産課題に 必要なぶんだけ 先に 人を まわす
+  const pool=workers().sort((a,b)=>a.lv-b.lv);
+  S.tasks.forEach(t=>{const left=t.need-t.done,wk=Math.max(1,t.due-S.w);let k=Math.min(pool.length,Math.ceil(left/wk*1.3));
+    if(t.kind==="issue"){const f=pool.filter(m=>m.sp===t.sp);f.slice(0,k).forEach(m=>{m.th=t.id;pool.splice(pool.indexOf(m),1);k--;});}
+    k=Math.max(0,k);pool.slice(0,k).forEach(m=>m.th=t.id);pool.splice(0,k);});
   if(!top.length)return;
-  workers().sort((a,b)=>b.lv-a.lv).forEach(m=>{
+  pool.sort((a,b)=>b.lv-a.lv).forEach(m=>{
     let best=top[0],bs=-99;
     top.forEach((t,i)=>{const s=(fits(m,PROJ[t])?2:0)-cnt[t]*.9+(t===S.kTheme?1.5:0)+(top.length-i)*.1;if(s>bs){bs=s;best=t;}});
     m.th=best;cnt[best]++;
@@ -854,19 +867,65 @@ function autoAssign(){
   S.team.forEach(m=>{if(m.rookie){const mt=mentorOf(m);m.th=mt?mt.th:top[0];}});
 }
 function openAssign(next){
-  normPrio();const opts=[...S.prio,-1];
+  normPrio();const opts=[...S.prio,...S.tasks.map(t=>t.id),-1];
   const draw=sh=>{
     sh.innerHTML=`<div class="wt">メンバー はいち</div>
-    <div class="small dim" style="margin-bottom:8px">メンバーは 毎週 1 試料ずつ 自分で 条件を 考えて 実験する（1 試料ごとに 予算を つかう）。<span class="y">黄色わく</span>は 得意分野が テーマに 合う＝実験が うまい。合わない テーマや 待機は モチベが 少しずつ さがる。🔰新人は 戦力外、[指導] は 隔週。Ⓗは 派遣社員（半年で 契約満了）。</div>
+    <div class="small dim" style="margin-bottom:8px">メンバーは 毎週 1 試料ずつ 自分で 条件を 考えて 実験する（1 試料ごとに 予算を つかう）。<span class="y">黄色わく</span>は 得意分野が テーマに 合う＝実験が うまい。合わない テーマや 待機は モチベが 少しずつ さがる。🔰新人は 戦力外、[指導] は 隔週。Ⓗは 派遣社員（半年で 契約満了）。📋雑務・⚠量産課題は 期限までに 終わらせないと 評価が さがる（費用は かからない）。</div>
     <div class="btnrow" style="margin:0 0 8px"><button id="auto">▶ おまかせ はいち</button></div>
     ${S.team.map((m,i)=>`<div class="sample"><div class="hd"><b>${m.rookie?"🔰":m.career?"★":m.haken?"Ⓗ":""}${m.n}</b>${m.haken?`<span class="small o">派遣 あと${Math.max(0,m.until-S.w)}週</span>`:""}<span class="small dim">${SK[m.sp].n} Lv${m.lv}</span><span class="small ${m.mot<50?"r":m.mot>=75?"g":""}">${m.mot<35?"(×_×)":m.mot<50?"(-_-)":m.mot>=75?"(^o^)":"(・_・)"}</span>${m.mentee?'<span class="small dim">[指導]</span>':""}${m.lend>S.w?'<span class="small o">応援中</span>':""}</div>
-     <div class="seg">${opts.map(t=>`<button data-m="${i}" data-t="${t}" class="${m.th===t?"on":""} ${t>=0&&fits(m,PROJ[t])?"fit":""}">${t<0?"待機":(t===S.kTheme?"👑":"")+PROJ[t].short}</button>`).join("")}</div></div>`).join("")}
+     <div class="seg">${opts.map(t=>`<button data-m="${i}" data-t="${t}" class="${m.th===t?"on":""} ${t>=TASK_BASE?(taskOf(t).sp===m.sp?"fit":"task"):t>=0&&fits(m,PROJ[t])?"fit":""}">${t<0?"待機":t>=TASK_BASE?(taskOf(t).kind==="issue"?"⚠":"📋")+taskOf(t).n:(t===S.kTheme?"👑":"")+PROJ[t].short}</button>`).join("")}</div></div>`).join("")}
     <div class="btnrow"><button class="pri" id="cx">▶ けってい</button></div>`;
     sh.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{S.team[+b.dataset.m].th=+b.dataset.t;draw(sh);});
     sh.querySelector("#auto").onclick=()=>{autoAssign();draw(sh);};
     sh.querySelector("#cx").onclick=()=>{save();next();};
   };
   modal("",draw);
+}
+
+// ---------- 雑務・量産課題 ----------
+const CHORES=["安全教育の 資料づくり","設備の 定期点検","薬品の 棚卸し","ISO 監査対応","工場見学者の 対応","特許の 先行調査","予算書類の 作成","廃液の 処理","新人研修の 講師","展示会の 準備","社内報の 原稿","防災訓練の 準備","測定装置の 校正","共用ラボの 掃除当番"];
+const ISSUES=[{n:"セルの 膨れ",sp:"denki"},{n:"内部短絡の 多発",sp:"hyoka"},{n:"容量ばらつき",sp:"hyoka"},{n:"電極の 剥離",sp:"gosei"},{n:"原料ロット差",sp:"gosei"},{n:"ライン停止が 多い",sp:"denki"},{n:"異物混入",sp:"hyoka"},{n:"シミュレーションと 実機の ずれ",sp:"keisan"}];
+function taskOf(id){return S.tasks.find(t=>t.id===id)||{n:"?",kind:"chore"};}
+function taskMembers(t){return S.team.filter(m=>m.th===t.id);}
+function newChore(){
+  const t={id:TASK_BASE+(++S.taskSeq),kind:"chore",n:rnd(CHORES.filter(c=>!S.tasks.some(x=>x.n===c))),need:2+Math.floor(Math.random()*5),done:0,due:S.w+3+Math.floor(Math.random()*7)};
+  S.tasks.push(t);log(`雑務：${t.n}（${t.due-S.w}週以内）`);
+  return next=>say("boss",`O西さん、雑務が 来ました。<br><b>📋 ${t.n}</b>（工数 ${t.need}人週・期限 ${t.due-S.w}週）<br>テーマとは 関係ありませんが、落とすと 評価に ひびきます。<span class="o">だれかを はいちして ください。</span>`)(next);
+}
+function newIssue(){
+  const b=rnd(ISSUES.filter(c=>!S.tasks.some(x=>x.n===c.n)));
+  const t={id:TASK_BASE+(++S.taskSeq),kind:"issue",n:b.n,sp:b.sp,need:4+Math.floor(Math.random()*5),done:0,due:S.w+5+Math.floor(Math.random()*5)};
+  S.tasks.push(t);log(`量産課題：${t.n}`);
+  return next=>{SFX.bad();say("kawaguchi",`オウイ！ プロトラインで <b>⚠ ${t.n}</b>が 出とるらしいぞ！<br>工数 ${t.need}人週・期限 ${t.due-S.w}週。<b>${SK[t.sp].n}</b>が 得意な やつを つけたら 早いで。<br>ほっといたら 歩留まりが 落ちるぞ。`)(next);};
+}
+function taskWork(){
+  const msgs=[];
+  S.tasks.forEach(t=>{taskMembers(t).forEach(m=>{const o=output(m);t.done+=o*(t.kind==="issue"&&m.sp===t.sp?1.5:1);});});
+  S.tasks.slice().forEach(t=>{
+    if(t.done>=t.need){
+      S.tasks=S.tasks.filter(x=>x!==t);taskMembers(t).forEach(m=>m.th=-1);
+      if(t.kind==="issue"){S.issueOK++;S.ready=clamp(S.ready+8,0,100);S.rep+=4;S.protoPen=Math.max(0,S.protoPen-.03);msgs.push(`⚠ ${t.n} 解決！ 生技れんけい +8・ひょうか +4`);}
+      else msgs.push(`📋 ${t.n} 完了`);
+      log(`${t.kind==="issue"?"量産課題 解決":"雑務 完了"}：${t.n}`);
+    }else if(S.w>=t.due){
+      S.tasks=S.tasks.filter(x=>x!==t);taskMembers(t).forEach(m=>m.th=-1);
+      if(t.kind==="issue"){S.issueNG++;S.protoPen=Math.min(.3,S.protoPen+.06);addFavor(-8);S.rep=Math.max(0,S.rep-5);msgs.push(`<span class="r">⚠ ${t.n} 未解決… 歩留まり −6%・こうかんど −8・ひょうか −5</span>`);}
+      else{S.choreMiss++;S.rep=Math.max(0,S.rep-8);addEg(-3);msgs.push(`<span class="r">📋 ${t.n} 期限切れ… ひょうか −8・E口かんけい −3</span>`);}
+      log(`${t.kind==="issue"?"量産課題 未解決":"雑務 期限切れ"}：${t.n}`);
+    }
+  });
+  if(msgs.length)pushQ(okModal(`<div class="wt">雑務・課題</div><div class="res">${msgs.join("<br>")}<div class="small dim" style="margin-top:4px">あいた メンバーは 待機に なった。</div></div>`));
+}
+function taskCard(){
+  if(!S.tasks.length)return"";
+  return`<div style="margin-top:8px"><div class="small dim">雑務・量産課題（費用なし・期限つき）</div>${S.tasks.map(t=>{const mem=taskMembers(t);const left=t.due-S.w;
+    return`<div class="trow"><div class="l1"><span class="rk">${t.kind==="issue"?"⚠":"📋"}</span><span style="flex:1">${t.n}${t.sp?`<span class="small dim">（${SK[t.sp].n}）</span>`:""}</span><span class="small ${left<=2?"r":""}">あと${left}週</span></div>
+     <div class="l2"><span>${mem.length?mem.map(m=>m.n).join("・"):'<span class="r">だれも いない</span>'}</span><span>進み <b class="y">${Math.min(100,Math.round(t.done/t.need*100))}%</b></span></div></div>`;}).join("")}</div>`;
+}
+function motCrash(){
+  const c=workers().filter(m=>m.mot>20);if(!c.length)return null;
+  const m=rnd(c);m.mot=0;log(`${m.n}の モチベが なぜか 底に…`);
+  return next=>{SFX.bad();say("boss",`O西さん……${m.n}が 最近 まったく 元気が ありません。<br>本人に 聞いても 「なんとなく…」と 言うだけで。<br><span class="r">${m.n}の モチベ 0</span>（チームケアで もどせます）`)(next);};
 }
 
 // ---------- 外部実験・派遣・設備導入 ----------
@@ -1304,17 +1363,17 @@ function favorRewards(next){
 // ---------- 他部署・社外とのやりとり ----------
 const DEPTS=[
  {n:"企画部",topic:"製品仕様の すりあわせ",
-  ok:()=>{S.rep+=4;S.budget+=40;return"仕様の 落としどころが 決まった。ひょうか +4・予算 +40 万円";},
-  ng:()=>{S.rep=Math.max(0,S.rep-3);addStress(6);return"仕様の 追加要求を 押しつけられた…ひょうか −3";}},
+  ok:()=>{S.rep+=4;S.budget+=200;return"仕様の 落としどころが 決まった。ひょうか +4・予算 +200 万円";},
+  ng:()=>{S.rep=Math.max(0,S.rep-3);S.budget-=150;addStress(6);return"仕様の 追加要求を 押しつけられた…ひょうか −3・予算 −150 万円";}},
  {n:"生技部",topic:"量産プロセスの 事前検討",
   ok:()=>{S.ready=clamp(S.ready+15,0,100);return"量産条件の すりあわせが 進んだ。生技れんけい +15";},
   ng:()=>{S.ready=clamp(S.ready-5,0,100);addStress(6);return"「ラボの 条件では 流せない」と 突き返された。生技れんけい −5";}},
  {n:"調達部",topic:"原料の 価格と 納期",
-  ok:()=>{S.costUntil=S.w+8;return"原料を 安く 確保できた。8 週間 試料コスト −15%";},
-  ng:()=>{S.flags.delay=1;addStress(5);return"原料の 納期が 遅れる…来週は じっけん できない";}},
+  ok:()=>{S.costUntil=S.w+8;S.budget+=100;return"原料を 安く 確保できた。8 週間 試料コスト −15%・予算 +100 万円";},
+  ng:()=>{S.flags.delay=1;S.budget-=200;addStress(5);return"原料の 納期が 遅れ、値上げも…来週は じっけん できない・予算 −200 万円";}},
  {n:"社外",topic:"",
-  ok:()=>{S.rep+=6;gain("denki",1);return"先方から 高く 評価された。ひょうか +6";},
-  ng:()=>{S.rep=Math.max(0,S.rep-4);addStress(8);return"打ち合わせが こじれた…ひょうか −4";}}
+  ok:()=>{S.rep+=6;gain("denki",1);S.budget+=300;return"先方から 高く 評価され、共同開発費が ついた。ひょうか +6・予算 +300 万円";},
+  ng:()=>{S.rep=Math.max(0,S.rep-4);S.budget-=150;addStress(8);return"打ち合わせが こじれた…ひょうか −4・違約対応で 予算 −150 万円";}}
 ];
 const OUTSIDE=["顧客（自動車メーカー）との 技術打ち合わせ","大学との 共同研究 打ち合わせ","装置メーカーとの 仕様打ち合わせ","材料メーカーとの サンプル評価会"];
 function deptEvent(){
@@ -1327,10 +1386,16 @@ function deptEvent(){
   return next=>{(ok?SFX.ok:SFX.bad)();okModal(`<div class="wt">${d.n==="社外"?"社外との やりとり":d.n+"との やりとり"}</div><div class="res">${esc(topic)}<div class="small dim" style="margin-top:4px">ストレス ${S.stress} → ${mood}（成功率 ${Math.round(p*100)}%）</div><div class="${ok?"g":"r"}" style="margin-top:6px">${ok?"○ ":"× "}${t}</div></div>`)(next);};
 }
 function tantrum(){
-  const who=rnd(S.team);
-  addMot(-15);addStress(-10);addEg(-8);S.tantrum++;
-  log(`ストレスで ${who?who.n:"部下"}に あたってしまった（チームのモチベ −15）`);
-  return next=>{SFX.hit();modal(talkHTML("onishi",`なんで こんな ミスするんだ！！<br><span class="small dim">……${who?who.n:"部下"}に きつく あたってしまった。</span><br><span class="r">チームの モチベ −15</span><br><span class="small dim">E口室長の 耳にも 入った…（E口かんけい −8）</span>`)+`<div class="btnrow"><button class="pri" id="ok">▶ つぎへ</button></div>`,sh=>{typeIn(sh);sh.querySelector("#ok").onclick=next;});};
+  S.eg=0;addStress(-15);S.tantrum++;
+  log(`ストレスで E口室長に あたってしまった（E口かんけい 0）`);
+  S.graceUntil=S.w+4;
+  return next=>{SFX.hit();modal(talkHTML("onishi",`E口さん！ 室の 管理は どうなってるんですか！！<br><span class="small dim">……ストレスで E口室長に きつく あたってしまった。</span><br><span class="r">E口かんけい 0</span>`)+`
+   <button class="qopt" data-e="a">▶ すぐに あやまる<br><span class="small dim">たいりょく −15・ストレス +5 ／ E口かんけい 30 まで もどる</span></button>
+   <button class="qopt" data-e="b">▶ そのまま にする<br><span class="small dim">E口かんけい 0 のまま（部下が 転職しやすい）</span></button>`,sh=>{typeIn(sh);
+    sh.querySelector('[data-e="a"]').onclick=()=>{S.soc=Math.max(0,S.soc-15);addStress(5);S.eg=Math.max(S.eg,30);log("E口室長に あやまった（E口かんけい 30）");
+      say("boss","……いえ、私も 言いすぎました。<br>O西さんも 大変なのは わかっています。<br>しばらくは 私が みんなを フォローしておきます。<br><span class=\"g\">E口かんけい 30</span>・4 週間は 転職者が 出ない")(next);};
+    sh.querySelector('[data-e="b"]').onclick=()=>say("boss","……。<br><span class=\"small dim\">E口室長は だまって 席に もどった。4 週間は なんとか みんなを まとめてくれるようだ。</span>")(next);
+   });};
 }
 
 // ---------- E口室長・人事 ----------
@@ -1381,7 +1446,7 @@ function egEvent(){
     });
   };
 }
-function quitProb(m){return Math.min(.35,Math.max(0,(45-S.eg)/150)+Math.max(0,(50-m.mot)/200));}
+function quitProb(m){if(S.graceUntil>S.w)return 0;return Math.min(.35,Math.max(0,(45-S.eg)/150)+Math.max(0,(50-m.mot)/200));}
 function quitCheck(){
   const q=S.team.filter(m=>!m.haken&&Math.random()<quitProb(m));
   if(!q.length)return null;
@@ -1390,7 +1455,7 @@ function quitCheck(){
     if(m.mentee){const r=S.team.find(x=>x.n===m.mentee);m.mentee=null;if(r)assignMentor(r);}
     const mt=S.team.find(x=>x.mentee===m.n);if(mt)mt.mentee=null;
   });
-  addStress(8);addEg(-5);
+  addStress(8);
   const names=q.map(m=>m.n).join("・");
   log(`${names}が 転職した…`);
   return next=>{SFX.bad();say("boss",`O西さん……${names}が 転職すると 言ってきました。<br>${S.eg<45?"正直、今の 進め方には 室の みんなも 不満が あるようです。":"モチベーションが 下がっていたようです。"}<br><span class="r">部下が ${q.length} 人 へった</span>・ストレス +8`)(next);};
@@ -1441,7 +1506,7 @@ function kCheck(){
 
 // ---------- 社内報告会 ----------
 function monScore(){const m=S.mon;return m.samples*.15+m.up*3+m.done*8+m.pat*4+m.pub*2+m.comp*1+m.study*.5;}
-function grade(sc){return sc>=14?{g:"S",r:6,b:60,s:-8}:sc>=8?{g:"A",r:4,b:30,s:-3}:sc>=3.5?{g:"B",r:1,b:0,s:2}:{g:"C",r:-3,b:0,s:10};}
+function grade(sc){return sc>=14?{g:"S",r:6,b:300,s:-8}:sc>=8?{g:"A",r:4,b:150,s:-3}:sc>=3.5?{g:"B",r:1,b:0,s:2}:{g:"C",r:-3,b:-200,s:10};}
 function meeting(){
   const m=S.mon,G=grade(monScore());
   S.rep=Math.max(0,S.rep+G.r);S.budget+=G.b;S.soc=Math.max(5,S.soc-5);addStress(G.s);addEg({S:4,A:2,B:0,C:-4}[G.g]);
@@ -1458,19 +1523,20 @@ function meeting(){
   S.mon=freshMon();
   return next=>{(G.g==="C"?SFX.bad:SFX.ok)();modal(`<div class="wt">げつれい 社内報告会</div>
    <div class="res"><div class="small" style="line-height:1.8">試料 ${m.samples}・最高値更新 ${m.up}・テーマ達成 ${m.done}・特許 ${m.pat}・発表 ${m.pub}・計算 ${m.comp}・勉強 ${m.study}</div>
-    <div style="margin-top:6px">ひょうか <span class="big ${G.g==="C"?"r":"y"}">${G.g}</span> <span class="small">ひょうか ${G.r>=0?"+":""}${G.r}${G.b?` ・ よさん +${G.b}万`:""} ・ ストレス ${G.s>=0?"+":""}${G.s}</span></div></div>
+    <div style="margin-top:6px">ひょうか <span class="big ${G.g==="C"?"r":"y"}">${G.g}</span> <span class="small">ひょうか ${G.r>=0?"+":""}${G.r}${G.b?` ・ よさん ${G.b>0?"+":""}${G.b}万`:""} ・ ストレス ${G.s>=0?"+":""}${G.s}</span></div></div>
    <div class="small dim" style="margin:6px 0">しつぎ：${q}</div>
    ${talkHTML("kawaguchi",rnd(lines))}${hint}${eqmsg}<div class="btnrow"><button class="pri" id="ok">▶ つぎの つきへ</button></div>`,sh=>{typeIn(sh);sh.querySelector("#ok").onclick=next;});};
 }
 
 // ---------- 週送り ----------
 function endWeek(){
+  taskWork();
   autoRun();
   if(!S.clear)extResults();
   S.flags.directed=null;
   if(S.clear){save();render();runQ();return;}
   // 待機・不得意テーマは モチベ じわじわ 低下
-  S.team.forEach(m=>{if(!m.rookie&&(m.th<0||!fits(m,PROJ[m.th])))m.mot=clamp(m.mot-1,0,100);});
+  S.team.forEach(m=>{if(!m.rookie&&(m.th<0||(m.th<TASK_BASE&&!fits(m,PROJ[m.th]))))m.mot=clamp(m.mot-1,0,100);});
   if(isMeetWeek())pushQ(meeting());
   S.flags.delay=0;
   S.w++;S.soc=Math.min(100,S.soc+6);addStress(-2);if(S.grantCd>0)S.grantCd--;
@@ -1479,10 +1545,14 @@ function endWeek(){
   if(wkOf(S.w)===1){S.budget+=monthlyBudget();addFavor(-1);addEg(-1);if(S.favor<15){S.budget=Math.max(0,S.budget-20);log("K口役員の 機嫌が わるい（予算 −20 万）");}}
   S.P.forEach((P,i)=>{if(P.pat===1&&S.w-P.patW>=PATENT_WAIT){
     const ok=Math.random()<P.patP;P.pat=ok?2:-1;
-    if(ok){S.rep+=10;S.budget+=50;log(`とっきょ登録：${PROJ[i].short}`);}else log(`とっきょ拒絶：${PROJ[i].short}`);
-    pushQ(next=>{(ok?SFX.fan:SFX.bad)();okModal(`<div class="wt">とっきょ 審査けっか</div><div class="res"><span class="sq" style="background:${PROJ[i].col}"></span> ${PROJ[i].name}<div class="big ${ok?"g":"r"}" style="margin-top:6px">${ok?"とうろく さてい！":"きょぜつ さてい…"}</div><div class="small dim">${ok?"ひょうか +10・発明報奨金 +50 万円":P.disclosed?"先に学会発表していたことが響いた。":"先行文献との差が認められなかった。"}</div></div>`)(next);});
+    if(ok){S.rep+=10;S.budget+=150;log(`とっきょ登録：${PROJ[i].short}`);}else log(`とっきょ拒絶：${PROJ[i].short}`);
+    pushQ(next=>{(ok?SFX.fan:SFX.bad)();okModal(`<div class="wt">とっきょ 審査けっか</div><div class="res"><span class="sq" style="background:${PROJ[i].col}"></span> ${PROJ[i].name}<div class="big ${ok?"g":"r"}" style="margin-top:6px">${ok?"とうろく さてい！":"きょぜつ さてい…"}</div><div class="small dim">${ok?"ひょうか +10・発明報奨金 +150 万円":P.disclosed?"先に学会発表していたことが響いた。":"先行文献との差が認められなかった。"}</div></div>`)(next);});
   }});
   if(S.w>S.TW){pushQ(()=>finishGame(false));render();runQ();return;}
+  // 雑務・量産課題・モチベ急降下
+  if(S.w>=S.taskNext&&S.tasks.filter(t=>t.kind==="chore").length<3){S.taskNext=S.w+2+Math.floor(Math.random()*3);pushQ(newChore());}
+  if(S.equipIn&&S.w>=S.issueNext&&S.tasks.filter(t=>t.kind==="issue").length<2){S.issueNext=S.w+3+Math.floor(Math.random()*3);pushQ(newIssue());}
+  if(S.w>8&&Math.random()<.05){const mc=motCrash();if(mc)pushQ(mc);}
   // 人事
   const hx=hakenExpire();if(hx)pushQ(hx);
   const gr=rookieGrad();if(gr)pushQ(gr);
@@ -1491,7 +1561,7 @@ function endWeek(){
   else if(S.w>1&&(S.w-1)%24===0)pushQ(careerHire());
   if(wkOf(S.w)===1&&S.w>4){const qc=quitCheck();if(qc)pushQ(qc);const kc=kCheck();if(kc)pushQ(kc);}
   // ストレス爆発
-  if(S.stress>=75&&Math.random()<.3)pushQ(tantrum());
+  if(S.stress>=85&&Math.random()<.2)pushQ(tantrum());
   // 部署・社外とのやりとり
   let busy=false;
   if(S.w>=S.egNext){S.egNext=S.w+4+Math.floor(Math.random()*4);if(S.team.length){pushQ(egEvent());busy=true;}}
@@ -1549,6 +1619,8 @@ function endScreen(){
     <div class="tbox"><div class="small dim">部下に あたった</div><div class="v ${S.tantrum?"r":""}">${S.tantrum} 回</div></div>
     <div class="tbox"><div class="small dim">E口かんけい</div><div class="v">${S.eg}</div></div>
     <div class="tbox"><div class="small dim">K口指示 達成</div><div class="v p">${S.kDone} 件</div></div>
+    <div class="tbox"><div class="small dim">雑務 期限切れ</div><div class="v ${S.choreMiss?"r":""}">${S.choreMiss} 件</div></div>
+    <div class="tbox"><div class="small dim">量産課題 解決</div><div class="v">${S.issueOK} / ${S.issueOK+S.issueNG}</div></div>
     <div class="tbox"><div class="small dim">転職した 部下</div><div class="v ${S.quits?"r":""}">${S.quits} 人</div></div>
     <div class="tbox"><div class="small dim">そうごう スコア</div><div class="v y">${score}</div></div>
    </div></div>
