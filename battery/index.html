@@ -727,7 +727,7 @@ function titleScreen(){
    ◆ 資料作成週は ストレスが 20 たまる。K口役員に 呼ばれた 直後の 週は 休めない。<br>
    ◆ 月末は 社内報告会。前の週は 資料作成で 実験は 1 水準まで。<br>
    ◆ <span class="p">K口役員</span>に「オウイ」と よばれたら… 話せば こうかんどUP（予算・人員）、でも <span class="r">ストレス</span>も たまる。<br>
-   ◆ ストレスが 高いと E口室長に あたって 関係が ゼロに なる。他部署や 社外との やりとりも うまくいかない。<br>
+   ◆ ストレスが 高すぎると E口室長に あたって 関係が ゼロに なる（すぐ あやまれば 少し もどる）。他部署や 社外との やりとりも うまくいかない。<br>
    ◆ 部下を まとめるのは <span class="o">E口室長</span>。E口と うまく やらないと 部下が <span class="r">転職</span> してしまう。<br>
    ◆ 半年ごとに キャリア入社、毎年 4 月に 新人🔰。新人は 戦力にならず、指導役の 工数が 半分になる。
    </div>
@@ -1388,7 +1388,14 @@ function deptEvent(){
 function tantrum(){
   S.eg=0;addStress(-15);S.tantrum++;
   log(`ストレスで E口室長に あたってしまった（E口かんけい 0）`);
-  return next=>{SFX.hit();modal(talkHTML("onishi",`E口さん！ 室の 管理は どうなってるんですか！！<br><span class="small dim">……ストレスで E口室長に きつく あたってしまった。</span><br><span class="r">E口かんけい 0</span>（部下が 転職しやすくなる）`)+`<div class="btnrow"><button class="pri" id="ok">▶ つぎへ</button></div>`,sh=>{typeIn(sh);sh.querySelector("#ok").onclick=next;});};
+  S.graceUntil=S.w+4;
+  return next=>{SFX.hit();modal(talkHTML("onishi",`E口さん！ 室の 管理は どうなってるんですか！！<br><span class="small dim">……ストレスで E口室長に きつく あたってしまった。</span><br><span class="r">E口かんけい 0</span>`)+`
+   <button class="qopt" data-e="a">▶ すぐに あやまる<br><span class="small dim">たいりょく −15・ストレス +5 ／ E口かんけい 30 まで もどる</span></button>
+   <button class="qopt" data-e="b">▶ そのまま にする<br><span class="small dim">E口かんけい 0 のまま（部下が 転職しやすい）</span></button>`,sh=>{typeIn(sh);
+    sh.querySelector('[data-e="a"]').onclick=()=>{S.soc=Math.max(0,S.soc-15);addStress(5);S.eg=Math.max(S.eg,30);log("E口室長に あやまった（E口かんけい 30）");
+      say("boss","……いえ、私も 言いすぎました。<br>O西さんも 大変なのは わかっています。<br>しばらくは 私が みんなを フォローしておきます。<br><span class=\"g\">E口かんけい 30</span>・4 週間は 転職者が 出ない")(next);};
+    sh.querySelector('[data-e="b"]').onclick=()=>say("boss","……。<br><span class=\"small dim\">E口室長は だまって 席に もどった。4 週間は なんとか みんなを まとめてくれるようだ。</span>")(next);
+   });};
 }
 
 // ---------- E口室長・人事 ----------
@@ -1439,7 +1446,7 @@ function egEvent(){
     });
   };
 }
-function quitProb(m){return Math.min(.35,Math.max(0,(45-S.eg)/150)+Math.max(0,(50-m.mot)/200));}
+function quitProb(m){if(S.graceUntil>S.w)return 0;return Math.min(.35,Math.max(0,(45-S.eg)/150)+Math.max(0,(50-m.mot)/200));}
 function quitCheck(){
   const q=S.team.filter(m=>!m.haken&&Math.random()<quitProb(m));
   if(!q.length)return null;
@@ -1554,7 +1561,7 @@ function endWeek(){
   else if(S.w>1&&(S.w-1)%24===0)pushQ(careerHire());
   if(wkOf(S.w)===1&&S.w>4){const qc=quitCheck();if(qc)pushQ(qc);const kc=kCheck();if(kc)pushQ(kc);}
   // ストレス爆発
-  if(S.stress>=75&&Math.random()<.3)pushQ(tantrum());
+  if(S.stress>=85&&Math.random()<.2)pushQ(tantrum());
   // 部署・社外とのやりとり
   let busy=false;
   if(S.w>=S.egNext){S.egNext=S.w+4+Math.floor(Math.random()*4);if(S.team.length){pushQ(egEvent());busy=true;}}
