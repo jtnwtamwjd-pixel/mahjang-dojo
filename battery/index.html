@@ -332,9 +332,9 @@ const PROJ = [
    if(ng===2&&!sd)n.push("Si 負極が まだ 開発途中");
    return {v:[E,R],n};
   }},
- {id:"equip",col:"#a4e4fc",kind:"equip",icon:"🏗",name:"プロト用 設備導入",short:"設備導入",sub:"目標クリアした材料を プロト用設備で 特性検証",
+ {id:"equip",col:"#a4e4fc",kind:"equip",icon:"🏗",name:"電極プロト用 設備導入",short:"電極設備",sub:"目標クリアした材料を プロト用設備で 特性検証",
   skills:["hyoka","gosei"],cost:50,
-  intro:"生技部との 連携が 進んで、プロト用 設備の 導入検討が 始まったで。目標を クリアした 材料を 設備で 作って、ラボと 同じ 特性が 出るか 検証せえ。合格したら 設備導入や。ただし 導入には 3000 万円 かかるで。設備が なかったら プロト量産試作は できんからな。",
+  intro:"生技部との 連携が 進んで、プロト用 設備の 導入検討が 始まったで。目標を クリアした 材料を 設備で 作って、ラボと 同じ 特性が 出るか 検証せえ。合格したら 設備導入や。ただし 導入には 3000 万円 かかるで。設備が 入ったら すぐ 電極プロト量産を 始められる。",
   params:[
    {l:"検証する材料（目標クリア済み）",o:[]},
    {l:"設備方式",o:["バッチ式混練機","連続式二軸混練機","ロール to ロール塗工機"]},
@@ -356,9 +356,9 @@ const PROJ = [
    if(sc===2)n.push("スケールアップで 均一性が 低下");
    return {v:[P,Math.min(100,U)],n};
   }},
- {id:"proto",col:"#f878f8",kind:"proto",icon:"🏭",name:"プロト量産ライン立ち上げ",short:"プロト量産",sub:"量産試作ラインで歩留まりと生産能力を両立",
+ {id:"proto",col:"#f878f8",kind:"proto",icon:"🏭",name:"電極プロト量産",short:"電極プロト",sub:"電極の 量産試作ラインで 歩留まりと 生産能力を 両立",
   skills:["denki","hyoka"],cost:80,
-  intro:"3 年目や。ここからは プロト量産試作も 進めるで。プロト用設備を 導入せんと 試作は できんぞ。ラボで作れても、ラインで毎日同じものが作れなければ製品にならない。生技部との連携度が歩留まりに直結するぞ。歩留まり 85 %、生産能力 450 セル/日が合格ラインだ。",
+  intro:"設備が 入ったな。ここからは 電極の プロト量産試作や。ラボで作れても、ラインで毎日同じものが作れなければ製品にならない。生技部との連携度が歩留まりに直結するぞ。歩留まり 85 %、生産能力 450 セル/日ぶんが合格ラインだ。",
   params:[
    {l:"電極作製プロセス",o:["湿式スラリー塗工","乾式（ドライ）電極","転写プレス"]},
    {l:"ライン速度",o:["1 m/min","3 m/min","5 m/min","10 m/min","20 m/min"]},
@@ -369,13 +369,58 @@ const PROJ = [
   calc(c){
    const [pr,sp,ps,ins]=c,n=[];
    const f=.85+.15*(S.ready||0)/100;
-   const Y=110*[.9,.8,.95][pr]*[1,.98,.95,.88,.65][sp]*[.85,.97,1][ps]*[.9,1][ins]*f*(1-(S.protoPen||0));
+   const Y=118*[.9,.8,.95][pr]*[1,.99,.97,.92,.7][sp]*[.85,.97,1][ps]*[.9,1][ins]*f*(1-(S.protoPen||0));
    const C=900*[1,1.2,.8][pr]*[.15,.4,.65,1,1.6][sp]*[.6,1,.7][ps]*[1,.85][ins];
    if(pr===1)n.push("溶媒レスで速いが膜厚ムラが出やすい");
    if(pr===2)n.push("転写時の剥離で不良が出る");
    if(sp===4)n.push("速度に乾燥・プレスが追いつかない");
    if(ps===0)n.push("一軸プレスはバッチ式で律速");
    if(ins===0)n.push("不良の流出でロット全体が NG に");
+   if((S.ready||0)<40)n.push("生技部との条件すり合わせ不足");
+   if((S.protoPen||0)>0)n.push(`未解決の 量産課題で 歩留まり −${Math.round(S.protoPen*100)}%`);
+   return {v:[Math.min(100,Y),C],n};
+  }},
+ {id:"cequip",col:"#7cc4fc",kind:"equip",icon:"🏗",name:"セルプロト用 設備導入",short:"セル設備",sub:"完成した セル仕様を プロト用 組立設備で 特性検証",
+  skills:["denki","hyoka"],cost:50,
+  intro:"セル試作が 完成したな。次は セルの 組立設備や。電極とは 別の 設備が いるで。完成した セルを 組立設備で 作って、ラボと 同じ 特性が 出るか 検証せえ。合格したら 2500 万円で 導入や。",
+  params:[
+   {l:"積層方式",o:["枚葉スタック","Z 折り積層","連続ロール積層"]},
+   {l:"雰囲気管理",o:["ドライルーム（露点 −40℃）","ドライルーム（露点 −60℃）","グローブボックス連結"]},
+   {l:"拘束治具",o:["ボルト締結","油圧拘束","一体型 拘束ケース"]},
+   {l:"スケール",o:["10 セル/日","50 セル/日","200 セル/日"]}
+  ],
+  metrics:[{l:"ラボ比 特性",u:"%",t:95,d:1,max:120},{l:"設備稼働率",u:"%",t:80,d:1,max:100}],
+  calc(c){
+   const [st,at,jg,sc]=c,n=[];
+   let P=108*Math.min(1.15,ratio(PB.cell.idx))*[1,.98,.94][st]*[.9,1,1][at]*[.94,1,.98][jg]*[1,.98,.92][sc];
+   let U=118*[.78,.92,.87][st]*[1,.95,.8][at]*[.85,.9,.98][jg]*[.82,.97,.9][sc]*(.85+.15*(S.ready||0)/100);
+   if(at===0)n.push("硫化物系 セルが 水分で 劣化");
+   if(st===0)n.push("枚葉スタックは タクトが 長い");
+   if(st===2)n.push("連続積層で 端部の 位置ずれ");
+   if(jg===0)n.push("ボルト締結は 圧力ムラが 出る");
+   if(sc===2)n.push("スケールアップで 均一性が 低下");
+   return {v:[P,Math.min(100,U)],n};
+  }},
+ {id:"cproto",col:"#fc9838",kind:"proto",icon:"🏭",name:"セルプロト量産",short:"セルプロト",sub:"セル組立ラインで 歩留まりと 生産能力を 両立",
+  skills:["denki","hyoka"],cost:80,
+  intro:"セル組立設備が 入ったな。最後の 山、セルの プロト量産や。電極が ラボ品のままやと 歩留まりが 出んぞ。電極プロト量産と あわせて 両方 合格したら プロジェクト 達成や。歩留まり 85 %、生産能力 300 セル/日が 合格ラインや。",
+  params:[
+   {l:"積層方式",o:["枚葉スタック","Z 折り積層","連続ロール積層"]},
+   {l:"ライン タクト",o:["30 秒/セル","15 秒/セル","8 秒/セル","4 秒/セル","2 秒/セル"]},
+   {l:"拘束方式",o:["ボルト締結","油圧拘束","一体型 拘束ケース"]},
+   {l:"検査方式",o:["抜き取り検査","全数 X 線 CT 検査"]}
+  ],
+  metrics:[{l:"歩留まり",u:"%",t:85,d:1,max:100},{l:"生産能力",u:"セル/日",t:300,d:0}],
+  calc(c){
+   const [st,tk,jg,ins]=c,n=[];
+   const f=.85+.15*(S.ready||0)/100, ed=S.P[PB.proto.idx].done;
+   const Y=112*[.97,.95,.85][st]*[1,.99,.97,.9,.65][tk]*[.88,.97,1][jg]*[.9,1][ins]*f*(ed?1:.92)*(1-(S.protoPen||0));
+   const C=750*[.6,1,1.4][st]*[.15,.3,.55,1,1.7][tk]*[.8,1,.9][jg]*[1,.85][ins];
+   if(!ed)n.push("電極が まだ ラボ品で ばらつく");
+   if(st===2)n.push("連続積層は 速いが 位置ずれ不良");
+   if(tk===4)n.push("タクトに 積層精度が 追いつかない");
+   if(jg===0)n.push("ボルト締結で 拘束圧が ばらつく");
+   if(ins===0)n.push("内部短絡の 見逃しで ロット NG");
    if((S.ready||0)<40)n.push("生技部との条件すり合わせ不足");
    if((S.protoPen||0)>0)n.push(`未解決の 量産課題で 歩留まり −${Math.round(S.protoPen*100)}%`);
    return {v:[Math.min(100,Y),C],n};
@@ -534,9 +579,11 @@ const EVENTS = [
 
 // ===================== 状態 =====================
 let S=null;
-const SAVEKEY="battery_lab_save_v7";
+const SAVEKEY="battery_lab_save_v8";
 const TASK_BASE=1000;
-const EQUIP_COST=3000, HAKEN_COST=300, HAKEN_MAX=3, EXT_MAX=2, PROTO_W=97;
+const EQUIP_COST=3000, CEQUIP_COST=2500, HAKEN_COST=300, HAKEN_MAX=3, EXT_MAX=2;
+// 設備 → 導入フラグ・費用・プロトテーマ
+const EQ={equip:{f:"equipIn",cost:EQUIP_COST,pr:"proto",n:"電極プロト用設備"},cequip:{f:"cEquipIn",cost:CEQUIP_COST,pr:"cproto",n:"セルプロト用設備"}};
 const NAME_POOL=["N村","Y田","H野","M本","K藤","A部","I川","U野","F田","W田","G藤","R木","Z間","O野","T井","H田","M川","K田","S田","Y本","I藤","N田","O川","K野","T村","A木","M田","S井","H本","Y川"];
 function pickName(){return NAME_POOL.find(n=>!S.team.some(m=>m.n===n)&&!(S.gone||[]).includes(n))||("新人"+(S.team.length+1));}
 const FAVOR_REWARDS=[
@@ -553,7 +600,7 @@ function freshMon(){return {samples:0,up:0,done:0,pat:0,pub:0,comp:0,study:0};}
 function newGame(bgi){
   const sk={denki:10,gosei:10,keisan:10,hyoka:10};
   Object.assign(sk,BG[bgi].sk);
-  S={bg:bgi,w:1,TW:YEARS*48,soc:100,stress:10,favor:30,ready:15,budget:5000,rep:0,sk,cur:0,equipOpen:false,equipIn:false,ext:[],noRest:0,hakens:0,tasks:[],taskSeq:0,taskNext:3,issueNext:0,protoPen:0,choreMiss:0,issueOK:0,issueNG:0,
+  S={bg:bgi,w:1,TW:YEARS*48,soc:100,stress:10,favor:30,ready:15,budget:5000,rep:0,sk,cur:0,equipOpen:false,equipIn:false,cEquipIn:false,ext:[],noRest:0,hakens:0,tasks:[],taskSeq:0,taskNext:3,issueNext:0,protoPen:0,choreMiss:0,issueOK:0,issueNG:0,
      team:[],eg:50,egNext:5,gone:[],quits:0,hires:0,rookies:0,prio:[],kTheme:null,kNext:10,kDone:0,lastAuto:[],slowUntil:0,
      P:PROJ.map(()=>({log:[],hits:0,done:false,doneW:0,pubs:0,comp:{},lit:{},acts:0,pat:0,patW:0,patP:0})),
      cellSE:[],flags:{},seen:{},grantCd:0,hist:[],over:false,clear:false,lastRank:0,mon:freshMon(),
@@ -604,18 +651,20 @@ function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;","
 function doneMaterials(){return [...SE_IDS,"ncm","si"].filter(id=>S.P[PB[id].idx].done);}
 function params(p){
   if(p.kind==="cell")return p.params.map((x,i)=>i===3?{...x,o:SE_IDS.map(id=>PB[id].short+(S.P[PB[id].idx].done?"★":""))}:x);
-  if(p.kind==="equip")return p.params.map((x,i)=>i===0?{...x,o:doneMaterials().map(id=>PB[id].short)}:x);
+  if(p.id==="equip")return p.params.map((x,i)=>i===0?{...x,o:doneMaterials().map(id=>PB[id].short)}:x);
   return p.params;
 }
 function seDone(){return SE_IDS.filter(id=>S.P[PB[id].idx].done).length;}
 function unlocked(p){
-  if(p.kind==="equip")return S.equipOpen&&doneMaterials().length>0;
-  if(p.kind==="proto")return S.w>=PROTO_W;
+  if(p.id==="equip")return S.equipOpen&&doneMaterials().length>0;
+  if(p.id==="cequip")return S.P[PB.cell.idx].done;
+  if(p.id==="proto")return S.equipIn;
+  if(p.id==="cproto")return S.cEquipIn;
   return true;
 }
 // 実験できるか（プロトは 設備導入後のみ）
-function runnable(pi){return PROJ[pi].kind!=="proto"||S.equipIn;
-}
+function runnable(pi){const p=PROJ[pi];return p.kind!=="proto"||unlocked(p);}
+function protoDone(){return S.P[PB.proto.idx].done&&S.P[PB.cproto.idx].done;}
 function score(p,v){return v.reduce((a,x,j)=>a*Math.min(1.4,x/p.metrics[j].t),1);}
 function bestOf(p){
   const ps=params(p);let best=null,bs=-1;
@@ -628,7 +677,7 @@ function failProb(ms){
   return clamp(pf,.02,.9);
 }
 // テーマごとの 必要な 知見（ノウハウ）。たまるほど 性能が 出るようになる
-const XP_NEED={se:100,cat:160,an:160,cell:260,equip:180,proto:380};
+const XP_NEED={se:100,cat:160,an:160,cell:260,equip:140,proto:280};
 function know(pi){return Math.min(1,(S.P[pi].xp||0)/XP_NEED[PROJ[pi].kind]);}
 function measure(pi,c,ms){
   const p=PROJ[pi], r=p.calc(c), s=ms?ms.s:skillAvg(p), kn=know(pi);
@@ -720,8 +769,9 @@ function titleScreen(){
    ◆ O西の 下で 室長 E口が 室を 指揮。室の メンバー 14 人を テーマに 配置して、いくつもの テーマを 同時に すすめる。<br>
    ◆ テーマの ゆうせんどは 自分で きめられるが、<span class="p">K口役員に 指示された テーマ👑</span>は かならず 最優先。<br>
    ◆ まいしゅう O西は 1 つ コマンドを えらぶ。<br>
-   ◆ 電解質・正極・Si 負極・セル試作は 最初から 同時並行。3 年目から <span class="y">プロト量産試作</span>が 解放され、クリアで ゲームクリア。<br>
-   ◆ 報告会で 生技れんけいが 30 以上だと <b>設備導入テーマ</b>が 解放。目標クリアした 材料で 特性検証に 合格し、${EQUIP_COST} 万円で 設備を 入れないと プロト量産試作は できない。<br>
+   ◆ 電解質・正極・Si 負極・セル試作は 最初から 同時並行。<span class="y">電極プロト量産</span>と <span class="y">セルプロト量産</span>の 両方を クリアで ゲームクリア。<br>
+   ◆ 報告会で 生技れんけいが 30 以上だと <b>設備導入テーマ</b>が 解放。目標クリアした 材料で 特性検証に 合格し、${EQUIP_COST} 万円で 設備を 入れると すぐ 電極プロト量産が 始まる。<br>
+   ◆ セル試作が 完成すると <b>セル設備</b>の 検証が 解放。合格して ${CEQUIP_COST} 万円で 入れると セルプロト量産が 始まる。<br>
    ◆ 予算で 派遣社員（半年）を やとったり、外部に 実験を 依頼（納期 2 週）できる。<br>
    ◆ 部下には 雑務も くる。期限までに 終わらせないと 評価が さがる。設備導入後は プロトラインの 量産課題も 発生。<br>
    ◆ 資料作成週は ストレスが 20 たまる。K口役員に 呼ばれた 直後の 週は 休めない。<br>
@@ -738,7 +788,7 @@ function titleScreen(){
   app.querySelector("#start").onclick=()=>{
     if(sv&&!sv.over&&!confirm("いまの セーブを けして はじめますか？"))return;
     newGame(bgi);
-    pushQ(say("kawaguchi","O西、今日から 君が 全固体電池プロジェクトの リーダーや。<br>期限は 5 年。プロト量産まで こぎつけてくれ。<br>電解質・正極・Si 負極・セルは 同時に 進めえ。3 年目からは プロト量産試作も 始めるで。"));
+    pushQ(say("kawaguchi","O西、今日から 君が 全固体電池プロジェクトの リーダーや。<br>期限は 5 年。プロト量産まで こぎつけてくれ。<br>電解質・正極・Si 負極・セルは 同時に 進めえ。設備が 入ったら 電極と セルの プロト量産や。"));
     pushQ(say("kawaguchi","オウイ！ O西！<br>期待しとるぞ。わしが呼んだら、すぐ来いよ。"));
     pushQ(say("onishi","（K口役員に呼ばれると話が長いんだよな…）<br>はい！ がんばります！"));
     pushQ(say("boss","室長の E口です。O西さん、よろしく お願いします。<br>室の メンバーは 14 人。それぞれ 得意分野が ちがうので、どの テーマに 配置するかは お任せします。"));
@@ -801,7 +851,7 @@ function render(){
     theme=`<div class="win"><div class="wt">テーマ</div>
      <div class="thead"><span class="sq" style="background:${p.col}"></span><div style="flex:1;min-width:0"><b>${p.name}</b><div class="small dim">${p.sub}</div></div><button class="small" id="pick">きりかえ</button></div>
      <div class="targets">${p.metrics.map((m,i)=>{const b=P.log.length?Math.max(...P.log.map(e=>e.v[i])):null;return`<div class="tbox"><div class="small dim">${m.l}</div><div class="v ${b!==null&&b>=m.t?"g":""}">${b===null?"--":fmt(b,m.d)}<span class="small dim"> / ${m.t} ${m.u}</span></div></div>`}).join("")}</div>
-     ${p.kind==="proto"&&!S.equipIn?'<div class="small r" style="margin-top:6px">プロト用設備が 未導入：試作できない</div>':""}
+     ${p.kind==="proto"&&!runnable(pi)?'<div class="small r" style="margin-top:6px">プロト用設備が 未導入：試作できない</div>':""}
      <div class="btnrow" style="margin-top:6px"><button class="small" id="ext" ${runnable(pi)&&S.ext.length<EXT_MAX&&S.budget>=extCost(p)?"":"disabled"}>▶ 外部に 実験を 依頼（${extCost(p)}万・納期2週）</button></div>
      <div class="small" style="margin-top:6px">知見 ${bar(know(pi)*100,"#3cbcfc")} ${Math.round(know(pi)*100)}% ・ さいげんせい ${"●".repeat(Math.min(2,P.hits))}${"○".repeat(Math.max(0,2-P.hits))}${P.pat?` <span class="badge ${P.pat===2?"y":P.pat<0?"r":"b"}">${P.pat===1?"特許 審査中":P.pat===2?"特許 登録":"特許 拒絶"}</span>`:""}${p.kind==="proto"?` <span class="small dim">（生技れんけい が 歩留まりに 効く）</span>`:""}</div>
      ${progRow()}</div>`;
@@ -829,7 +879,7 @@ function render(){
   app.querySelector("#asg").onclick=()=>openAssign(render);
   const ex=app.querySelector("#ext");if(ex)ex.onclick=openExt;
   const hk=app.querySelector("#hk");if(hk)hk.onclick=openHaken;
-  const eqb=app.querySelector("#eqbuy");if(eqb)eqb.onclick=buyEquip;
+  app.querySelectorAll(".eqbuy").forEach(b=>b.onclick=()=>buyEquip(b.dataset.eq));
   app.querySelector("#mute").onclick=()=>{MUTE=!MUTE;try{localStorage.setItem("battery_lab_mute",MUTE?"1":"0");}catch(_){}render();};
   app.querySelector("#totitle").onclick=()=>{save();titleScreen();};
   save();
@@ -845,8 +895,7 @@ function roomCard(){
    ${rows||'<div class="small dim">すすめる テーマが ない。</div>'}${la}
    ${taskCard()}
    ${S.ext.length?`<div class="small" style="margin-top:6px">外部依頼中：${S.ext.map(e=>`${PROJ[e.pi].short}（あと${Math.max(0,e.due-S.w)}週）`).join("・")}</div>`:""}
-   ${S.P[PB.equip.idx].done&&!S.equipIn?`<button class="pri wide" id="eqbuy" style="margin-top:8px" ${S.budget>=EQUIP_COST?"":"disabled"}>▶ プロト用設備を 導入する（${EQUIP_COST}万）</button>`:""}
-   ${S.equipIn?'<div class="small g" style="margin-top:6px">🏗 プロト用設備 導入済み</div>':""}
+   ${Object.entries(EQ).map(([id,e])=>S.P[PB[id].idx].done&&!S[e.f]?`<button class="pri wide eqbuy" data-eq="${id}" style="margin-top:8px" ${S.budget>=e.cost?"":"disabled"}>▶ ${e.n}を 導入する（${e.cost}万）</button>`:S[e.f]?`<div class="small g" style="margin-top:6px">🏗 ${e.n} 導入済み</div>`:"").join("")}
    <button class="pri wide" id="asg" style="margin-top:8px">▶ メンバー はいち</button>
    <button class="wide" id="hk" style="margin-top:6px" ${S.team.filter(m=>m.haken).length<HAKEN_MAX&&S.budget>=HAKEN_COST?"":"disabled"}>▶ 派遣社員を やとう（半年 ${HAKEN_COST}万）</button></div>`;
 }
@@ -978,12 +1027,14 @@ function hakenExpire(){
   const names=g.map(m=>m.n).join("・");log(`派遣の ${names} が 契約満了`);
   return next=>say("boss",`派遣の ${names}さんが 今週で 契約満了です。<br>おつかれさまでした。<span class="o">はいちを 見直して ください。</span>`)(next);
 }
-function buyEquip(){
-  if(!confirm(`プロト用設備を ${EQUIP_COST} 万円で 導入しますか？`))return;
-  S.budget-=EQUIP_COST;S.equipIn=true;S.ready=clamp(S.ready+10,0,100);
-  log("🏗 プロト用設備を 導入した");SFX.fan();
-  pushQ(say("kawaguchi","オウイ！ 設備が 入ったか！<br>これで プロト量産試作が できるな。<br>3000 万 かけたんや、絶対 モノに せえよ。"));
-  runQ();
+function buyEquip(id){
+  const e=EQ[id||"equip"];
+  if(S[e.f]||S.budget<e.cost||!confirm(`${e.n}を ${e.cost} 万円で 導入しますか？`))return;
+  S.budget-=e.cost;S[e.f]=true;S.ready=clamp(S.ready+10,0,100);
+  log(`🏗 ${e.n}を 導入した`);SFX.fan();
+  pushQ(say("kawaguchi",`オウイ！ 設備が 入ったか！<br>これで <b>${PB[e.pr].name}</b>が 始められるな。<br>${e.cost} 万 かけたんや、絶対 モノに せえよ。`));
+  announceUnlocks();
+  normPrio();render();runQ();
 }
 function announceUnlocks(){
   PROJ.forEach(q=>{const Q=S.P[q.idx];if(unlocked(q)&&!Q.done&&!Q.started){Q.started=1;pushQ(say("kawaguchi",`あたらしい テーマ <b>${q.name}</b>や。<br>${q.intro}`));}});
@@ -1030,7 +1081,7 @@ function autoRun(){
 }
 function progRow(){
   return`<div class="prog">${PROJ.map((q,i)=>`<span class="${S.P[i].done?"d":i===S.cur?"c":""}" style="${S.P[i].done?`background:${q.col}`:""}"></span>`).join("")}</div>
-  <div class="small dim">電解質 ${seDone()}/6 ・ 正極 ${S.P[PB.ncm.idx].done?"○":"×"} ・ Si負極 ${S.P[PB.si.idx].done?"○":"×"} ・ セル ${S.P[PB.cell.idx].done?"○":"×"} ・ 設備 ${S.equipIn?"導入済":S.P[PB.equip.idx].done?"検証合格":unlocked(PB.equip)?"検証中":"×"} ・ <span class="p">プロト量産 ${S.P[PB.proto.idx].done?"○":unlocked(PB.proto)?(S.equipIn?"かのう":"設備待ち"):"3年目から"}</span></div>`;
+  <div class="small dim">電解質 ${seDone()}/6 ・ 正極 ${S.P[PB.ncm.idx].done?"○":"×"} ・ Si負極 ${S.P[PB.si.idx].done?"○":"×"} ・ セル ${S.P[PB.cell.idx].done?"○":"×"} ${Object.entries(EQ).map(([id,e])=>` ・ ${PB[id].short} ${S[e.f]?"導入済":S.P[PB[id].idx].done?"検証合格":unlocked(PB[id])?"検証中":"×"} ・ <span class="p">${PB[e.pr].short} ${S.P[PB[e.pr].idx].done?"○":S[e.f]?"かのう":"設備待ち"}</span>`).join("")}</div>`;
 }
 function shortCond(p,c){const ps=params(p);return c.map((o,i)=>ps[i].o[o]).join(" / ");}
 function logCard(pi){
@@ -1142,14 +1193,16 @@ function completeProj(pi){
   if(pi===S.kTheme){S.kTheme=null;S.kDone++;addFavor(12);S.rep+=5;msg+=`<br><b class="p">わしが 言うた テーマや。ようやった！</b>（こうかんど +12・ひょうか +5）`;}
   if(P.pat===0&&p.kind!=="proto")msg+=`<br>発表の前に 特許出願も 忘れずにな。`;
   const was=themeMembers(pi).length;
-  if(p.kind!=="equip"&&p.kind!=="cell"&&p.kind!=="proto")msg+=`<br>この 材料は プロト用設備での 検証にも 使えるで。`;
-  if(p.kind==="equip")msg+=`<br><br>設備での 特性検証に 合格や！ あとは <b>設備導入（${EQUIP_COST} 万円）</b>や。予算を 確保しとけよ。`;
+  if(p.kind!=="equip"&&p.kind!=="cell"&&p.kind!=="proto")msg+=`<br>この 材料は 電極プロト用設備での 検証にも 使えるで。`;
+  if(p.kind==="cell")msg+=`<br>次は <b>セルプロト用 設備</b>の 検証や。`;
+  if(p.kind==="equip")msg+=`<br><br>設備での 特性検証に 合格や！ あとは <b>${EQ[p.id].n}の 導入（${EQ[p.id].cost} 万円）</b>や。予算を 確保しとけよ。`;
+  if(p.kind==="proto"&&!protoDone())msg+=`<br><br>あとは <b>${p.id==="proto"?"セル":"電極"}プロト量産</b>や。両方 そろったら ゴールやで！`;
   normPrio();
   if(S.cur===pi)S.cur=S.prio.length?S.prio[0]:null;
   if(was)msg+=`<br><span class="o">${was} 人の メンバーが 待機に なった。はいちを 見直そう。</span>`;
-  if(p.kind==="proto"){
+  if(p.kind==="proto"&&protoDone()){
     S.clear=true;
-    pushQ(say("kawaguchi","オウイ！ O西！！<br>プロト量産ライン、見てきたぞ。<br>……ようやった。ほんまに ようやった。"));
+    pushQ(say("kawaguchi","オウイ！ O西！！<br>電極と セルの プロト量産ライン、見てきたぞ。<br>……ようやった。ほんまに ようやった。"));
     pushQ(say("onishi","ありがとうございます！<br>チームのみんなの おかげです！"));
     pushQ(()=>finishGame(true));
     return;
@@ -1551,7 +1604,7 @@ function endWeek(){
   if(S.w>S.TW){pushQ(()=>finishGame(false));render();runQ();return;}
   // 雑務・量産課題・モチベ急降下
   if(S.w>=S.taskNext&&S.tasks.filter(t=>t.kind==="chore").length<3){S.taskNext=S.w+2+Math.floor(Math.random()*3);pushQ(newChore());}
-  if(S.equipIn&&S.w>=S.issueNext&&S.tasks.filter(t=>t.kind==="issue").length<2){S.issueNext=S.w+3+Math.floor(Math.random()*3);pushQ(newIssue());}
+  if((S.equipIn||S.cEquipIn)&&S.w>=S.issueNext&&S.tasks.filter(t=>t.kind==="issue").length<2){S.issueNext=S.w+3+Math.floor(Math.random()*3);pushQ(newIssue());}
   if(S.w>8&&Math.random()<.05){const mc=motCrash();if(mc)pushQ(mc);}
   // 人事
   const hx=hakenExpire();if(hx)pushQ(hx);
